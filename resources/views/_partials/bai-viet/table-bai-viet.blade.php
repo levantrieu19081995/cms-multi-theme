@@ -22,12 +22,12 @@
     <script>
         function callback(res) {
             if (window.opener) {
-                if (typeof window.opener._postSelectCallback_{{ request()->state }} === 'function') {
-                    window.opener._postSelectCallback_{{ request()->state }}({{ request()->state }}, JSON.parse(atob(
+                if (typeof window.opener._postSelectCallback_{{ (int) request()->state }} === 'function') {
+                    window.opener._postSelectCallback_{{ (int) request()->state }}({{ (int) request()->state }}, JSON.parse(atob(
                         res)));
                     window.close();
                 } else {
-                    alert('Cửa sổ cha chưa định nghĩa callback _postSelectCallback_{{ request()->state }}(state, res)');
+                    alert('Cửa sổ cha chưa định nghĩa callback _postSelectCallback_{{ (int) request()->state }}(state, res)');
                 }
             } else {
                 alert('Không tìm thấy của sổ cha');

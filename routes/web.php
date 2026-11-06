@@ -58,6 +58,7 @@ Route::prefix($cmsPrefix)->middleware('auth')->group(function () {
     Route::put('/binh-luan/{id}/reply', [CommentController::class, 'reply'])->name('binh-luan.reply');
     Route::delete('/binh-luan/{id}', [CommentController::class, 'destroy'])->name('binh-luan.destroy');
 
+    Route::get('/api/bai-viet/getChiTietBaiViet/{postSlug}', [ContentMediaController::class, 'detailBySlug'])->where('postSlug', '.+')->name('api.bai-viet.chi-tiet');
     Route::get('/media-list/{postId}', [ContentMediaController::class, 'list'])->whereNumber('postId')->name('media-list');
 
     // Hình ảnh: the image library lives at /cms/thu-vien-hinh-anh; the old address keeps working as a redirect (same post ids).

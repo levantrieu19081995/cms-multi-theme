@@ -229,7 +229,7 @@
         }
 
         function getChiTietBaiViet(postSlug) {
-            fetch(`/api/bai-viet/getChiTietBaiViet/${postSlug}`)
+            fetch(@json(\Modules\CmsBackend\Support\ModuleUrl::route('api.bai-viet.chi-tiet', ['postSlug' => '__SLUG__'])).replace('__SLUG__', encodeURI(String(postSlug).replace(/^\/+/, ''))), { headers: { 'Accept': 'application/json' } })
                 .then(response => response.json())
                 .then(data => {
                     if (data.code == 200) {
@@ -252,6 +252,8 @@
         }
 
         function updateBannerPreview() {
+            // The live preview card is commented out in this view; nothing to update then.
+            if (!document.getElementById('preview-title')) return;
             const title = document.getElementById('title')?.value || @json(__('admin.ui.tieu_de'));
             const description = document.getElementById('banner-description')?.value || @json(__('admin.ui.thong_tin_mo_ta'));
             const btnText = document.getElementById('banner-btn-text')?.value || @json(__('admin.ui.nhan_nut'));

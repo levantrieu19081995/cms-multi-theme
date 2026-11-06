@@ -24,4 +24,20 @@ class ContentMediaController extends Controller
             'index' => $media->getCustomProperty('index') ?? 0,
         ])->sortBy('index')->values());
     }
+
+    /**
+     * Post summary for the Banner form: after a post is picked, the form reads media[0].original_url as the banner image
+     * (avatar first, then the post's own images). Answers {code, data} like the endpoint this replaces.
+     */
+    public function detailBySlug(string $postSlug): JsonResponse
+    {
+        $post = Post::query()->where('slug', ltrim($postSlug, '/'))->whereNull('deleted_at')->first();
+        if (! $post) {
+            return response()->json(['code' => 404], 404);
+        }
+        $media = $post->getMedia('avatars')->concat($post->getMedia('images'))
+            ->map(fn ($m) => ['id' => $m->id, 'collection' => $m->collection_name, 'original_url' => $m->getUrl()])->values();
+
+        return response()->json(['code' => 200, 'data' => ['id' => $post->id, 'title' => $post->title, 'slug' => $post->slug, 'media' => $media]]);
+    }
 }

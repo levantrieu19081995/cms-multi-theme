@@ -2,8 +2,8 @@
     <script>
         function callback(res) {
             if (window.opener) {
-                if (typeof window.opener._postSelectCallback_{{ request()->state }} === 'function') {
-                    window.opener._postSelectCallback_{{ request()->state }}({{ request()->state }}, JSON.parse(atob(
+                if (typeof window.opener._postSelectCallback_{{ (int) request()->state }} === 'function') {
+                    window.opener._postSelectCallback_{{ (int) request()->state }}({{ (int) request()->state }}, JSON.parse(atob(
                         res)));
                     window.close();
                 } else {
