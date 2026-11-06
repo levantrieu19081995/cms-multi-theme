@@ -1,0 +1,144 @@
+{
+  "menu": [
+    {
+      "order": 301,
+      "name": "Quản lý Menu",
+      "i18n": "admin.menu.quan_ly_menu",
+      "icon": "menu-icon tf-icons ri-menu-2-line",
+      "slug": "menus.index",
+      "url": "menus",
+      "roler": "menu-manager"
+    },
+    {
+      "order": 102,
+      "name": "Quản lý bài viết",
+      "i18n": "admin.menu.quan_ly_bai_viet",
+      "icon": "menu-icon tf-icons ri-newspaper-line",
+      "slug": "bai-viet.index",
+      "url": "/bai-viet",
+      "roler": [
+        "post-manager",
+        "post-view",
+        "post-create",
+        "post-update",
+        "post-publishing",
+        "post-approve",
+        "post-delete"
+      ]
+    },
+    {
+      "order": 103,
+      "name": "Quản lý trang",
+      "i18n": "admin.menu.quan_ly_trang",
+      "icon": "menu-icon tf-icons ri-pages-line",
+      "slug": "trang.index",
+      "url": "/trang",
+      "roler": [
+        "page-manager",
+        "page-view",
+        "page-create",
+        "page-approve",
+        "page-update",
+        "page-publishing",
+        "page-delete"
+      ]
+    },
+    {
+      "order": 104,
+      "name": "Quản lý chuyên mục",
+      "i18n": "admin.menu.quan_ly_chuyen_muc",
+      "icon": "menu-icon tf-icons ri-function-line",
+      "slug": "chuyen-muc.index",
+      "url": "/chuyen-muc",
+      "roler": "term-manager"
+    },
+    {
+      "order": 105,
+      "name": "Quản lý bình luận",
+      "i18n": "admin.menu.quan_ly_binh_luan",
+      "icon": "menu-icon tf-icons ri-message-2-line",
+      "slug": "binh-luan.index",
+      "url": "/binh-luan",
+      "roler": [
+        "comment-manager",
+        "comment-view",
+        "comment-create",
+        "comment-approve",
+        "comment-update",
+        "comment-reject",
+        "comment-publishing",
+        "comment-delete"
+      ]
+    },
+    {
+      "order": 106,
+      "name": "Quản lý banner",
+      "i18n": "admin.menu.quan_ly_banner",
+      "icon": "menu-icon tf-icons ri-image-2-line",
+      "slug": "banner.index",
+      "url": "/banner",
+      "roler": "banner-manager"
+    },
+    {
+      "order": 107,
+      "name": "Quản lý quảng cáo",
+      "i18n": "admin.menu.quan_ly_quang_cao",
+      "icon": "menu-icon tf-icons ri-advertisement-line",
+      "slug": "quang-cao.index",
+      "url": "/quang-cao",
+      "roler": "ads-manager"
+    },
+
+    {
+      "order": 202,
+      "name": "Quản lý tập tin",
+      "i18n": "admin.menu.quan_ly_tap_tin",
+      "icon": "menu-icon tf-icons ri-folder-3-line",
+      "slug": "file.index",
+      "url": "/file",
+      "roler": "media-manager"
+    },
+    {
+      "order": 203,
+      "name": "Quản lý thư viện hình ảnh",
+      "i18n": "admin.menu.quan_ly_thu_vien_hinh_anh",
+      "icon": "menu-icon tf-icons ri-folder-image-line",
+      "slug": "hinh-anh.index",
+      "url": "/hinh-anh",
+      "roler": "media-manager"
+    },
+    {
+      "order": 204,
+      "name": "Quản lý video",
+      "i18n": "admin.menu.quan_ly_video",
+      "icon": "menu-icon tf-icons ri-folder-video-line",
+      "slug": "video.index",
+      "url": "/video",
+      "roler": "video-manager"
+    },
+
+    {
+      "order": 302,
+      "name": "Quản lý người dùng",
+      "i18n": "admin.menu.quan_ly_nguoi_dung",
+      "icon": "menu-icon tf-icons ri-user-settings-line",
+      "slug": ["users", "roles", "activities"],
+      "roler": "user-manager",
+      "submenu": [
+        { "slug": "roles.index", "name": "Vai trò", "url": "roles", "roler": "user-manager" },
+        { "slug": "users.index", "name": "Người dùng", "url": "users", "roler": "user-manager" },
+        { "slug": "activities.index", "name": "Nhật ký người dùng", "url": "activities", "roler": "user-manager" }
+      ]
+    },
+    {
+      "order": 303,
+      "name": "Cài đặt",
+      "i18n": "admin.menu.cai_dat",
+      "icon": "menu-icon tf-icons ri-settings-3-line",
+      "slug": "setting",
+      "submenu": [
+        { "name": "Cài đặt chung", "i18n": "admin.menu.cai_dat_chung", "slug": "setting.general", "url": "setting/general", "roler": "about-manager" }
+      ]
+    }
+  ]
+}

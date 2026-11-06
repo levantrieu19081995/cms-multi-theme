@@ -1,0 +1,21 @@
+/*
+ * Gallery orbit (JS: effects/gallery-orbit/index.js). Chỉ cơ chế: định vị 3D, kéo thả, ảnh giữa, ảnh "ma" của hiệu ứng FLIP.
+ * Theme tự định: cỡ sân khấu (width/aspect-ratio/background), cạnh ảnh nhỏ (--cms-ring-thumb), cỡ/bo góc/đổ bóng ảnh giữa, nút điều khiển.
+ * JS ghi các biến --cms-ring-perspective, --cms-ring-orbit-y, --cms-ring-center-top và transform/opacity/z-index của từng ảnh nhỏ.
+ * Nạp SAU css của theme để các luật này thắng luật nền cùng độ ưu tiên (đúng thứ tự trước khi tách).
+ */
+.cms-ring { position: relative; }
+.cms-ring.is-ready .cms-ring-stage { position: relative; perspective: var(--cms-ring-perspective, 600px); cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.cms-ring.is-dragging .cms-ring-stage, .cms-ring.is-dragging .cms-ring-stage * { cursor: grabbing; }
+.cms-ring.is-ready .cms-ring-stage img { -webkit-user-drag: none; pointer-events: none; }
+.cms-ring.is-ready .cms-ring-orbit { position: absolute; inset: 0; display: block; overflow: visible; padding: 0; transform-style: preserve-3d; transform: translateY(var(--cms-ring-orbit-y, 0px)); }
+/* Each thumbnail is positioned on the tilted ring by JS (inline transform/opacity, animated per frame). */
+.cms-ring.is-ready .cms-ring-item { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; }
+.cms-ring.is-ready .cms-ring-thumb {
+  position: absolute; left: calc(var(--cms-ring-thumb, 125px) / -2); top: calc(var(--cms-ring-thumb, 125px) / -2);
+  width: var(--cms-ring-thumb, 125px); height: var(--cms-ring-thumb, 125px); cursor: pointer;
+  backface-visibility: hidden; will-change: transform, opacity;
+}
+.cms-ring-center { position: absolute; left: 50%; z-index: 10; top: calc(50% + var(--cms-ring-center-top, -208px)); overflow: hidden; will-change: transform, opacity; }
+/* Previous centre image while it shrinks away (JS FLIP animation). */
+.cms-ring-ghost { z-index: 9; pointer-events: none; }

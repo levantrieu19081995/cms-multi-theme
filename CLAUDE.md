@@ -1,0 +1,69 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Overview
+
+Laravel 11 / PHP 8.2+ multi-unit CMS (first deployment: Nam Bình Dương university), built with `nwidart/laravel-modules`. Two active modules: `CmsBackend` (admin + shared services) and `CmsFrontend` (public site). Module names are deliberately neutral — never name modules/controllers after a customer. `README.md` (Vietnamese) is the authoritative design/decision log; read it before architectural changes. The directory is not a git repository.
+
+## Commands
+
+```bat
+npm run dev:all        # Laravel server + Vite together, ALL themes (scripts/dev-all.ps1); website http://127.0.0.1:8011/, admin http://127.0.0.1:8011/cms, login at /cms/login
+php artisan serve --host=127.0.0.1 --port=8011   # or run separately...
+npm run dev            # ...Vite dev server ONLY (no Laravel). For PHP + Vite use dev:all / dev:all-themes / dev:<theme>
+npm run build          # production Vite build (all enabled modules in modules_statuses.json)
+npm run build:cms      # build only CmsBackend + CmsFrontend, all themes (CMS_BUILD_PROJECT profile, scripts/project-profiles.mjs) -> build-exports/cms/build
+npm run dev:all-themes # Laravel + Vite, every public theme (same as dev:all)
+npm run dev:default | dev:nbd | dev:bda            # Laravel + Vite, ONE theme (also: npm run dev:theme -- nam-binh-duong)
+npm run build:all-themes                           # every theme -> build-exports/all-themes/build (same set as build:cms)
+npm run build:default | build:nbd | build:bda      # ONE theme -> build-exports/themes/<theme>/build (also: npm run build:theme -- ban-de-an)
+node scripts/theme-build.mjs <all|theme> --check-only   # registry + Blade @vite() check, no Vite build
+php artisan test                                  # PHPUnit (Unit + Feature suites)
+php artisan test tests/Feature/SbutThemeTest.php  # single file
+php artisan test --filter=methodName              # single test
+vendor/bin/pint                                   # PHP formatting
+php artisan optimize:clear                        # after moving the source or changing config
+```
+
+- Tests hit the real configured DB (`cms_workspace`; sqlite lines in `phpunit.xml` are commented out). Existing HTTP tests wrap changes in transactions that roll back — keep that pattern. Do not run migrations/seeders or alter the DB just to boot the app.
+- `public/storage` must symlink into *this* source (`php artisan storage:unlink && storage:link` after relocating).
+- Vite scans `resources/assets/{js,css,sass}/**` recursively plus each module's `vite.config.js`. **CmsFrontend entries no longer come from a blind glob**: they come from the registry `scripts/theme-profiles.mjs` (see "Dev/Build per theme"). A new theme's CSS/JS must be registered there (and needs a rebuild, `@vite` in the screen/component).
+
+## Architecture: screens/themes
+
+Request flow: `Route → shared Controller → Service (data + business rules) → ScreenTheme resolves theme → Screen view → layout/components`. Views never query the DB or decide permissions; data is prepared in controllers/services (e.g. `Modules/CmsFrontend/app/Services/HomePresentation.php` builds and caches homepage blocks, keyed by theme/db/locale).
+
+- Only the **public** site is themable. Themes: `default`, `nam-binh-duong` (SBUT), `ban-de-an`. Admin is hard-wired to `screens/default`; do not add admin themes. The selection is stored as option `cms_public_theme` (the old `cms_home_theme` is ignored).
+- Theme registry, legacy-view-name mapping, `shared_views`, per-theme `home_sections` (category slugs), `statistics`, `audience_links`, and cache `version`: `Modules/CmsBackend/config/screens.php`. Resolution/fallback: `Modules/CmsBackend/app/Services/ScreenTheme.php`; Laravel view-finder hook: `app/Support/ScreenViewFinder.php`. Unregistered/unknown DB key → falls back to `default`; missing theme views fall back to default screens.
+- Views live at `Modules/<Module>/resources/views/screens/<theme>/{layout,home}.blade.php`, `components/`, `pages/`. Controllers call neutral view names (`cmsfrontend::screens.home`, `cmsbackend::screens.pages.news.index`) or `ScreenTheme::view(surface, screen)` — never hardcode a theme key in a controller. Theme assets: `resources/assets/{css,js}/screens/<key>/`.
+- Adding a theme: register key (lowercase/digits/hyphens) + label + `surfaces: public` in `screens.php`, create only the views that differ, test fallback/cache/permissions, bump the theme `version` when changing config that affects fragment cache. Theme must not change DB, permissions, menus, or workflow, and must not get its own controller/service just for layout.
+- Theme content comes from existing posts/categories (no sample data seeded into the DB); empty blocks show an "updating" state.
+- **Homepage Layout Manager** (`Modules/CmsFrontend/app/Homepage/`): the public homepage of every theme is built from a layout of blocks (zones, variants, enabled, order) instead of a fixed `home-content` view. Block types = `Definitions/`, per-theme zones/renderers/default layout = `Themes/`, all listed once in `HomepageBlockRegistry`; layout and per-theme block settings live in `homepage_block_instances/theme_blocks/block_settings`; with nothing installed the code default layout is used. Developers arrange it in Developer Settings → "Bố cục trang chủ" (preview → apply); admins only edit block content sources in "Cài đặt trang chủ". Effects belong to the shared framework: blocks declare preset KEYS (`EffectCatalog`), the page loads only the `effects/auto/*` entries those presets need, and every build profile contains them. How to extend: `docs/homepage-layout-manager/HUONG-DAN-MO-RONG.md`.
+- **Developer Settings → tab "Tài khoản"** (`Services/Developer/AccountAdmin.php`, `DeveloperAccountsController`, partial `accounts.blade.php`, lang `developer_accounts`): list of all accounts, password reset (signs the account out everywhere), lock/unlock, role assignment and role permissions (through `PermissionAvailability::syncRole`). Developer session only; every action is written to the activity log without the password.
+- **Never run the whole `vendor/bin/phpunit` against data you care about**: older tests use `RefreshDatabase` and wipe the database. `phpunit.xml` points at a non-existent database on purpose; run only `tests/Unit/Homepage` (no DB) or pass a dedicated test database.
+
+## Dev/Build per theme (asset profiles)
+
+Theme assets can be built/watched for all themes or for one. This only splits CSS/JS/views; **it does not split database data** (a single-theme build on a shared DB still shows every project's content: deploy each project with its own DB, or scope content with a key such as `project_key`/`site_id`/`theme_key` filtered in every query; never use `NBD`/`BDA` title prefixes as the separation). Full reference and decisions: README.md section 8.
+
+- **Registry**: `scripts/theme-profiles.mjs` is the only place that declares themes for builds: entries (CSS/JS globs), `dependencies`, `fallbackEntries`, `unusedViews`. Themes: `default` (Khuyến nông), `nam-binh-duong`, `ban-de-an`. Sources stay in `Modules/CmsFrontend/resources/assets/{css,js}/screens/<theme>/`; shared assets = everything outside `screens/**`; Core, CmsBackend and the Materialize theme are always built.
+- **Dependencies**: `ban-de-an` needs `nam-binh-duong` (its layout loads that theme's `theme.css/js`). `nam-binh-duong` and `ban-de-an` fall back to `default` views `layouts/sections/{styles,scripts}Front`, so they must carry `screens/default/shell.css` and `shell.js` (`fallbackEntries`).
+- **Modes** (process env, never `.env`): `CMS_ASSET_MODE=all` (default) or `single` + `CMS_ASSET_THEME=<key>`. Single: only shared + that theme + its dependencies are built/watched; the admin theme selector is locked; the DB option `cms_public_theme` is never modified, and a stored theme without assets falls back to the built theme with a log warning.
+- **Runtime**: `Modules/CmsBackend/app/Support/AssetProfile.php` decides the mode in this order: env vars → `public/hot` present (Vite dev, treated as all) → `public/build/theme-build.json` → all. `ScreenTheme::choices()/key()` and `ScreenThemeController` use it. Never leave `public/hot` on production; run `php artisan config:clear` after changing the profile variables.
+- **Output** (`public/build` is never written by a build): `build-exports/all-themes/build`, `build-exports/themes/<theme>/build`, and `build-exports/cms/build` (`build:cms`). To deploy, copy the whole content (`manifest.json`, `theme-build.json`, `assets/`) of exactly one profile folder into the target project's `public/build`, back up the running one first, and never mix files of two profiles.
+- **Checks**: `theme-build.mjs` fails the build if a `@vite()` used by a theme's views (including `default` fallback views) is not built, if the manifest lacks Core/CmsBackend/CmsFrontend or a profile entry, if a single build contains another theme's entry, or if a referenced file is missing.
+- **Deployment matrix**: framework dev and theme-switch demo = `all-themes` + master DB; Nam Bình Dương / Ban Đề án / Khuyến nông = `nam-binh-duong` / `ban-de-an` / `default` + a separate DB for each.
+- **Status (30/10/2026)**: registry, `--check-only` for the four profiles, Node/PHP syntax and `AssetProfile` via tinker pass. **Not yet confirmed**: real builds of the four profiles, real `dev:*` runs and Ctrl+C, browser rendering, and `theme-build.json` after copying into `public/build`. Do not describe this as production-ready until those are done.
+
+## Other conventions
+
+- Autoload (composer.json): `Modules\CmsBackend\` → `Modules/CmsBackend/app/`, `Modules\CmsFrontend\` → `Modules/CmsFrontend/app/`; global helpers in `app/Helpers/GlobalHelpers.php`.
+- Content deletion: "Xóa" is soft delete; "Xóa vĩnh viễn kèm tập tin" (admin-only) requires the post to be unpublished first, checks menu/banner/child-post links, and must keep files still referenced by other content (never delete a whole folder by post ID alone).
+- Homepage fragment cache is disabled in debug; in production it keys on theme/version/content stamp, and public-visibility rules (approval status, schedule, expiry, internal categories) must be enforced both when querying and when caching.
+- The stale `Modules/CmsBackend/AGENTS.md` (leftover of the Khuyến nông source) was removed; ignore any mention of it in older notes.
+- **Two copies of `AbstractPostController` still run side by side, on purpose.** `Modules/CmsBackend/app/Http/Controllers/Shared/` is the canonical one (translations via `saveTranslations`, `ModuleUrl` route names, `admin.*` language keys) and the Editorial/CDN controllers use it. `app/Http/Controllers/AbstractPostController.php` is the legacy copy; the old shared-framework controllers (Video, ImageLibrary, Banner, Page, Post) still extend it, and the media pickers (`video.index`, `hinh-anh.index`) depend on them. Do not add features to the legacy copy, and do not delete it until those screens are moved to module controllers and tested; a write screen can change behaviour (it would start writing `post_translations`).
+- The old-address redirects (`RedirectLegacyAdminRoutes`, `GuardEditorialLegacyRoutes`) are in use: the pickers still open `/trang?mode=select`, `/bai-viet?mode=select`, and both middleware keep the query string when redirecting. Remove them only after the pickers use the module route names.
+- **`CMS_ROUTE_PREFIX` must not be empty.** With an empty prefix the administration overview (`/`) collides with the public home, the route `cms.dashboard` disappears and every signed-in request ends in a 500 (`Route [cms.dashboard] not defined`). Use `cms` (the default). A server `.env` carried `CMS_ROUTE_PREFIX=""` from an older deployment: check it when deploying.
+- Production deployments set `CMS_PROJECT_KEY` (`khuyen-nong`, `nam-binh-duong`, `ban-de-an`); the permission manifest (`storage/app/developer/permission-manifest.json`) is bound to that key. While the manifest file is absent every permission is available; once it exists only the listed slugs are.
+- The Khuyến nông/Sóc Trăng sources are separate; changes here must not be applied back to them or their databases.

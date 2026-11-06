@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@cusc.vn",
+      "name": "Quản trị",
+      "status": 1,
+      "type": 1,
+      "password": "12345678",
+      "roles": [
+        "user",
+        "administrator"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+/*
+ * Hiện lần lượt (JS: effects/stagger/index.js, khởi tạo qua effects/reveal).
+ *   [data-stagger-group]                  con trực tiếp trồi lên lần lượt khi cuộn tới, cuộn ngược thì chìm xuống
+ *   [data-stagger-group=".a, .b li"]     như trên nhưng chọn phần tử bên trong nhóm bằng selector (theo thứ tự trong trang)
+ *   [data-stagger-group][data-stagger-offset=".25"]  cả nhóm chạy trễ thêm (giây)
+ *   [data-bars] > i[style="--h:60%"]      cột biểu đồ mọc lên khi phần chứa nó hiện ra
+ * Chỉnh theo khối bằng biến CSS: --reveal-rise, --reveal-scale, --reveal-duration, --reveal-fade, --reveal-ease (mặc định ở reveal/style.css).
+ * Trạng thái ẩn chỉ áp dụng khi JS đã thêm .reveal-ready vào <html>, nên lỗi JS không làm mất nội dung.
+ */
+
+/* Chỉ đặt trạng thái ẩn; khi .is-in phần tử trở về opacity/transform gốc của theme */
+.reveal-ready .reveal-item{transition:opacity var(--reveal-fade) var(--reveal-ease),transform var(--reveal-duration) var(--reveal-ease)}
+.reveal-ready .reveal-item:not(.is-in){opacity:0;transform:translateY(var(--reveal-rise)) scale(var(--reveal-scale))}
+
+[data-bars]{display:flex;align-items:flex-end;gap:5px;height:56px}
+[data-bars] i{flex:1;border-radius:5px;height:var(--h);background:currentColor}
+.reveal-ready [data-bars] i{height:12%;transition:height 1.3s cubic-bezier(.2,.7,.2,1)}
+.reveal-ready .is-in [data-bars] i{height:var(--h)}
+
+/* Luôn chạy kể cả khi máy bật giảm chuyển động: vượt qua các luật transition:none!important chung của theme */
+@media(prefers-reduced-motion:reduce){
+  html.reveal-ready .reveal-item{transition-property:opacity,transform!important;transition-duration:var(--reveal-fade),var(--reveal-duration)!important;transition-timing-function:var(--reveal-ease)!important}
+  html.reveal-ready [data-bars] i{transition:height 1.3s cubic-bezier(.2,.7,.2,1)!important}
+}

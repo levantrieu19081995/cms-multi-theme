@@ -1,0 +1,11 @@
+{
+    "name": "CmsFrontend",
+    "alias": "cmsfrontend",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\CmsFrontend\\Providers\\CmsFrontendServiceProvider"
+    ],
+    "files": []
+}

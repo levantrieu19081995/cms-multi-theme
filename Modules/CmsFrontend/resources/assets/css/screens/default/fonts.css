@@ -1,0 +1,14 @@
+/*
+ * Roboto cục bộ (Roboto[wdth,wght], OFL — public/assets/fonts/roboto/OFL.txt) cho theme Khuyến nông: đủ glyph tiếng Việt và dải weight 100–900 liên tục,
+ * nên 400/500/600/700/800/900 đều là weight thật, không bị trình duyệt giả lập đậm. Cùng tên 'Roboto' với font theme Nam Bình Dương dùng (token --cms-font
+ * trong shell.css). Chỉ nạp trong layout của theme default (không nằm trong fallbackEntries của theme khác).
+ * Tệp nạp là woff2 đã cắt (Latin, Latin mở rộng, tiếng Việt, dấu câu/ký hiệu thông dụng; cố định độ rộng, giữ trục độ đậm): ~83 KB thay vì ~477 KB của TTF gốc.
+ * Cần ký tự ngoài dải đó thì tạo lại từ Roboto-Variable.ttf (giữ nguyên làm nguồn).
+ */
+@font-face {
+  font-family: 'Roboto';
+  src: url('../../../fonts/roboto/Roboto-Variable-vi.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}

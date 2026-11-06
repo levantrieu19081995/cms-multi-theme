@@ -1,0 +1,11 @@
+{
+    "name": "CmsBackend",
+    "alias": "cmsbackend",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\CmsBackend\\Providers\\CmsBackendServiceProvider"
+    ],
+    "files": []
+}

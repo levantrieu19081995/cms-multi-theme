@@ -1,0 +1,10 @@
+/* Login: nhận diện riêng của theme (token --auth-*). Cấu trúc form/bố cục ở auth/login-base.css; chuyển động ở effects/auth. */
+.cms-public.cms-login-page {
+  --auth-page-bg: #0d0d0d;
+  --auth-surface: #f7f7f5;
+  --auth-ink: #111;
+  --auth-accent: #111;
+  --auth-accent-hover: #262626;
+  --auth-curtain: #111;
+  --auth-font: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}

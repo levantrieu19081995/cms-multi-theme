@@ -1,0 +1,22 @@
+{
+  "menu": [
+    {
+      "menuHeader": "Hệ thống",
+      "i18n": "admin.menu.he_thong"
+    },
+    {
+      "name": "Cài đặt",
+      "i18n": "admin.menu.cai_dat",
+      "icon": "menu-icon tf-icons ri-shopping-bag-3-line",
+      "slug": "#multi-level",
+      "submenu": [
+        {
+          "slug": "cms.setting.trang-chu",
+          "name": "Cài đặt trang chủ",
+          "i18n": "admin.menu.cai_dat_trang_chu",
+          "url": "/cms/setting/trang-chu"
+        }
+      ]
+    }
+  ]
+}

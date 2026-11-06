@@ -1,0 +1,27 @@
+@php
+    $shortcutIcons = ['tuyen-sinh'=>'ri-graduation-cap-line','dao-tao'=>'ri-book-open-line','lien-ket'=>'ri-team-line','nghien-cuu'=>'ri-flask-line'] + config('cmsfrontend.menu_icons', []);
+@endphp
+@if(!empty($cmsNavigation))
+<nav class="quick-links" aria-label="{{ __('frontend.ui.truy_cap_cac_chuc_nang') }}"><button class="sbut-shortcut-backdrop" type="button" tabindex="-1" aria-label="{{ __('frontend.ui.dong_menu_con') }}"></button><div class="wrap quick-inner sbut-shortcut-inner">
+@foreach($cmsNavigation as $item)
+    @php
+        $titleSlug = \Illuminate\Support\Str::slug($item['title']);
+        $icon = collect($shortcutIcons)->first(fn ($value,$keyword) => $keyword !== 'default' && str_contains($titleSlug,$keyword)) ?? 'ri-links-line';
+    @endphp
+    <div class="sbut-shortcut-item">
+    @if(!empty($item['children']))
+        <details class="sbut-shortcut-dropdown"><summary class="sbut-shortcut-trigger"><i class="{{ $icon }}" aria-hidden="true"></i><span><strong>{{ $item['title'] }}</strong></span></summary>
+            <div class="sbut-shortcut-panel">
+                <div class="sbut-shortcut-head"><span>{{ $item['title'] }}</span>@if($item['url'])<a class="sbut-shortcut-all" href="{{ $item['url'] }}" @if(($item['target'] ?? null) === '_blank') target="_blank" rel="noopener noreferrer" @endif>{{ __('frontend.ui.xem_tat_ca') }}</a>@endif</div>
+                <ul @class(['sbut-shortcut-list','sbut-shortcut-list--columns'=>count($item['children'])>4]) style="--sbut-menu-rows:{{ (int) ceil(count($item['children'])/2) }}">
+                    @include('cmsfrontend::screens.components.layouts.sections.navbar.menu-item',['items'=>$item['children']])
+                </ul>
+            </div>
+        </details>
+    @else
+        <a class="sbut-shortcut-trigger" href="{{ $item['url'] }}" @if(($item['target'] ?? null) === '_blank') target="_blank" rel="noopener noreferrer" @endif><i class="{{ $icon }}" aria-hidden="true"></i><span><strong>{{ $item['title'] }}</strong></span></a>
+    @endif
+    </div>
+@endforeach
+</div></nav>
+@endif

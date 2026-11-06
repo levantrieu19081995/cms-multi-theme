@@ -1,0 +1,87 @@
+.section-thongtin {
+  padding: 5rem 0;
+  background-image: url(https://be-better.monamedia.net/wp-content/uploads/2023/07/course_bg_1-2.png);
+  .swiper {
+    width: 100%;
+    height: 100%;
+    .swiper-button-next,
+    .swiper-button-prev {
+      top: 50%;
+      position: absolute;
+    }
+  }
+  .swiper-button-next {
+    right: 0%;
+    transform: translate(150%, 50%);
+    &:hover {
+      background-color: #0d6efd !important;
+    }
+    i {
+      font-size: 24px;
+    }
+  }
+  .swiper-button-prev {
+    left: 0%;
+    transform: translate(-150%, 50%);
+    &:hover {
+      background-color: #0d6efd !important;
+    }
+    i {
+      font-size: 24px;
+    }
+  }
+  .swiper-slide {
+    border-radius: 8px;
+    display: flex;
+    padding: 0;
+    box-shadow:
+      rgba(0, 0, 0, 0.05) 0px 6px 6px 0px,
+      rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #fff !important ;
+    .card-title {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      line-height: 1.5;
+      text-align: justify !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-height: 66px !important;
+    }
+    .img-wrapper {
+      width: 100%;
+      overflow: hidden; // 👈 giới hạn ảnh không tràn
+      position: relative;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      img {
+        display: block;
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+      }
+    }
+    &:hover {
+      .card-body h4 {
+        color: #0d6efd;
+      }
+      img {
+        transform: scale(1.2); // 👈 zoom ảnh trong khung
+      }
+    }
+  }
+
+  .card-body {
+    padding: 20px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+  .btn-xemchitiet {
+    background-color: #0d6efd;
+    color: #fff;
+  }
+}

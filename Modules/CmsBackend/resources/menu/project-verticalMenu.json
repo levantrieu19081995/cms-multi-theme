@@ -1,0 +1,343 @@
+{
+  "menu": [
+    {
+      "order": 100,
+      "menuHeader": "Tương tác - Nội dung",
+      "i18n": "admin.menu.tuong_tac_noi_dung"
+    },
+    {
+      "order": 112,
+      "name": "Quản lý dịch vụ",
+      "i18n": "admin.menu.quan_ly_dich_vu",
+      "icon": "menu-icon tf-icons ri-customer-service-2-line",
+      "slug": "cms.dashboard.dich-vu.index",
+      "url": "/cms/dich-vu",
+      "roler": [
+        "dichvu-manager",
+        "dichvu-view",
+        "dichvu-create",
+        "dichvu-update",
+        "dichvu-delete"
+      ]
+    },
+    {
+      "key": "cms_featured_statistics",
+      "order": 111,
+      "name": "Quản lý số liệu nổi bật",
+      "i18n": "admin.menu.quan_ly_so_lieu_noi_bat",
+      "icon": "menu-icon tf-icons ri-numbers-line",
+      "slug": "cms.dashboard.con-so-noi-bat.index",
+      "url": "/cms/con-so-noi-bat",
+      "roler": [
+        "sonoibat-manager",
+        "sonoibat-view",
+        "sonoibat-update"
+      ]
+    },
+    {
+      "order": 102,
+      "name": "Quản lý sự kiện",
+      "i18n": "admin.menu.quan_ly_su_kien",
+      "icon": "menu-icon tf-icons ri-calendar-event-line",
+      "slug": "cms.dashboard.su-kien.index",
+      "url": "/cms/su-kien",
+      "roler": [
+        "cms-event-view",
+        "cms-event-create",
+        "cms-event-update",
+        "cms-event-approve",
+        "cms-event-publish",
+        "cms-event-delete"
+      ]
+    },
+    {
+      "order": 103,
+      "name": "Quản lý gương tiêu biểu",
+      "i18n": "admin.menu.quan_ly_guong_tieu_bieu",
+      "icon": "menu-icon tf-icons ri-user-star-line",
+      "slug": "cms.dashboard.guong-tieu-bieu.index",
+      "url": "/cms/guong-tieu-bieu",
+      "roler": [
+        "guong-tieu-bieu-manager",
+        "guong-tieu-bieu-view",
+        "guong-tieu-bieu-create",
+        "guong-tieu-bieu-update",
+        "guong-tieu-bieu-delete"
+      ]
+    },
+    {
+      "order": 104,
+      "name": "Quản lý đối tác",
+      "i18n": "admin.menu.quan_ly_doi_tac",
+      "icon": "menu-icon tf-icons ri-shake-hands-line",
+      "slug": "cms.dashboard.doi-tac.index",
+      "url": "/cms/doi-tac",
+      "roler": [
+        "doitac-manager",
+        "doitac-view",
+        "doitac-create",
+        "doitac-update",
+        "doitac-delete"
+      ]
+    },
+    {
+      "order": 105,
+      "name": "Quản lý khảo sát",
+      "i18n": "admin.menu.quan_ly_khao_sat",
+      "icon": "menu-icon tf-icons ri-survey-line",
+      "slug": "cms.khao-sat",
+      "url": "/cms/khao-sat",
+      "roler": [
+        "khaosat-manager",
+        "khaosat-view",
+        "khaosat-create",
+        "khaosat-update",
+        "khaosat-publish",
+        "khaosat-delete",
+        "khaosat-response-view",
+        "khaosat-response-delete",
+        "khaosat-statistics-view",
+        "khaosat-export"
+      ]
+    },
+    {
+      "key": "cdn_baiviet",
+      "order": 101,
+      "name": "Quản lý bài viết",
+      "i18n": "admin.menu.quan_ly_bai_viet",
+      "icon": "menu-icon tf-icons ri-draft-line",
+      "slug": "cms.dashboard.cdn.bai-viet.index",
+      "url": "/cms/bai-viet",
+      "roler": [
+        "cms-post-view",
+        "cms-post-create",
+        "cms-post-update",
+        "cms-post-approve",
+        "cms-post-publish",
+        "cms-post-delete"
+      ]
+    },
+    {
+      "key": "cdn_trang",
+      "order": 101,
+      "name": "Quản lý trang",
+      "i18n": "admin.menu.quan_ly_trang",
+      "icon": "menu-icon tf-icons ri-pages-line",
+      "slug": "cms.dashboard.cdn.trang.index",
+      "url": "/cms/trang",
+      "roler": [
+        "page-manager",
+        "page-view",
+        "page-create",
+        "page-approve",
+        "page-update",
+        "page-publishing",
+        "page-delete"
+      ]
+    },
+    {
+      "key": "cdn_vanban",
+      "order": 113,
+      "name": "Quản lý văn bản",
+      "i18n": "admin.menu.quan_ly_van_ban",
+      "icon": "menu-icon tf-icons ri-file-text-line",
+      "slug": "cms.dashboard.cdn.van-ban.index",
+      "url": "/cms/van-ban",
+      "roler": [
+        "vanban-manager",
+        "vanban-view",
+        "vanban-create",
+        "vanban-update",
+        "vanban-delete"
+      ]
+    },
+    {
+      "key": "cdn_loaivanban",
+      "order": 114,
+      "name": "Quản lý loại văn bản",
+      "i18n": "admin.menu.quan_ly_loai_van_ban",
+      "icon": "menu-icon tf-icons ri-file-edit-line",
+      "slug": "cms.dashboard.cdn.loai-van-ban.index",
+      "url": "/cms/loai-van-ban",
+      "roler": [
+        "loaivanban-manager",
+        "loaivanban-view",
+        "loaivanban-create",
+        "loaivanban-update",
+        "loaivanban-delete"
+      ]
+    },
+    {
+      "key": "cdn_nhomvanban",
+      "order": 115,
+      "name": "Quản lý nhóm văn bản",
+      "i18n": "admin.menu.quan_ly_nhom_van_ban",
+      "icon": "menu-icon tf-icons ri-store-3-line",
+      "slug": "cms.dashboard.cdn.nhom-van-ban.index",
+      "url": "/cms/nhom-van-ban",
+      "roler": [
+        "nhomvanban-manager",
+        "nhomvanban-view",
+        "nhomvanban-create",
+        "nhomvanban-update",
+        "nhomvanban-delete"
+      ]
+    },
+    {
+      "key": "cdn_banner",
+      "order": 121,
+      "name": "Quản lý banner",
+      "i18n": "admin.menu.quan_ly_banner",
+      "icon": "menu-icon tf-icons ri-newspaper-line",
+      "slug": "cms.dashboard.cdn.banner.index",
+      "url": "/cms/banner",
+      "roler": [
+        "banner-manager",
+        "banner-view",
+        "banner-create",
+        "banner-approve",
+        "banner-update",
+        "banner-publishing",
+        "banner-delete"
+      ]
+    },
+    {
+      "key": "cdn_marquee",
+      "order": 122,
+      "name": "Quản lý marquee",
+      "i18n": "admin.menu.quan_ly_marquee",
+      "icon": "menu-icon tf-icons ri-chat-quote-line",
+      "slug": "cms.dashboard.cdn.marquee.index",
+      "url": "/cms/marquee",
+      "roler": [
+        "marquee-manager",
+        "marquee-view",
+        "marquee-create",
+        "marquee-update",
+        "marquee-delete",
+        "marquee-approve"
+      ]
+    },
+    {
+      "key": "cdn_lienket",
+      "order": 123,
+      "name": "Quản lý liên kết website",
+      "i18n": "admin.menu.quan_ly_lien_ket_website",
+      "icon": "menu-icon tf-icons ri-links-line",
+      "slug": "cms.dashboard.cdn.lien-ket.index",
+      "url": "/cms/lien-ket",
+      "roler": "link-manager"
+    },
+    {
+      "key": "cdn_hoidap",
+      "order": 131,
+      "name": "Hỏi đáp",
+      "i18n": "admin.menu.hoi_dap",
+      "icon": "menu-icon tf-icons ri-questionnaire-line",
+      "slug": "cms.dashboard.hoi-dap.index",
+      "url": "/cms/hoi-dap",
+      "roler": [
+        "hoidap-manager",
+        "hoidap-view",
+        "hoidap-update",
+        "hoidap-delete",
+        "hoidap-approve"
+      ]
+    },
+    {
+      "key": "cdn_lienhe",
+      "order": 132,
+      "name": "Liên hệ",
+      "i18n": "admin.menu.lien_he",
+      "icon": "menu-icon tf-icons ri-question-answer-line",
+      "slug": "cms.dashboard.lien-he.index",
+      "url": "/cms/lien-he",
+      "roler": [
+        "lienhe-manager",
+        "lienhe-view",
+        "lienhe-delete"
+      ]
+    },
+    {
+      "key": "social_media",
+      "order": 133,
+      "name": "Truyền thông đa kênh",
+      "i18n": "admin.menu.truyen_thong_da_kenh",
+      "icon": "menu-icon tf-icons ri-share-forward-line",
+      "slug": "cms.dashboard.truyen-thong.index",
+      "url": "/cms/truyen-thong",
+      "submenu": [
+        {
+          "slug": "cms.dashboard.truyen-thong.index",
+          "name": "Tổng quan",
+          "i18n": "admin.menu.truyen_thong_tong_quan",
+          "url": "/cms/truyen-thong",
+          "roler": ["social-manager", "social-publication-view"]
+        },
+        {
+          "slug": "cms.dashboard.truyen-thong.create",
+          "name": "Tạo bài đăng",
+          "i18n": "admin.menu.truyen_thong_tao_bai_dang",
+          "url": "/cms/truyen-thong/tao-bai-dang",
+          "roler": ["social-manager", "social-publication-create"]
+        },
+        {
+          "slug": "cms.dashboard.truyen-thong.publications.index",
+          "name": "Bài đã đăng",
+          "i18n": "admin.menu.truyen_thong_bai_da_dang",
+          "url": "/cms/truyen-thong/bai-da-dang",
+          "roler": ["social-manager", "social-publication-view"]
+        },
+        {
+          "slug": "cms.dashboard.truyen-thong.statistics",
+          "name": "Thống kê tương tác",
+          "i18n": "admin.menu.truyen_thong_thong_ke",
+          "url": "/cms/truyen-thong/thong-ke",
+          "roler": ["social-manager", "social-statistics-view"]
+        },
+        {
+          "slug": "cms.dashboard.truyen-thong.accounts",
+          "name": "Tài khoản liên kết",
+          "i18n": "admin.menu.truyen_thong_tai_khoan",
+          "url": "/cms/truyen-thong/tai-khoan",
+          "roler": ["social-manager", "social-account-manage"]
+        }
+      ]
+    },
+    {
+      "order": 200,
+      "menuHeader": "Dữ liệu",
+      "i18n": "admin.menu.du_lieu"
+    },
+    {
+      "key": "cdn_thuvien_hinhanh",
+      "order": 202,
+      "name": "Quản lý thư viện hình ảnh",
+      "i18n": "admin.menu.quan_ly_thu_vien_hinh_anh",
+      "icon": "menu-icon tf-icons ri-folder-image-line",
+      "slug": "cms.dashboard.cdn.thu-vien-hinh-anh.index",
+      "url": "/cms/thu-vien-hinh-anh",
+      "roler": "media-manager"
+    },
+    {
+      "order": 300,
+      "menuHeader": "Hệ thống",
+      "i18n": "admin.menu.he_thong"
+    },
+    {
+      "order": 303,
+      "merge": true,
+      "icon": "menu-icon tf-icons ri-settings-3-line",
+      "slug": "setting",
+      "submenu": [
+        {
+          "slug": "cms.setting.trang-chu",
+          "name": "Cài đặt trang chủ",
+          "i18n": "admin.menu.cai_dat_trang_chu",
+          "url": "/cms/setting/trang-chu",
+          "roler": "homepage-manager"
+        }
+      ]
+    }
+  ]
+}

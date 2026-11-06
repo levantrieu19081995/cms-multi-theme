@@ -1,0 +1,547 @@
+.landing-footer {
+  background: #0c57a3;
+  padding: 20px;
+}
+
+.footer-top {
+  background: hsla(241, 100%, 9%, 0.6);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 2px 4px,
+    rgba(0, 0, 0, 0.3) 0px 7px 13px -3px,
+    rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  text-align: left;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.footer-logo .logo {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+.footer-logo .logo .huan-chuong {
+  background-color: white;
+  border-radius: 50%;
+}
+
+.footer-content .sub-desc {
+  color: white;
+  font-size: clamp(0.6rem, 2vw, 0.9rem);
+}
+
+.footer-logo .logo .multi-color-title {
+  color: white;
+  font-size: medium;
+}
+.footer-content {
+  text-align: center;
+}
+
+.footer-content .brand-name {
+  /* font-size: 1.8rem; */
+  font-size: clamp(0.8rem, 2.5vw, 1.3rem);
+}
+
+.app-brand-logo {
+  display: flex;
+  background-color: white;
+  border-radius: 50%;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.app-brand-logo img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+}
+
+.app-brand-text {
+  font-size: 24px;
+  font-weight: 600;
+  text-transform: uppercase;
+  transform: scale(0.75, 1.55);
+  text-shadow: 4px 4px 6px rgba(66, 68, 90, 1);
+  transform-origin: left;
+  margin-top: 10px;
+}
+
+.footer-title {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative;
+  padding-bottom: 12px;
+  margin-bottom: 5px;
+  transition: color 0.3s;
+  max-width: fit-content;
+}
+
+.footer-title::after {
+  content: '';
+  display: block;
+  width: 70px;
+  height: 5px;
+  margin-top: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #1e90ff, #00c3ff, #1e90ff);
+  background-size: 200% 100%;
+  animation: footer-underline-move 2s linear infinite;
+  transition:
+    width 0.4s cubic-bezier(0.4, 2, 0.6, 1),
+    background 0.4s;
+}
+
+@keyframes footer-underline-move {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.footer-links,
+.footer-links li a {
+  color: #fff;
+  /* font-size: 14px; */
+  font-size: clamp(0.6rem, 2vw, 0.9rem);
+  line-height: 1.8;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-links li a:hover {
+  letter-spacing: 0.5px;
+}
+
+.footer-website-links {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.footer-website-links li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-link-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  padding: 3px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  color: #233767;
+}
+
+.footer-link-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.footer-link-avatar i {
+  font-size: 18px;
+}
+
+.footer-link-title {
+  min-width: 0;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.footer-title:hover {
+  text-shadow:
+    0 2px 8px rgba(30, 144, 255, 0.3),
+    0 1px 0 #222;
+}
+
+.footer-title:hover::after {
+  width: 100%;
+  background: linear-gradient(90deg, #00c3ff 0%, #1e90ff 100%);
+}
+
+/* Style cho input-group */
+.input-group {
+  border: 1px solid #444;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #1b2a47;
+}
+
+.input-group .form-control {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  padding: 12px 16px;
+}
+
+.input-group .form-control::placeholder {
+  color: #ccc;
+  font-style: italic;
+}
+
+.input-group:focus-within {
+  border: 1px solid #1e90ff;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.input-group .form-control:focus {
+  background-color: white;
+  color: #000000;
+}
+
+.input-group-text {
+  background-color: transparent;
+  border: none;
+  color: #1e90ff;
+  padding-right: 16px;
+  font-size: 18px;
+}
+
+/* Nút Đăng ký */
+.btn-primary {
+  background-color: #1e90ff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  transition: 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #1c7ed6;
+}
+
+/* From Uiverse.io by KINGFRESS */
+.btn-register {
+  font-weight: bold;
+  color: white;
+  background-color: #171717;
+  padding: 1em;
+  border: none;
+  border-radius: 0.6rem;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.btn-register span:not(:nth-child(6)) {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: 30px;
+  width: 30px;
+  background-color: #0c66ed;
+  border-radius: 50%;
+  transition: 0.6s ease;
+}
+
+.btn-register span:nth-child(6) {
+  position: relative;
+}
+
+.btn-register span:nth-child(1) {
+  transform: translate(-3.3em, -4em);
+}
+
+.btn-register span:nth-child(2) {
+  transform: translate(-6em, 1.3em);
+}
+
+.btn-register span:nth-child(3) {
+  transform: translate(-0.2em, 1.8em);
+}
+
+.btn-register span:nth-child(4) {
+  transform: translate(3.5em, 1.4em);
+}
+
+.btn-register span:nth-child(5) {
+  transform: translate(3.5em, -3.8em);
+}
+
+.btn-register:hover span:not(:nth-child(6)) {
+  transform: translate(-50%, -50%) scale(4);
+  transition: 1.5s ease;
+}
+
+/* social */
+.socials-container {
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+  margin-bottom: 5px;
+  background-color: transparent;
+}
+
+.social {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgb(194, 194, 194);
+  box-shadow:
+    rgba(0, 0, 0, 0.25) 0px 14px 28px,
+    rgba(0, 0, 0, 0.22) 0px 10px 10px;
+}
+
+.twitter:hover {
+  background: linear-gradient(45deg, #66757f, #00acee, #36daff, #dbedff);
+}
+
+.facebook:hover {
+  background: linear-gradient(45deg, #134ac0, #316ff6, #78a3ff);
+}
+
+.google-plus:hover {
+  background: linear-gradient(45deg, #872419, #db4a39, #ff7061);
+}
+
+.instagram:hover {
+  background: #f09433;
+  background: -moz-linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  background: -webkit-linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f09433', endColorstr='#bc1888', GradientType=1);
+}
+
+/* Zalo – primary #0068FF */
+.social.zalo:hover {
+  background: linear-gradient(45deg, #0068ff, #2b8cff, #66b1ff);
+  color: #fff;
+}
+
+/* TikTok – cyan #25F4EE, pink #FE2C55, black */
+.social.tiktok:hover {
+  background: linear-gradient(45deg, #25f4ee, #000000, #fe2c55);
+  color: #fff;
+}
+
+/* YouTube – red */
+.social.youtube:hover {
+  background: linear-gradient(45deg, #ff0000, #cc0000, #990000);
+  color: #fff;
+}
+
+/* Threads – black/mono */
+.social.threads:hover {
+  background: linear-gradient(45deg, #000000, #1c1c1c, #3a3a3a);
+  color: #fff;
+}
+
+/* LinkedIn – primary #0A66C2, dark #004182, light accent */
+.social.linkedin:hover {
+  background: linear-gradient(45deg, #0a66c2, #004182, #70b5f9);
+  color: #fff;
+}
+
+.social svg {
+  fill: white;
+  height: 20px;
+}
+
+.footer-bottom-index {
+  margin-top: 20px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 400;
+  border-top: 1px solid #fff;
+}
+
+.footer-copyright,
+.footer-analytics {
+  margin-top: 10px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.decor-spin-shape-footer {
+  margin-top: 10px;
+}
+
+/* Responsive Footer */
+@media (max-width: 1480px) {
+  .footer-logo {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .footer-logo .huan-chuong img {
+    height: clamp(90px, 4vw, 130px);
+    width: clamp(90px, 4vw, 130px);
+  }
+
+  .app-brand-link {
+    line-height: 1.5;
+  }
+
+  .app-brand-text {
+    transform-origin: center;
+  }
+
+  .sub-name,
+  .sub-desc,
+  .footer-info-address {
+    margin-top: 5px;
+    text-align: center !important;
+    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 992px) {
+  .footer-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 16px;
+  }
+
+  .footer-title {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 12px;
+  }
+
+  .footer-logo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .app-brand-logo img {
+    height: 70px;
+  }
+
+  .app-brand-text {
+    font-size: 18px;
+  }
+
+  .footer-title {
+    font-size: 16px;
+  }
+
+  .footer-links {
+    /* font-size: 13px; */
+    font-size: clamp(0.7rem, 2vw, 0.9rem);
+  }
+
+  .footer-bottom-index {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-top {
+    padding: 8px;
+    gap: 10px;
+  }
+
+  .footer-logo {
+    gap: 6px;
+    flex-direction: column !important;
+    /* Stack vertically */
+    align-items: center !important;
+    /* Center horizontally */
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .footer-logo .logo {
+    margin: 0;
+    display: flex;
+    align-items: center !important;
+  }
+
+  .footer-logo .logo {
+    flex-direction: column !important;
+  }
+
+  .footer-logo .huan-chuong img {
+    height: 70px;
+    width: 70px;
+  }
+
+  .app-brand-logo img {
+    height: 48px;
+    margin-bottom: 4px;
+    /* Space between logo and text */
+  }
+
+  .app-brand-text {
+    font-size: 16px;
+    margin-left: 8px;
+  }
+
+  .footer-title {
+    font-size: 15px;
+    padding-bottom: 6px;
+  }
+
+  .footer-bottom-index {
+    font-size: 12px;
+    padding: 6px 0;
+  }
+
+  .footer-copyright,
+  .footer-analytics {
+    font-size: 12px;
+  }
+
+  .socials-container {
+    gap: 12px;
+  }
+
+  .social {
+    width: 36px;
+    height: 36px;
+  }
+
+  .social svg {
+    height: 16px;
+  }
+}

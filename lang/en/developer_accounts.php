@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'tab' => 'Accounts',
+    'title' => 'Accounts',
+    'hint' => 'Every account of the system. Resetting a password signs that account out of all devices; the password is never written to the log.',
+    'search' => 'Search by name, username, email...',
+    'truncated' => 'Only the first 1000 accounts (by name) are shown.',
+    'col_name' => 'Name', 'col_username' => 'Username', 'col_email' => 'Email', 'col_roles' => 'Roles', 'col_status' => 'Status', 'col_edit_published' => 'Edit published', 'edit_published_hint' => 'When on, the account may edit published articles directly (they stay published). Every edit is logged. Only the Developer can switch it; it is not part of any role.', 'edit_published_not_ready' => 'Column users.can_edit_published is missing: run the migration before using this switch.', 'edit_published_switch' => 'Allow :name to edit published articles directly', 'col_created' => 'Created', 'col_actions' => 'Actions',
+    'active' => 'Active', 'inactive' => 'Locked', 'no_role' => 'No role', 'empty' => 'No matching account.',
+    'btn_password' => 'Change password', 'btn_roles' => 'Roles', 'btn_lock' => 'Lock', 'btn_unlock' => 'Activate', 'btn_cancel' => 'Cancel', 'btn_save' => 'Save',
+    'confirm_lock' => 'Lock this account? It is signed out of all devices and cannot sign in.',
+    'confirm_unlock' => 'Activate this account again?',
+    'password_title' => 'Reset password', 'password_new' => 'New password (at least 8 characters)', 'password_confirm' => 'Repeat the new password',
+    'roles_title' => 'Roles of the account', 'roles_hint' => 'Clear all boxes to remove every role.',
+    'roles_section' => 'Roles and permissions', 'roles_section_hint' => 'Set the permissions of each role. Permissions not allowed in the permission tab are not listed.',
+    'col_role' => 'Role', 'col_users' => 'Accounts', 'col_permissions' => 'Permissions', 'btn_permissions' => 'Set permissions',
+    'permissions_title' => 'Permissions of the role', 'permissions_search' => 'Search permissions...', 'permissions_all' => 'Select all', 'permissions_none' => 'Clear all',
+    'password_saved' => 'Password reset.', 'status_on' => 'Account activated.', 'edit_published_on' => 'Account may now edit published articles directly.', 'edit_published_off' => 'Direct editing of published articles revoked.', 'status_off' => 'Account locked.', 'roles_saved' => 'Roles updated.', 'permissions_saved' => 'Role permissions updated.',
+    'error_password_length' => 'The password must be 8 to 128 characters.',
+    'error_password_mismatch' => 'The two passwords do not match.',
+    'error_user_unknown' => 'Account not found.',
+    'error_edit_published_unavailable' => 'Column users.can_edit_published is missing: run the migration first.',
+    'error_role_unknown' => 'Invalid role.',
+    'error_permission_unknown' => 'Invalid permission.',
+    'error_permission_unavailable' => 'A permission is not allowed in this project.',
+];

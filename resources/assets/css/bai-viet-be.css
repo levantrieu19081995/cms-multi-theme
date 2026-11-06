@@ -1,0 +1,103 @@
+.chuyen-muc-danh-sach {
+  padding: 15px;
+  /* border: solid 1px darkblue;
+  border-radius: 10px; */
+  overflow: auto;
+}
+
+.accordion-header-font-size {
+  font-size: 1.125rem !important;
+}
+
+.loai-xuat-ban {
+  display: flex;
+  align-items: center;
+}
+
+.table-bai-viet thead tr th {
+  text-align: center;
+  /* font-size: 14px;
+  font-weight: bold; */
+}
+
+.table-chuyen-muc thead tr th {
+  text-align: center;
+}
+
+/* word-break: break-word;
+white-space: normal;
+max-width: 500px; hoặc chiều rộng phù hợp tùy giao diện */
+.td-thong-tin-bai-viet p {
+  margin-bottom: 0 !important;
+  white-space: normal !important;
+  word-break: break-word;
+  max-width: 500px;
+}
+
+.img-avt img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+}
+
+.child-checkboxes {
+  margin-left: 20px;
+}
+
+.trang-cha-select .filter-option {
+  color: #3b4056;
+}
+
+/* nút xóa grid ảnh */
+
+.remove-image-btn {
+  position: absolute;
+  top: 5px;
+  right: 20px;
+  padding: 0.2rem 0.5rem;
+  font-size: 10px;
+  background-color: rgb(255 0 0 / 16%);
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.remove-image-btn:hover {
+  opacity: 1;
+  /* Khi hover, nút sẽ rõ hơn */
+}
+
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+}
+
+#image-preview-container .img-fluid {
+  height: 208.58px;
+  object-fit: cover;
+}
+
+.file-list {
+  margin-top: 10px;
+}
+
+.file-item {
+  margin: 5px 0;
+}
+
+.file-item a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.file-item a:hover {
+  text-decoration: underline;
+}
+
+.btn-xoa-file-dinh-kem {
+  bottom: 0;
+}

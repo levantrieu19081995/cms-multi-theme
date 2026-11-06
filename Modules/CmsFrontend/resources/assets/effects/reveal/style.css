@@ -1,0 +1,18 @@
+/*
+ * Chữ hiện theo dòng (JS: effects/reveal/index.js).
+ *   [data-reveal-lines]   chữ hiện theo dòng, không tách từng chữ: một dòng hiện nguyên dòng; nhiều dòng (ngăn bằng <br>)
+ *                         hiện lần lượt theo thanh cuộn, cuộn ngược thì ẩn theo thứ tự ngược lại
+ *   [data-count="40"]     số chạy từ 0 khi phần chứa nó hiện ra (một lần), xem effects/count-up
+ * Biến CSS dùng chung với effects/stagger: --reveal-rise, --reveal-scale, --reveal-duration, --reveal-fade, --reveal-ease; riêng dòng chữ: --reveal-muted.
+ * Trạng thái ẩn chỉ áp dụng khi JS đã thêm .reveal-ready vào <html>, nên lỗi JS không làm mất nội dung.
+ */
+:root{--reveal-rise:280px;--reveal-scale:.96;--reveal-duration:1s;--reveal-fade:.7s;--reveal-ease:cubic-bezier(.16,1,.3,1);--reveal-muted:#c9c9c9}
+
+[data-reveal-lines] .reveal-line{display:inline-block}
+.reveal-ready [data-reveal-lines] .reveal-line{color:var(--reveal-muted);filter:blur(1.2px);transform:translateY(.45em);transition:color .7s ease,filter .7s ease,transform 1.1s var(--reveal-ease)}
+.reveal-ready [data-reveal-lines] .reveal-line.on{color:inherit;filter:none;transform:none}
+
+/* Luôn chạy kể cả khi máy bật giảm chuyển động: vượt qua các luật transition:none!important chung của theme */
+@media(prefers-reduced-motion:reduce){
+  html.reveal-ready [data-reveal-lines] .reveal-line{transition-property:color,filter,transform!important;transition-duration:.7s,.7s,1.1s!important;transition-timing-function:ease,ease,var(--reveal-ease)!important;transition-delay:0s!important}
+}

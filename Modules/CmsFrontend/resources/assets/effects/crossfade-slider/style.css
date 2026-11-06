@@ -1,0 +1,10 @@
+/*
+ * Crossfade slider (JS: effects/crossfade-slider/index.js). Chỉ cơ chế: các slide chồng trong một ô lưới, slide .is-active hiện ra bằng mờ dần.
+ * Tuỳ chỉnh bằng biến CSS trên khung [data-cms-hero]: --effect-duration, --effect-ease. Kích thước, màu, chữ, mũi tên, chấm thuộc theme.
+ * Nạp SAU css của theme.
+ */
+[data-cms-hero] { --effect-duration: .7s; --effect-ease: ease; }
+.cms-hero-track { display: grid; }
+.cms-hero-slide { grid-area: 1 / 1; opacity: 0; visibility: hidden; transition: opacity var(--effect-duration) var(--effect-ease), visibility 0s linear var(--effect-duration); }
+.cms-hero-slide.is-active { opacity: 1; visibility: visible; transition: opacity var(--effect-duration) var(--effect-ease); }
+@media (prefers-reduced-motion: reduce) { .cms-hero-slide { transition: none; } }

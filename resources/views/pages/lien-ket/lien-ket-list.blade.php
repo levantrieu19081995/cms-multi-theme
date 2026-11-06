@@ -1,0 +1,94 @@
+@extends('layouts/layoutMaster')
+
+@section('title', __('Liên kết website') )
+
+@section('vendor-style')
+@endsection
+
+ 
+
+@section('page-script')
+{{-- @vite([
+  'resources/assets/js/menu-list.js'
+]) --}}
+@endsection
+
+@section('content')
+
+    <!-- Users List Table -->
+    <div class="card">
+        <h5 class="card-header">{{ __('Liên kết website') }}</h5>
+        <div class="card-body">
+            <div>
+              <form action="" method="get">
+                <div class="input-group input-group-merge mb-6">
+                  <span class="input-group-text" id="basic-addon-search31"><i class="ri-search-line"></i></span>
+                  <input type="text" id="filter" name="filter" class="form-control" placeholder="Tìm kiếm..." aria-label="Tìm kiếm..."
+                    value="{{ request()->filter }}">
+                </div>
+                <div class="row">
+                  <div class="mb-6">
+                    <button type="submit" class="btn btn-primary waves-effect waves-light">Tìm</button>
+                    <a href="{{ route('lien-ket.create') }}" type="button" class="btn btn-outline-secondary waves-effect">Thêm mới</a>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="table-responsive text-nowrap">
+              <table id="role-table" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th style="width: 1%">STT</th>
+                            <th>{{ __('Tên website liên kết') }}</th>
+                            <th style="width: 80px;">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($links as $link)
+                            <tr>
+                                <td>{{ (($links->currentPage() - 1) * $links->perPage()) + $loop->index + 1 }}</td>
+                                <td>{{ $link->title }}</td>
+
+                                <td>
+                                  <div class="d-flex align-items-center gap-50">
+                                    {{-- <a href="{{ route('menus.edit', $link) }}"
+                                      class="btn btn-sm btn-icon btn-text-secondary rounded-pill waves-effect"
+                                      data-bs-toggle="tooltip"
+                                      title="Xem">
+                                      <i class="ri-eye-line ri-20px"></i>
+                                    </a> --}}
+                                    <button
+                                      class="btn btn-sm btn-icon btn-text-secondary rounded-pill waves-effect dropdown-toggle hide-arrow"
+                                      data-bs-toggle="dropdown"
+                                      aria-expanded="false">
+                                      <i class="ri-more-2-line ri-20px"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-end m-0" style="">
+                                      <a href="{{ route('lien-ket.edit', $link) }}" class="dropdown-item">
+                                        <i class="ri-edit-box-line me-2"></i><span>Sửa</span>
+                                      </a>
+                                      <a href="javascript:void(0)" class="dropdown-item delete-record"
+                                          data-action="role-delete"
+                                          data-id="{{ $link->id }}"
+                                          data-route="{{ route('lien-ket.destroy', $link) }}">
+                                        <i class="ri-delete-bin-7-line me-2"></i><span>Xóa</span>
+                                      </a>
+                                    </div>
+                                  </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                        @if ($links->isEmpty())
+                          <tr>
+                            <td colspan="100">Không tìm thấy dữ liệu</td>
+                          </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-layout-footer" style="margin-top: 20px; margin-right: 20px;margin-left: 20px;">
+              {{ $links->onEachSide(2)->links('layouts.paginate') }}
+            </div>
+        </div>
+    </div>
+@endsection

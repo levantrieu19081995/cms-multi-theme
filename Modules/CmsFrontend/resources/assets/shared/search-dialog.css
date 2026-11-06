@@ -1,0 +1,7 @@
+/*
+ * Cơ chế của hộp tìm kiếm <dialog> (JS: shared/search-dialog.js): căn giữa, nền phía sau mờ, khoá cuộn trang khi mở.
+ * Kích thước, màu, chữ và nội dung hộp do CSS của theme quyết định. Tuỳ chỉnh nền mờ bằng biến: --search-backdrop, --search-backdrop-blur.
+ */
+dialog[data-search-dialog] { margin: auto; max-height: calc(100dvh - 60px); overflow-y: auto; }
+dialog[data-search-dialog]::backdrop { background: var(--search-backdrop, rgba(0, 0, 0, .7)); backdrop-filter: blur(var(--search-backdrop-blur, 6px)); }
+html:has(dialog[data-search-dialog][open]) { overflow: hidden; }

@@ -1,0 +1,10 @@
+.icon-item {
+  cursor: pointer;
+  &:hover {
+    border: 1px #084b85 solid !important;
+  }
+  &.active {
+    background-color: #084b85 !important;
+    color: white;
+  }
+}

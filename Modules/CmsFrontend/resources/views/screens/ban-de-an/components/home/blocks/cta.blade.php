@@ -1,0 +1,2 @@
+{{-- Kêu gọi liên hệ (chỉ hiện khi chức năng Liên hệ bật). --}}
+@if (app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('contact'))<section class="cta"><div class="wrap cta-inner" data-stagger-group><div><h2 data-reveal-lines>{{ __('frontend.ui.hanh_trinh_moi_bat_dau_tu_hom_nay') }}</h2><p>{{ __('frontend.ui.tim_hieu_thong_tin_va_lua_chon_con_duong_phu_hop') }}</p></div><a class="btn green" href="{{ route('cms.lien-he') }}">{{ __('frontend.ui.lien_he_tu_van') }}</a></div></section>@endif

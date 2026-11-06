@@ -1,0 +1,124 @@
+{
+  "menu": [
+    {
+      "name": "Bảng điều khiển",
+      "i18n": "admin.menu.bang_dieu_khien",
+      "icon": "menu-icon tf-icons ri-home-smile-line",
+      "slug": "dashboard",
+      "url": "dashboard"
+    },
+    {
+      "menuHeader": "Hệ thống",
+      "i18n": "admin.menu.he_thong"
+    },
+    {
+      "name": "Cài đặt",
+      "i18n": "admin.menu.cai_dat",
+      "icon": "menu-icon tf-icons ri-shopping-bag-3-line",
+      "slug": "#multi-level",
+      "submenu": [
+        {
+          "name": "Cài đặt chung",
+          "i18n": "admin.menu.cai_dat_chung",
+          "icon": "menu-icon tf-icons ri-home-smile-line",
+          "slug": "setting.general",
+          "url": "setting/general"
+        }
+      ]
+    },
+    {
+      "name": "Menu",
+      "i18n": "admin.menu.menu",
+      "icon": "menu-icon tf-icons ri-home-smile-line",
+      "slug": "menus.index",
+      "url": "menus"
+    },
+    {
+      "name": "Quản lý người dùng",
+      "i18n": "admin.menu.quan_ly_nguoi_dung",
+      "icon": "menu-icon tf-icons ri-shopping-bag-3-line",
+      "slug": ["users", "roles"],
+      "submenu": [
+        {
+          "slug": "roles.index",
+          "name": "Vai trò",
+          "i18n": "admin.menu.vai_tro",
+          "url": "roles"
+        },
+        {
+          "slug": "users.index",
+          "name": "Người dùng",
+          "i18n": "admin.menu.nguoi_dung",
+          "url": "users"
+        }
+      ]
+    },
+    {
+      "name": "Quản lý tập tin",
+      "i18n": "admin.menu.quan_ly_tap_tin",
+      "icon": "menu-icon tf-icons ri-shopping-bag-3-line",
+      "slug": "file.index",
+      "url": "/file"
+    },
+    {
+      "menuHeader": "Quản lý nội dung",
+      "i18n": "admin.menu.quan_ly_noi_dung"
+    },
+    {
+      "name": "Quản lý bài viết",
+      "i18n": "admin.menu.quan_ly_bai_viet",
+      "icon": "menu-icon tf-icons ri-newspaper-line",
+      "slug": "bai-viet.index",
+      "url": "/bai-viet"
+    },
+    {
+      "name": "Quản lý trang",
+      "i18n": "admin.menu.quan_ly_trang",
+      "icon": "menu-icon tf-icons ri-pages-line",
+      "slug": "trang.index",
+      "url": "/trang"
+    },
+    {
+      "name": "Quản lý thư viện hình ảnh",
+      "i18n": "admin.menu.quan_ly_thu_vien_hinh_anh",
+      "icon": "menu-icon tf-icons ri-folder-image-line",
+      "slug": "hinh-anh.index",
+      "url": "/hinh-anh"
+    },
+    {
+      "name": "Quản lý video",
+      "i18n": "admin.menu.quan_ly_video",
+      "icon": "menu-icon tf-icons ri-folder-video-line",
+      "slug": "video.index",
+      "url": "/video"
+    },
+    {
+      "name": "Quản lý banner",
+      "i18n": "admin.menu.quan_ly_banner",
+      "icon": "menu-icon tf-icons ri-newspaper-line",
+      "slug": "banner.index",
+      "url": "/banner"
+    },
+    {
+      "name": "Quản lý quảng cáo",
+      "i18n": "admin.menu.quan_ly_quang_cao",
+      "icon": "menu-icon tf-icons ri-advertisement-line",
+      "slug": "quang-cao.index",
+      "url": "/quang-cao"
+    },
+    {
+      "name": "Chuyên mục",
+      "i18n": "admin.menu.chuyen_muc",
+      "icon": "menu-icon tf-icons ri-function-line",
+      "slug": "chuyen-muc.index",
+      "url": "/chuyen-muc"
+    },
+    {
+      "name": "Binh luận",
+      "i18n": "admin.menu.binh_luan",
+      "icon": "menu-icon tf-icons ri-message-2-line",
+      "slug": "binh-luan.index",
+      "url": "/binh-luan"
+    }
+  ]
+}

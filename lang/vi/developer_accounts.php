@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'tab' => 'Tài khoản',
+    'title' => 'Danh sách tài khoản',
+    'hint' => 'Mọi tài khoản của hệ thống. Đặt lại mật khẩu sẽ đăng xuất tài khoản đó khỏi mọi thiết bị; mật khẩu không được ghi vào nhật ký.',
+    'search' => 'Tìm theo tên, tài khoản, email...',
+    'truncated' => 'Chỉ hiển thị 1000 tài khoản đầu tiên (theo tên).',
+    'col_name' => 'Họ tên', 'col_username' => 'Tài khoản', 'col_email' => 'Email', 'col_roles' => 'Vai trò', 'col_status' => 'Trạng thái', 'col_edit_published' => 'Sửa bài đã đăng', 'edit_published_hint' => 'Bật thì tài khoản được sửa trực tiếp bài viết đang đăng (bài vẫn giữ trạng thái đã xuất bản). Mỗi lần sửa được ghi nhật ký. Chỉ Developer bật/tắt được; không nằm trong vai trò.', 'edit_published_not_ready' => 'Chưa có cột users.can_edit_published: chạy migration trước khi dùng công tắc này.', 'edit_published_switch' => 'Cho phép :name sửa trực tiếp bài đã đăng', 'col_created' => 'Ngày tạo', 'col_actions' => 'Thao tác',
+    'active' => 'Hoạt động', 'inactive' => 'Đã khóa', 'no_role' => 'Chưa có vai trò', 'empty' => 'Không có tài khoản nào khớp.',
+    'btn_password' => 'Đổi mật khẩu', 'btn_roles' => 'Vai trò', 'btn_lock' => 'Khóa', 'btn_unlock' => 'Kích hoạt', 'btn_cancel' => 'Hủy', 'btn_save' => 'Lưu',
+    'confirm_lock' => 'Khóa tài khoản này? Tài khoản sẽ bị đăng xuất khỏi mọi thiết bị và không đăng nhập được.',
+    'confirm_unlock' => 'Kích hoạt lại tài khoản này?',
+    'password_title' => 'Đặt lại mật khẩu', 'password_new' => 'Mật khẩu mới (tối thiểu 8 ký tự)', 'password_confirm' => 'Nhập lại mật khẩu mới',
+    'roles_title' => 'Vai trò của tài khoản', 'roles_hint' => 'Bỏ chọn hết để gỡ mọi vai trò của tài khoản.',
+    'roles_section' => 'Vai trò và quyền', 'roles_section_hint' => 'Cấu hình quyền cho từng vai trò. Quyền chưa được cho phép ở tab Quản lý phân quyền không hiện ở đây.',
+    'col_role' => 'Vai trò', 'col_users' => 'Số tài khoản', 'col_permissions' => 'Số quyền', 'btn_permissions' => 'Cấu hình quyền',
+    'permissions_title' => 'Quyền của vai trò', 'permissions_search' => 'Tìm quyền...', 'permissions_all' => 'Chọn tất cả', 'permissions_none' => 'Bỏ chọn tất cả',
+    'password_saved' => 'Đã đặt lại mật khẩu.', 'status_on' => 'Đã kích hoạt tài khoản.', 'edit_published_on' => 'Đã cho phép tài khoản sửa trực tiếp bài đã đăng.', 'edit_published_off' => 'Đã thu hồi quyền sửa trực tiếp bài đã đăng.', 'status_off' => 'Đã khóa tài khoản.', 'roles_saved' => 'Đã cập nhật vai trò của tài khoản.', 'permissions_saved' => 'Đã cập nhật quyền của vai trò.',
+    'error_password_length' => 'Mật khẩu phải từ 8 đến 128 ký tự.',
+    'error_password_mismatch' => 'Hai lần nhập mật khẩu không khớp.',
+    'error_user_unknown' => 'Không tìm thấy tài khoản.',
+    'error_edit_published_unavailable' => 'Chưa có cột users.can_edit_published: hãy chạy migration trước.',
+    'error_role_unknown' => 'Vai trò không hợp lệ.',
+    'error_permission_unknown' => 'Quyền không hợp lệ.',
+    'error_permission_unavailable' => 'Có quyền chưa được cho phép ở dự án này.',
+];

@@ -1,0 +1,75 @@
+/*
+ * Chuyển trang ngang "nối đuôi" giữa Login và Dashboard (JS: effects/auth/push-horizontal-transition.js). Dùng chung hai chiều, hai trang
+ * (Login qua shell, Dashboard qua layout admin); chỉ có tác dụng khi <html> mang class do script thêm, nên theme khác không bị ảnh hưởng.
+ *
+ *   --cms-push-dir  +1: trang cũ đi sang trái, trang mới vào từ phải (Login → Dashboard)
+ *                   -1: trang cũ đi sang phải, trang mới vào từ trái (Logout → Login)
+ *   --cms-push-duration, --cms-push-ease: dùng chung cho cả hai chiều, cả hai trang và fallback.
+ *
+ * Chỉ animate `transform` (translate3d) trực tiếp trên hai ảnh chụp: trình duyệt tự nội suy trên compositor, không có vòng lặp JS, không đổi
+ * layout/paint. Hai ảnh chụp bắt đầu cùng lúc, cùng duration, cùng easing, không delay, nên ở mọi tiến độ p:
+ *   trang cũ dịch  dir · -100% · p        trang mới ở  dir · 100% · (1 - p)        => hai mép nối sát nhau.
+ * Trang mới nhô thêm 0.5px về phía trang cũ lúc bắt đầu (thu về 0 khi kết thúc) để không lộ đường ráp subpixel.
+ */
+:root { --cms-push-duration: 950ms; --cms-push-ease: cubic-bezier(.22, 1, .36, 1); }
+@media (max-width: 767px) { :root { --cms-push-duration: 750ms; } }
+
+/* ---- View Transition ---- */
+html.cms-push::view-transition,
+html.cms-push::view-transition-group(root) { animation: none; z-index: 1; }
+
+html.cms-push::view-transition-old(root),
+html.cms-push::view-transition-new(root) {
+  mix-blend-mode: normal;
+  clip-path: none;
+  filter: none;
+  opacity: 1;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  animation-duration: var(--cms-push-duration);
+  animation-timing-function: var(--cms-push-ease);
+  animation-delay: 0s;
+  animation-fill-mode: both;
+}
+html.cms-push::view-transition-old(root) { animation-name: cms-push-old; }
+html.cms-push::view-transition-new(root) { animation-name: cms-push-new; }
+
+@keyframes cms-push-old {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(calc(var(--cms-push-dir, 1) * -100%), 0, 0); }
+}
+@keyframes cms-push-new {
+  from { transform: translate3d(calc(var(--cms-push-dir, 1) * (100% - .5px)), 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+/* ---- Không hỗ trợ View Transition: trang hiện tại trượt đi trước khi điều hướng (leave), trang đích trượt vào khi tải xong (enter) ---- */
+html.cms-push-leave,
+html.cms-push-enter { overflow: hidden; }
+html.cms-push-leave body,
+html.cms-push-enter body {
+  will-change: transform;
+  backface-visibility: hidden;
+  animation-duration: var(--cms-push-duration);
+  animation-timing-function: var(--cms-push-ease);
+  animation-delay: 0s;
+  animation-fill-mode: both;
+}
+html.cms-push-leave body { animation-name: cms-push-leave; }
+html.cms-push-enter body { animation-name: cms-push-enter; }
+@keyframes cms-push-leave {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(calc(var(--cms-push-dir, 1) * -100vw), 0, 0); }
+}
+@keyframes cms-push-enter {
+  from { transform: translate3d(calc(var(--cms-push-dir, 1) * 100vw), 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.cms-push::view-transition-old(root),
+  html.cms-push::view-transition-new(root),
+  html.cms-push-leave body,
+  html.cms-push-enter body { animation: none !important; }
+}

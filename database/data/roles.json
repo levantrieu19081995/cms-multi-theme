@@ -1,0 +1,28 @@
+{
+  "roles": [
+    {
+      "name": "administrator",
+      "permissions": [
+        "user-manager",
+        "role-manager",
+        "category-manager",
+        "post-create",
+        "post-approve"
+      ]
+    },
+    {
+      "name": "writer",
+      "permissions": [
+        "post-create"
+      ]
+    },
+    {
+      "name": "publisher",
+      "permissions": [
+        "category-manager",
+        "post-create",
+        "post-approve"
+      ]
+    }
+  ]
+}

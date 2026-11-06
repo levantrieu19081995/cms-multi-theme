@@ -1,0 +1,34 @@
+.section-video {
+  padding: 5rem 0;
+  background-image: url(https://be-better.monamedia.net/wp-content/uploads/2023/07/course_bg_1-2.png);
+}
+.section-video .video-card {
+  height: 100%;
+}
+.section-video .video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+}
+.section-video .video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.section-video .video-title-overlay {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.55));
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  backdrop-filter: blur(2px);
+}

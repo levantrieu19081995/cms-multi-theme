@@ -1,0 +1,65 @@
+/*
+ * Phía Dashboard của hiệu ứng "cửa mở" sau đăng nhập (JS: effects/auth/dashboard-arrival.js). Chỉ nạp trong layout admin (CmsBackend);
+ * KHÔNG nạp cùng effects/auth/style.css vì các luật ::view-transition ở đây không giới hạn theo class (trang Login có luật riêng).
+ *
+ * ONE timeline: the registered number --cms-p (0 → 1) is animated once, on ::view-transition, with the shared duration
+ * and easing. Both login doors and the dashboard window are pure functions of that same value:
+ *
+ *   measured on the login page (stored in sessionStorage):  c = centre of the gap, vw = viewport width
+ *   t  = max(c, vw - c) + 2px                                  (distance each door travels)
+ *   leftInnerEdge(p)  = c - t·p          rightInnerEdge(p) = c + t·p
+ *   loginGap(p)       = 2·t·p
+ *   dashboard window  = [leftInnerEdge + 1px , rightInnerEdge - 1px]  → width = max(0, loginGap - 2px), centred on c
+ *
+ * The dashboard snapshot keeps its full viewport size; only a clip-path window over it widens. Nothing is scaled.
+ */
+  @view-transition { navigation: auto; }
+
+  @property --cms-p { syntax: '<number>'; inherits: true; initial-value: 0; }
+
+  :root { --cms-vt-dur: 800ms; --cms-vt-ease: cubic-bezier(.4, 0, .2, 1); }
+  @media (max-width: 767px) { :root { --cms-vt-dur: 600ms; } }
+
+  ::view-transition { animation: cms-vt-progress var(--cms-vt-dur) var(--cms-vt-ease) both; }
+  @keyframes cms-vt-progress { from { --cms-p: 0; } to { --cms-p: 1; } }
+
+  /* Old root = what is left of the login page (dark backdrop). New root = the dashboard, seen only through the window. */
+  ::view-transition-group(root) { animation: none; z-index: 1; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+  ::view-transition-new(root) {
+    clip-path: inset(
+      0
+      calc(var(--cms-vt-vw, 100vw) - var(--cms-vt-c, 50vw) + 1px - var(--cms-vt-t, 50vw) * var(--cms-p))
+      0
+      calc(var(--cms-vt-c, 50vw) + 1px - var(--cms-vt-t, 50vw) * var(--cms-p))
+    );
+  }
+
+  /* Login doors: above the dashboard. */
+  ::view-transition-group(cms-login-left),
+  ::view-transition-group(cms-login-right) { z-index: 3; animation: none; }
+  ::view-transition-old(cms-login-left),
+  ::view-transition-old(cms-login-right) { animation: none; mix-blend-mode: normal; }
+  ::view-transition-new(cms-login-left),
+  ::view-transition-new(cms-login-right) { display: none; }
+  ::view-transition-old(cms-login-left) {
+    transform: translateX(calc(var(--cms-vt-t, 50vw) * var(--cms-p) * -1));
+    filter: drop-shadow(calc(12px * var(--cms-p)) 0 calc(28px * var(--cms-p)) rgba(0, 0, 0, calc(.35 * var(--cms-p))));
+  }
+  ::view-transition-old(cms-login-right) {
+    transform: translateX(calc(var(--cms-vt-t, 50vw) * var(--cms-p)));
+    filter: drop-shadow(calc(-12px * var(--cms-p)) 0 calc(28px * var(--cms-p)) rgba(0, 0, 0, calc(.35 * var(--cms-p))));
+  }
+
+  /* Browsers without cross-document View Transitions: the login page leaves a short-lived flag, the page fades in. */
+  html.cms-login-fade body { animation: cms-login-fade-in 800ms var(--cms-vt-ease) both; }
+  @keyframes cms-login-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.cms-login-fade body { animation: none; }
+    ::view-transition,
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) { animation: none !important; }
+  }

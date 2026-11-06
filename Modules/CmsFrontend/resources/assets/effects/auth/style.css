@@ -1,0 +1,160 @@
+/*
+ * Hiệu ứng Login → Dashboard (cửa tách đôi) và Logout → Login (cửa khép lại). Nạp SAU auth/login-base.css (thứ tự cascade như khi còn nằm cuối login.css).
+ * JS: effects/auth/login-dashboard-transition.js. Phía Dashboard: CmsBackend login-transition.blade.php. Phía Login khi logout: script trong pages/auth/login.blade.php.
+ * Thời lượng/easing dùng chung: --cms-vt-dur, --cms-vt-ease (theme có thể ghi đè trên :root). Chuyển Login/Register: data-auth-mode trong auth/login-base.css. Màu cửa/nền lấy từ token --auth-surface, --auth-curtain do theme khai báo.
+ */
+/* ---- After a successful login: the two halves open to the sides, revealing the dashboard ---- */
+.cms-login-curtain { display: none; }
+
+
+/* Real halves named for the View Transition (the dashboard page animates them). Set only on success. */
+.cms-login-frame.is-login-success .cms-login-visual { view-transition-name: cms-login-left; }
+.cms-login-frame.is-login-success .cms-login-pane--login { view-transition-name: cms-login-right; }
+.cms-login-frame.is-login-success .cms-login-pane--register { visibility: hidden; }
+.cms-login-frame.is-login-success { pointer-events: none; }
+/* The right door carries its own fill so its View Transition snapshot is never see-through. */
+.cms-login-frame.is-login-success .cms-login-pane--login { background: var(--auth-surface); }
+
+/* Fallback (no View Transitions): the same split played on this page before navigating. */
+.cms-login-frame.is-login-fallback {
+  overflow: visible;
+  border-color: transparent;
+  background: transparent;
+}
+
+.cms-login-frame.is-login-fallback .cms-login-visual {
+  animation: cms-login-open-left 800ms cubic-bezier(.4, 0, .2, 1) both;
+}
+
+.cms-login-frame.is-login-fallback .cms-login-pane--login {
+  background: var(--auth-surface);
+  animation: cms-login-open-right 800ms cubic-bezier(.4, 0, .2, 1) both;
+}
+
+.cms-login-page-wrap.is-login-success-wrap { overflow: hidden; }
+
+@keyframes cms-login-open-left {
+  from { transform: translate3d(-100%, 0, 0); filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)); }
+  to { transform: translate3d(-205%, 0, 0); filter: drop-shadow(12px 0 28px rgba(0, 0, 0, .35)); }
+}
+
+@keyframes cms-login-open-right {
+  from { transform: translate3d(0, 0, 0); filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)); }
+  to { transform: translate3d(105%, 0, 0); filter: drop-shadow(-12px 0 28px rgba(0, 0, 0, .35)); }
+}
+
+@keyframes cms-login-curtain-left {
+  to { transform: translate3d(-105%, 0, 0); filter: drop-shadow(12px 0 28px rgba(0, 0, 0, .35)); }
+}
+
+@keyframes cms-login-curtain-right {
+  to { transform: translate3d(105%, 0, 0); filter: drop-shadow(-12px 0 28px rgba(0, 0, 0, .35)); }
+}
+
+/* Mobile: the stacked layout would split top/bottom, so two 50%-wide doors take over (they carry the names). */
+@media (max-width: 767px) {
+  .cms-login-frame.is-login-success .cms-login-visual,
+  .cms-login-frame.is-login-success .cms-login-pane--login { view-transition-name: none; }
+
+  .cms-login-frame.is-login-success .cms-login-curtain {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 50;
+    display: block;
+    width: 50%;
+    background: var(--auth-curtain);
+  }
+
+  .cms-login-frame.is-login-success .cms-login-curtain--left { left: 0; view-transition-name: cms-login-left; }
+  .cms-login-frame.is-login-success .cms-login-curtain--right { right: 0; view-transition-name: cms-login-right; }
+
+  .cms-login-frame.is-login-fallback .cms-login-visual,
+  .cms-login-frame.is-login-fallback .cms-login-pane--login { animation: none; }
+
+  .cms-login-frame.is-login-fallback .cms-login-curtain--left { animation: cms-login-curtain-left 600ms cubic-bezier(.4, 0, .2, 1) both; }
+  .cms-login-frame.is-login-fallback .cms-login-curtain--right { animation: cms-login-curtain-right 600ms cubic-bezier(.4, 0, .2, 1) both; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cms-login-frame.is-login-fallback .cms-login-visual,
+  .cms-login-frame.is-login-fallback .cms-login-pane--login,
+  .cms-login-frame.is-login-fallback .cms-login-curtain { animation: none; }
+}
+
+/* ---- Arrival after logout: the reverse of the opening ----
+   Same single timeline idea: --cms-p runs 1 → 0, the two doors come in from the sides (±t·p) and the window that still shows
+   the page the user left (the old root) shrinks to the same gap, minus 1px per side, centred on --cms-vt-c.
+   The three vars are measured in the pagereveal script of login.blade.php. */
+@view-transition { navigation: auto; }
+
+@property --cms-p { syntax: '<number>'; inherits: true; initial-value: 0; }
+
+:root { --cms-vt-dur: 800ms; --cms-vt-ease: cubic-bezier(.4, 0, .2, 1); }
+@media (max-width: 767px) { :root { --cms-vt-dur: 600ms; } }
+
+html.cms-login-arriving .cms-login-visual { view-transition-name: cms-login-left; }
+html.cms-login-arriving .cms-login-pane--login { view-transition-name: cms-login-right; background: var(--auth-surface); }
+html.cms-login-arriving .cms-login-pane--register { visibility: hidden; }
+
+html.cms-login-arriving::view-transition { animation: cms-vt-close var(--cms-vt-dur) var(--cms-vt-ease) both; }
+@keyframes cms-vt-close { from { --cms-p: 1; } to { --cms-p: 0; } }
+
+/* Bottom: the new login backdrop. Above it: the page being left, seen only through the shrinking window. */
+html.cms-login-arriving::view-transition-group(root) { animation: none; z-index: 1; }
+html.cms-login-arriving::view-transition-old(root),
+html.cms-login-arriving::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html.cms-login-arriving::view-transition-new(root) { z-index: 1; }
+html.cms-login-arriving::view-transition-old(root) {
+  z-index: 2;
+  clip-path: inset(
+    0
+    calc(var(--cms-vt-vw, 100vw) - var(--cms-vt-c, 50vw) + 1px - var(--cms-vt-t, 50vw) * var(--cms-p))
+    0
+    calc(var(--cms-vt-c, 50vw) + 1px - var(--cms-vt-t, 50vw) * var(--cms-p))
+  );
+}
+
+html.cms-login-arriving::view-transition-group(cms-login-left),
+html.cms-login-arriving::view-transition-group(cms-login-right) { z-index: 3; animation: none; }
+html.cms-login-arriving::view-transition-old(cms-login-left),
+html.cms-login-arriving::view-transition-old(cms-login-right) { display: none; }
+html.cms-login-arriving::view-transition-new(cms-login-left),
+html.cms-login-arriving::view-transition-new(cms-login-right) { animation: none; mix-blend-mode: normal; }
+html.cms-login-arriving::view-transition-new(cms-login-left) {
+  transform: translateX(calc(var(--cms-vt-t, 50vw) * var(--cms-p) * -1));
+  filter: drop-shadow(calc(12px * var(--cms-p)) 0 calc(28px * var(--cms-p)) rgba(0, 0, 0, calc(.35 * var(--cms-p))));
+}
+html.cms-login-arriving::view-transition-new(cms-login-right) {
+  transform: translateX(calc(var(--cms-vt-t, 50vw) * var(--cms-p)));
+  filter: drop-shadow(calc(-12px * var(--cms-p)) 0 calc(28px * var(--cms-p)) rgba(0, 0, 0, calc(.35 * var(--cms-p))));
+}
+
+/* Mobile: the two 50% doors stand in for the stacked halves and fade out at the very end to uncover the real page. */
+@media (max-width: 767px) {
+  html.cms-login-arriving .cms-login-visual,
+  html.cms-login-arriving .cms-login-pane--login { view-transition-name: none; }
+
+  html.cms-login-arriving .cms-login-curtain {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 50;
+    display: block;
+    width: 50%;
+    background: var(--auth-curtain);
+  }
+
+  html.cms-login-arriving .cms-login-curtain--left { left: 0; view-transition-name: cms-login-left; }
+  html.cms-login-arriving .cms-login-curtain--right { right: 0; view-transition-name: cms-login-right; }
+
+  html.cms-login-arriving::view-transition-new(cms-login-left),
+  html.cms-login-arriving::view-transition-new(cms-login-right) { opacity: clamp(0, calc(var(--cms-p) * 10), 1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.cms-login-arriving::view-transition,
+  html.cms-login-arriving::view-transition-group(*),
+  html.cms-login-arriving::view-transition-old(*),
+  html.cms-login-arriving::view-transition-new(*) { animation: none !important; }
+}

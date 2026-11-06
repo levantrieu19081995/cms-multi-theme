@@ -1,0 +1,752 @@
+:root {
+  --cms-file-navy: #17213d;
+  --cms-file-sidebar: #171a22;
+  --cms-file-sidebar-soft: #2a2f39;
+  --cms-file-purple: #5168d9;
+  --cms-file-purple-soft: #edf0ff;
+  --cms-file-blue-soft: #edf4ff;
+  --cms-file-border: #e1e7f1;
+  --cms-file-text-muted: #74809a;
+}
+
+.cms-editorial-admin .cms-file-manager-page {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.cms-editorial-admin .cms-file-manager-frame {
+  display: block;
+  width: 100%;
+  height: calc(100vh - 186px);
+  min-height: 620px;
+  border: 0;
+  background: #f7f9fd;
+}
+
+.cms-file-manager,
+.cms-file-manager * {
+  box-sizing: border-box;
+}
+
+.cms-file-manager,
+.cms-file-manager #tree,
+.cms-file-manager #main,
+.cms-file-manager #content,
+.cms-file-manager .modal {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none;
+}
+
+.cms-file-manager::-webkit-scrollbar,
+.cms-file-manager *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+html:has(.cms-file-manager),
+.cms-file-manager {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
+
+.cms-file-manager {
+  margin: 0;
+  overflow: hidden;
+  color: var(--cms-file-navy);
+  background: #f7f9fd;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+.cms-file-manager #nav {
+  z-index: 1040;
+  min-height: 64px;
+  padding: 10px 20px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.cms-file-manager #nav .navbar-brand,
+.cms-file-manager #nav .nav-link,
+.cms-file-manager #nav .navbar-link,
+.cms-file-manager #nav .navbar-toggler {
+  color: #525e79;
+  cursor: pointer;
+}
+
+.cms-file-manager #nav .navbar-brand:hover,
+.cms-file-manager #nav .nav-link:hover,
+.cms-file-manager #nav .navbar-link:hover {
+  color: var(--cms-file-purple);
+}
+
+.cms-file-manager #nav .nav-link {
+  margin-left: 6px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.cms-file-manager #nav .nav-link.active,
+.cms-file-manager #nav .nav-item.show .nav-link {
+  color: #fff;
+  background: var(--cms-file-purple);
+}
+
+.cms-file-manager #nav .dropdown-menu {
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(23, 33, 61, 0.15);
+}
+
+.cms-file-manager > .d-flex.flex-row {
+  align-items: stretch;
+  width: 100%;
+  height: calc(100vh - 64px);
+  min-height: 0;
+}
+
+.cms-file-manager #tree {
+  position: relative;
+  display: block !important;
+  flex: 0 0 290px;
+  width: 290px;
+  height: 100%;
+  padding: 20px 16px 92px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: var(--cms-file-navy);
+  background: transparent;
+  border: 0;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+  scrollbar-width: thin;
+}
+
+.cms-file-manager #tree::before {
+  display: block;
+  margin: 2px 10px 17px;
+  color: #6f7a91;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  content: var(--cms-tree-label, "Cây thư mục");
+}
+
+.cms-file-manager #tree > .m-3 {
+  display: none !important;
+}
+
+.cms-file-manager #tree .nav {
+  position: relative;
+  gap: 5px;
+}
+
+.cms-file-manager #tree .nav-item {
+  position: relative;
+  width: 100%;
+}
+
+.cms-file-manager #tree .nav-link,
+.cms-file-manager #tree a {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 10px 12px;
+  color: #26324d;
+  border-radius: 9px;
+  font-size: 14px;
+  line-height: 1.35;
+  text-decoration: none;
+  transition: color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+}
+
+.cms-file-manager #tree .nav-link i,
+.cms-file-manager #tree a i {
+  width: 22px;
+  color: #5168d9;
+  text-align: center;
+}
+
+.cms-file-manager #tree .nav-link:hover,
+.cms-file-manager #tree a:hover,
+.cms-file-manager #tree .nav-link.active,
+.cms-file-manager #tree a.active,
+.cms-file-manager #tree .nav-item.active > a {
+  color: #243252;
+  background: rgba(81, 104, 217, 0.09);
+  transform: translateX(2px);
+}
+
+.cms-file-manager #tree .nav-link.active i,
+.cms-file-manager #tree a.active i,
+.cms-file-manager #tree .nav-item.active > a i {
+  color: #4059cf;
+}
+
+.cms-file-manager #tree .sub-item {
+  margin-left: 23px;
+  width: calc(100% - 23px);
+}
+
+.cms-file-manager #tree .sub-item::before {
+  position: absolute;
+  top: -11px;
+  bottom: 50%;
+  left: -12px;
+  border-left: 1px solid #c7cfdd;
+  content: "";
+}
+
+.cms-file-manager #tree .sub-item::after {
+  position: absolute;
+  top: 50%;
+  left: -12px;
+  width: 13px;
+  border-top: 1px solid #c7cfdd;
+  content: "";
+}
+
+.cms-file-manager #tree .sub-item + .sub-item::before {
+  top: -23px;
+}
+
+.cms-file-manager #main {
+  flex: 1 1 auto;
+  width: auto !important;
+  min-width: 0;
+  height: 100%;
+  padding: 20px 24px 88px !important;
+  overflow: auto;
+  background: transparent;
+  scrollbar-color: #bec6d6 transparent;
+  scrollbar-width: thin;
+}
+
+.cms-file-manager #breadcrumbs .breadcrumb {
+  min-height: 48px;
+  margin: 0 0 20px;
+  padding: 13px 17px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.cms-file-manager #breadcrumbs .breadcrumb-item,
+.cms-file-manager #breadcrumbs .breadcrumb-item a {
+  color: #56627c;
+  font-weight: 600;
+}
+
+.cms-file-manager #content.grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  justify-content: flex-start;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+.cms-file-manager #content.grid > a {
+  flex: 0 0 158px;
+  width: 158px;
+  margin: 0 !important;
+  overflow: hidden;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  box-shadow: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.cms-file-manager #content.grid > a:hover,
+.cms-file-manager #content.grid > a.selected {
+  background: rgba(81, 104, 217, 0.06);
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+
+.cms-file-manager #content.grid .square {
+  width: 100%;
+  height: 126px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.cms-file-manager #content.grid .square img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* LFM normally points folders to public/vendor/.../folder.png. CMS deployment
+   intentionally does not publish that shared directory, so keep the folder
+   artwork inside the module skin. */
+.cms-file-manager #content .square > div[style*="folder.png"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 120'%3E%3Cpath fill='%23b9ddfb' d='M10 26c0-7 5-12 12-12h39l14 16h63c7 0 12 5 12 12v65H10V26Z'/%3E%3Cpath fill='%238cc4ee' d='M10 43h140v64c0 7-5 12-12 12H22c-7 0-12-5-12-12V43Z'/%3E%3Cpath fill='none' stroke='%23d9efff' stroke-linecap='round' stroke-width='2' d='M22 105h116'/%3E%3C/svg%3E") !important;
+  background-position: center !important;
+  background-size: contain !important;
+}
+
+.cms-file-manager #content.grid .info {
+  padding: 11px 12px 12px;
+  border: 0;
+  background: transparent;
+}
+
+.cms-file-manager #content.grid .item_name {
+  max-width: none;
+  margin-top: 0;
+  padding: 0;
+  border: 0;
+  color: var(--cms-file-navy);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.cms-file-manager #content.grid time {
+  display: block;
+  margin-top: 3px;
+  color: var(--cms-file-text-muted) !important;
+  font-size: 11px;
+  text-align: left;
+}
+
+.cms-file-manager #content.grid > a:has(.fa-folder),
+.cms-file-manager #content.grid > a:has(.ico-folder),
+.cms-file-manager #content.grid > a:has(.square > div[style*="folder.png"]) {
+  background: transparent;
+  box-shadow: none;
+}
+
+.cms-file-manager #content.grid > a:has(.fa-folder) .square,
+.cms-file-manager #content.grid > a:has(.ico-folder) .square,
+.cms-file-manager #content.grid > a:has(.square > div[style*="folder.png"]) .square {
+  color: var(--cms-file-navy);
+  background: transparent;
+}
+
+.cms-file-manager #content.grid > a:has(.fa-folder) .info,
+.cms-file-manager #content.grid > a:has(.ico-folder) .info,
+.cms-file-manager #content.grid > a:has(.square > div[style*="folder.png"]) .info {
+  background: transparent;
+}
+
+.cms-file-manager #content.grid > a:has(.fa-folder) .item_name,
+.cms-file-manager #content.grid > a:has(.fa-folder) time,
+.cms-file-manager #content.grid > a:has(.ico-folder) .item_name,
+.cms-file-manager #content.grid > a:has(.ico-folder) time,
+.cms-file-manager #content.grid > a:has(.square > div[style*="folder.png"]) .item_name,
+.cms-file-manager #content.grid > a:has(.square > div[style*="folder.png"]) time {
+  color: var(--cms-file-navy) !important;
+}
+
+.cms-file-manager #content.grid > a:has(.fa-folder) time,
+.cms-file-manager #content.grid > a:has(.ico-folder) time,
+.cms-file-manager #content.grid > a:has(.square > div[style*="folder.png"]) time {
+  color: var(--cms-file-text-muted) !important;
+}
+
+.cms-file-manager #content.list {
+  overflow: hidden;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+}
+
+.cms-file-manager #content.list > a {
+  min-height: 72px;
+  margin: 0;
+  padding: 9px 14px;
+  border: 0;
+  color: var(--cms-file-navy);
+  transition: background-color 0.18s ease;
+}
+
+.cms-file-manager #content.list > a:hover {
+  background: #f1f4f9;
+}
+
+.cms-file-manager #content.list .square {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  margin-right: 14px;
+  border-radius: 9px;
+  background: transparent;
+}
+
+.cms-file-manager #content.list .info {
+  align-self: center;
+  min-width: 0;
+}
+
+.cms-file-manager #content.list .item_name {
+  color: var(--cms-file-navy);
+  font-weight: 700;
+}
+
+.cms-file-manager #empty {
+  padding: 80px 24px;
+  color: var(--cms-file-text-muted);
+  text-align: center;
+}
+
+.cms-file-manager #empty i {
+  display: block;
+  margin-bottom: 15px;
+  color: #aeb8ca;
+  font-size: 48px;
+}
+
+.cms-file-manager #fab.fab-wrapper {
+  z-index: 1045;
+  right: auto;
+  bottom: 18px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  width: 258px;
+  margin: 0;
+}
+
+.cms-file-manager #fab .fab-button {
+  position: relative;
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 9px;
+  color: #f4f2fb;
+  background: #5168d9;
+  box-shadow: none;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.cms-file-manager #fab .fab-toggle {
+  z-index: 2;
+  gap: 8px;
+  border: 0;
+  background: #5168d9;
+  box-shadow: 0 8px 20px rgba(55, 75, 170, 0.24);
+  font-weight: 700;
+}
+
+.cms-file-manager #fab .fab-toggle::after {
+  content: var(--cms-fab-label, "Thêm");
+}
+
+.cms-file-manager #fab .fab-action {
+  z-index: 1;
+  justify-content: flex-start;
+  gap: 9px;
+  margin-bottom: -44px;
+  padding: 0 14px;
+  opacity: 0;
+  pointer-events: none;
+  background: #4259c8;
+  transition: margin-bottom 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.cms-file-manager #fab .fab-action::before {
+  position: static;
+  order: 2;
+  padding: 0;
+  color: #f4f2fb;
+  background: transparent;
+  font-size: 13px;
+  text-align: left;
+}
+
+.cms-file-manager #fab .fab-action i {
+  order: 1;
+  width: 20px;
+  color: #c5ccd7;
+  text-align: center;
+}
+
+.cms-file-manager #fab.fab-wrapper.fab-expand .fab-action {
+  margin-bottom: 8px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cms-file-manager #fab .fab-action:hover,
+.cms-file-manager #fab .fab-toggle:hover {
+  color: #fff;
+  background: #4058c5;
+}
+
+.cms-file-manager .modal-backdrop.show {
+  opacity: 0.2;
+  background: #18233f;
+}
+
+.cms-file-manager #uploadModal .modal-dialog,
+.cms-file-manager #dialog .modal-dialog {
+  width: calc(100% - 32px);
+  max-width: 540px;
+  margin: 32px auto;
+}
+
+.cms-file-manager .modal-content {
+  overflow: hidden;
+  border: 0;
+  border-radius: 18px;
+  color: var(--cms-file-navy);
+  background: rgba(247, 249, 253, 0.98);
+  box-shadow: 0 20px 56px rgba(23, 33, 61, 0.2);
+}
+
+.cms-file-manager #uploadModal .modal-header,
+.cms-file-manager #dialog .modal-header {
+  align-items: center;
+  padding: 22px 24px 10px;
+  border: 0;
+}
+
+.cms-file-manager #uploadModal .modal-title,
+.cms-file-manager #dialog .modal-title {
+  margin: 0;
+  color: var(--cms-file-navy);
+  font-size: 21px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.cms-file-manager #uploadModal .close,
+.cms-file-manager #dialog .close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  color: #66728a;
+  background: rgba(81, 104, 217, 0.08);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
+  opacity: 1;
+}
+
+.cms-file-manager #uploadModal .close:hover,
+.cms-file-manager #dialog .close:hover {
+  color: #4058c5;
+  background: rgba(81, 104, 217, 0.14);
+}
+
+.cms-file-manager #uploadModal .modal-body,
+.cms-file-manager #dialog .modal-body {
+  padding: 14px 24px;
+}
+
+.cms-file-manager #uploadModal .modal-footer,
+.cms-file-manager #dialog .modal-footer {
+  display: flex;
+  gap: 10px;
+  padding: 10px 24px 24px;
+  border: 0;
+}
+
+.cms-file-manager #uploadModal .modal-footer .btn,
+.cms-file-manager #dialog .modal-footer .btn {
+  flex: 1 1 0;
+  width: auto !important;
+  min-height: 44px;
+  margin: 0;
+  border: 0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: none;
+}
+
+.cms-file-manager #uploadModal .btn-secondary,
+.cms-file-manager #dialog .btn-secondary {
+  color: #526078;
+  background: #e8ecf4;
+}
+
+.cms-file-manager #uploadModal .btn-secondary:hover,
+.cms-file-manager #dialog .btn-secondary:hover {
+  color: #34415b;
+  background: #dce2ed;
+}
+
+.cms-file-manager #uploadModal #uploadForm.dropzone {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.cms-file-manager #uploadModal #attachment {
+  margin: 0 0 12px;
+}
+
+.cms-file-manager #uploadModal #upload-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 46px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 7px 18px rgba(55, 75, 170, 0.18);
+}
+
+.cms-file-manager #uploadModal #uploadForm > .dz-default.dz-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 132px;
+  margin: 0;
+  padding: 24px;
+  border: 1px dashed #b9c3d6;
+  border-radius: 12px;
+  color: #8490a6;
+  background: rgba(232, 236, 244, 0.46);
+  font-size: 14px;
+}
+
+.cms-file-manager #dialog .form-control {
+  min-height: 48px;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--cms-file-navy);
+  background: #e9edf5;
+  font-size: 15px;
+  box-shadow: none;
+}
+
+.cms-file-manager #dialog .form-control:focus {
+  background: #e9edf5;
+  box-shadow: 0 0 0 3px rgba(81, 104, 217, 0.16);
+}
+
+.cms-file-manager .btn-primary {
+  border-color: var(--cms-file-purple);
+  background: var(--cms-file-purple);
+}
+
+.cms-file-manager .btn-primary:hover,
+.cms-file-manager .btn-primary:focus {
+  border-color: #4058c5;
+  background: #4058c5;
+  box-shadow: none;
+}
+
+@media (max-width: 575.98px) {
+  .cms-file-manager #uploadModal .modal-dialog,
+  .cms-file-manager #dialog .modal-dialog {
+    width: calc(100% - 20px);
+    margin: 14px auto;
+  }
+
+  .cms-file-manager #uploadModal .modal-header,
+  .cms-file-manager #dialog .modal-header {
+    padding: 18px 18px 8px;
+  }
+
+  .cms-file-manager #uploadModal .modal-body,
+  .cms-file-manager #dialog .modal-body {
+    padding: 12px 18px;
+  }
+
+  .cms-file-manager #uploadModal .modal-footer,
+  .cms-file-manager #dialog .modal-footer {
+    padding: 8px 18px 18px;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .cms-editorial-admin .cms-file-manager-frame {
+    height: calc(100vh - 164px);
+    min-height: 560px;
+  }
+
+  .cms-file-manager #nav {
+    min-height: 58px;
+    padding: 8px 12px;
+  }
+
+  .cms-file-manager > .d-flex.flex-row {
+    height: calc(100vh - 58px);
+  }
+
+  .cms-file-manager #tree {
+    position: fixed;
+    z-index: 1030;
+    top: 58px;
+    bottom: 0;
+    left: 0;
+    width: min(300px, 86vw);
+    height: auto;
+    box-shadow: 14px 0 32px rgba(12, 9, 24, 0.28);
+  }
+
+  .cms-file-manager #tree:not(.in) {
+    transform: translateX(-100%);
+  }
+
+  .cms-file-manager #tree.in {
+    transform: translateX(0);
+  }
+
+  .cms-file-manager #fab.fab-wrapper {
+    width: min(268px, calc(86vw - 32px));
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+
+  .cms-file-manager:not(:has(#tree.in)) #fab.fab-wrapper {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-110%);
+  }
+
+  .cms-file-manager #main {
+    width: 100% !important;
+    padding: 16px 14px 84px !important;
+  }
+
+  .cms-file-manager #content.grid {
+    gap: 12px;
+  }
+
+  .cms-file-manager #content.grid > a {
+    flex-basis: calc(50% - 6px);
+    width: calc(50% - 6px);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .cms-editorial-admin .cms-file-manager-page {
+    border-radius: 12px;
+  }
+
+  .cms-file-manager #content.grid > a {
+    flex-basis: 100%;
+    width: 100%;
+  }
+}

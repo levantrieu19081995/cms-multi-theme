@@ -1,0 +1,17 @@
+/*
+ * Dashboard reveal (JS: dashboard-reveal.js, plain script). Mechanism only: no colours, sizes or layout.
+ *   .cms-reveal[data-reveal-col]   block fades in and rises 28px, in reading order; blocks scrolled to later use their column as the delay
+ *   [data-countup]                 first number inside runs from 0 when its block appears
+ *   .cms-admin-links > li          side menu items drop in from the top, once per session (class .cms-menu-static = already played)
+ * The hidden state only applies once the script added .cms-motion to <html>, so a script error never hides content.
+ * Not shown at all when the OS asks for reduced motion.
+ */
+@media (prefers-reduced-motion: no-preference) {
+    /* Top-level blocks of the content area are hidden from the first paint (zero specificity), then the script marks them .cms-reveal / .cms-reveal-skip. */
+    html.cms-motion :where(.cms-admin-main:not([data-no-reveal]) > :not(script, style, template, link, noscript, .modal, .offcanvas, .toast, .cms-no-reveal, [hidden], [aria-hidden="true"])) { opacity: 0; transform: translateY(28px); }
+    html.cms-motion .cms-reveal-skip { opacity: 1; transform: none; }
+    html.cms-motion .cms-reveal { opacity: 0; transform: translateY(28px); }
+    html.cms-motion .cms-reveal.is-in { opacity: 1; transform: none; transition: opacity .9s cubic-bezier(.22, 1, .36, 1) var(--cms-d, 0s), transform .9s cubic-bezier(.22, 1, .36, 1) var(--cms-d, 0s); }
+    html.cms-motion:not(.cms-menu-static) .cms-admin-links > li { opacity: 0; transform: translateY(-14px); }
+    html.cms-motion:not(.cms-menu-static) .cms-admin-links > li.is-in { opacity: 1; transform: none; transition: opacity .5s cubic-bezier(.22, 1, .36, 1) var(--cms-d, 0s), transform .5s cubic-bezier(.22, 1, .36, 1) var(--cms-d, 0s); }
+}
