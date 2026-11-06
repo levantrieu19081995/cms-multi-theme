@@ -48,7 +48,7 @@
                     <div class="row">
                         <div class="mb-6">
                             <button type="submit" class="btn btn-primary waves-effect waves-light">Tìm</button>
-                            <a href="{{ route('hinh-anh.create') }}" type="button"
+                            <a href="{{ \Modules\CmsBackend\Support\ModuleUrl::route('thu-vien-hinh-anh.create') }}" type="button"
                                 class="btn btn-outline-secondary waves-effect">Thêm
                                 mới</a>
                         </div>

@@ -7,7 +7,6 @@ use App\Http\Controllers\AdsController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FileController;
-use App\Http\Controllers\ImageLibraryController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LayoutController;
 use App\Http\Controllers\MenuController;
@@ -18,6 +17,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 use Modules\CmsBackend\Http\Controllers\ContentFlagsController;
+use Modules\CmsBackend\Http\Controllers\ContentMediaController;
 
 // Administration (framework screens). Every administration address lives under the /cms prefix (CMS_ROUTE_PREFIX); the route
 // names are the ones the screens have always used (users.*, roles.*, menus.*, ...), only the addresses changed.
@@ -58,8 +58,14 @@ Route::prefix($cmsPrefix)->middleware('auth')->group(function () {
     Route::put('/binh-luan/{id}/reply', [CommentController::class, 'reply'])->name('binh-luan.reply');
     Route::delete('/binh-luan/{id}', [CommentController::class, 'destroy'])->name('binh-luan.destroy');
 
-    // Hình ảnh
-    Route::resource('/hinh-anh', ImageLibraryController::class);
+    Route::get('/media-list/{postId}', [ContentMediaController::class, 'list'])->whereNumber('postId')->name('media-list');
+
+    // Hình ảnh: the image library lives at /cms/thu-vien-hinh-anh; the old address keeps working as a redirect (same post ids).
+    Route::get('/hinh-anh/{rest?}', function (\Illuminate\Http\Request $request, ?string $rest = null) {
+        $query = $request->getQueryString();
+
+        return redirect()->to(\Modules\CmsBackend\Support\ModuleUrl::url('/'.trim((string) config('cmsbackend.route_prefix', 'cms'), '/').'/thu-vien-hinh-anh'.($rest ? '/'.$rest : '')).($query ? '?'.$query : ''), 302);
+    })->where('rest', '.*');
 
     // video
     Route::resource('/video', VideoController::class);
@@ -89,7 +95,7 @@ Route::get('/{area}/{rest?}', function (\Illuminate\Http\Request $request, strin
     $query = $request->getQueryString();
 
     return redirect()->to(url('/'.$cmsPrefix.'/'.$area.($rest !== null && $rest !== '' ? '/'.$rest : '')).($query ? '?'.$query : ''), 302);
-})->where('area', 'users|roles|menus|activities|binh-luan|chuyen-muc|hinh-anh|video|file|quang-cao|profile|page-builder|components|bai-viet|trang|banner|lien-ket')->where('rest', '.*');
+})->where('area', 'users|roles|menus|activities|binh-luan|chuyen-muc|hinh-anh|video|file|quang-cao|profile|page-builder|components|bai-viet|trang|banner|lien-ket|media-list')->where('rest', '.*');
 Route::get('/setting/{page}', function (\Illuminate\Http\Request $request, string $page) use ($cmsPrefix) {
     $query = $request->getQueryString();
 

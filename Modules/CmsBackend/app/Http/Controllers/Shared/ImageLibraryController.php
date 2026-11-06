@@ -48,7 +48,7 @@ class ImageLibraryController extends AbstractPostController
                 '_partials.thu-vien-hinh-anh.table-image',
                 __('admin.resource.image_library'),
                 'pages.thu-vien-hinh-anh',
-                'hinh-anh.index',
+                'thu-vien-hinh-anh.index',
                 $permissionsBase
             );
             return $next($request);
@@ -62,6 +62,6 @@ class ImageLibraryController extends AbstractPostController
             $post = $this->save($request);
         });
 
-        return redirect()->route('hinh-anh.index');
+        return redirect()->to(\Modules\CmsBackend\Support\ModuleUrl::route('thu-vien-hinh-anh.index'));
     }
 }

@@ -13,6 +13,10 @@ class CDNThuVienHinhAnhController extends ImageLibraryController
     public function index(Request $request)
     {
         $parentIndex = parent::index($request);
+        // Cửa sổ chọn ảnh mở ?mode=select: dùng view chọn của controller cha.
+        if ($request->input('mode') === 'select') {
+            return $parentIndex;
+        }
         $data = $parentIndex->getData();
         // dump($data);
         // Trả về view tùy chỉnh của module CmsBackend

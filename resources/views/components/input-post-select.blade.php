@@ -9,7 +9,7 @@
     $routes = [
         'post' => 'bai-viet.index',
         'page' => 'trang.index',
-        'image' => 'hinh-anh.index',
+        'image' => 'thu-vien-hinh-anh.index',
         'video' => 'video.index'
     ];
 @endphp

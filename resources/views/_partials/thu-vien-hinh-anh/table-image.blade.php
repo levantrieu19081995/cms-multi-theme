@@ -17,7 +17,7 @@
               <tr>
                   <th scope="row" class="text-center">{{ $index + 1 }}</th>
                   <td class="td-thong-tin-bai-viet">
-                      <p class="h6"><b><a href="{{ route('hinh-anh.edit', $post) }}">{{ $post->title }}</a></b></p>
+                      <p class="h6"><b><a href="{{ \Modules\CmsBackend\Support\ModuleUrl::route('thu-vien-hinh-anh.edit', $post) }}">{{ $post->title }}</a></b></p>
                       <p><i class="ri-calendar-event-line"></i> {{ $post->published_at ? 'Ngày xuất bản: '.$post->published_at : 'Ngày tạo: '.$post->created_at }}</p>
                       <p><i class="ri-information-line"></i> Trạng thái:
                           @if ($post->status == App\Enums\PostStatus::DRAFT->value)
@@ -39,21 +39,21 @@
                   <td>{{ $post->author ? $post->author->name : '-' }}</td>
                   <td class="text-center">
                       <div class="gap-50">
-                          <a href="{{ route('hinh-anh.edit', $post) }}" class="btn btn-sm btn-icon btn-text-secondary rounded-pill waves-effect" data-bs-toggle="tooltip" title="{{ __('Sửa') }}">
+                          <a href="{{ \Modules\CmsBackend\Support\ModuleUrl::route('thu-vien-hinh-anh.edit', $post) }}" class="btn btn-sm btn-icon btn-text-secondary rounded-pill waves-effect" data-bs-toggle="tooltip" title="{{ __('Sửa') }}">
                               <i class="ri-edit-box-line ri-20px"></i>
                           </a>
                           <button class="btn btn-sm btn-icon btn-text-secondary rounded-pill waves-effect dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false">
                               <i class="ri-more-2-line ri-20px"></i>
                           </button>
                           <div class="dropdown-menu dropdown-menu-end m-0">
-                              <a href="{{ route('hinh-anh.edit', $post) }}" class="dropdown-item">
+                              <a href="{{ \Modules\CmsBackend\Support\ModuleUrl::route('thu-vien-hinh-anh.edit', $post) }}" class="dropdown-item">
                                   <i class="ri-edit-box-line me-2"></i><span>{{ __('Sửa') }}</span>
                               </a>
                             
                               <a href="javascript:void(0)" class="dropdown-item delete-record"
                                  data-action="menu-delete"
                                  data-id="{{ $post->id }}"
-                                 data-route="{{ route('hinh-anh.destroy', $post) }}">
+                                 data-route="{{ \Modules\CmsBackend\Support\ModuleUrl::route('thu-vien-hinh-anh.destroy', $post) }}">
                                   <i class="ri-delete-bin-7-line me-2"></i><span>{{ __('Xóa') }}</span>
                               </a>
                           </div>
