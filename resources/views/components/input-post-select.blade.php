@@ -57,7 +57,7 @@
             const left = (width - w) / 2 / systemZoom + dualScreenLeft
             const top = (height - h) / 2 / systemZoom + dualScreenTop
 
-            window.open('{{ route($routes[$type]) }}?mode=select&state={{ $ranNum }}&pageSize=10', 'targetWindow',
+            window.open('{{ \Modules\CmsBackend\Support\ModuleUrl::route($routes[$type]) }}?mode=select&state={{ $ranNum }}&pageSize=10', 'targetWindow',
                                         `directories=no,
                                         titlebar=no
                                         location=no,
