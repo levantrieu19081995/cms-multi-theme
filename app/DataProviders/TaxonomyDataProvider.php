@@ -17,7 +17,7 @@ class TaxonomyDataProvider
      * @param integer $parentId
      * @return void
      */
-    public function getCategoryHierarchy($parentId = 0, $type)
+    public function getCategoryHierarchy($parentId, $type)
     {
         // Lấy các chuyên mục có taxonomy là 'category' và parent bằng parentId
         $categories = Taxonomy::with('term')
@@ -103,7 +103,7 @@ class TaxonomyDataProvider
 
         return $categories;
     }
-    public function paginate(string $filter, int $pageSize = 20, $type): LengthAwarePaginator
+    public function paginate(string $filter, int $pageSize, $type): LengthAwarePaginator
     {
         // Lấy các chuyên mục có taxonomy là 'category' và parent bằng parentId
         $categories = Taxonomy::with('term')

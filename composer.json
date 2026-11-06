@@ -50,7 +50,11 @@
       "Database\\Seeders\\": "database/seeders/",
       "Modules\\CmsBackend\\": "Modules/CmsBackend/app/",
       "Modules\\CmsFrontend\\": "Modules/CmsFrontend/app/"
-    }
+    },
+    "exclude-from-classmap": [
+      "Modules/*/database/migrations/*",
+      "Modules/*/database/seeders/*"
+    ]
   },
   "autoload-dev": {
     "psr-4": {

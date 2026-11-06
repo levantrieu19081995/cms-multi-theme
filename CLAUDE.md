@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Laravel 11 / PHP 8.2+ multi-unit CMS (first deployment: Nam Bình Dương university), built with `nwidart/laravel-modules`. Two active modules: `CmsBackend` (admin + shared services) and `CmsFrontend` (public site). Module names are deliberately neutral — never name modules/controllers after a customer. `README.md` (Vietnamese) is the authoritative design/decision log; read it before architectural changes. The directory is not a git repository.
+Laravel 12 / PHP 8.2+ multi-unit CMS (first deployment: Nam Bình Dương university), built with `nwidart/laravel-modules`. Two active modules: `CmsBackend` (admin + shared services) and `CmsFrontend` (public site). Module names are deliberately neutral — never name modules/controllers after a customer. `README.md` (Vietnamese) is the authoritative design/decision log; read it before architectural changes. The directory is a git repository (branch `main`, remote `origin` = github.com/levantrieu19081995/cms-multi-theme, **public**: never commit `.env`, DB backups, deploy archives or `storage/` contents; `.gitignore` already blocks them).
 
 ## Commands
 
@@ -58,6 +58,7 @@ Theme assets can be built/watched for all themes or for one. This only splits CS
 
 ## Other conventions
 
+- **Laravel 12 upgrade notes** (branch `upgrade/laravel-12`): `composer.json` pins `config.platform.php = 8.2.99` so the lock installs on the servers (PHP 8.2). `intervention/image` is v3 (no `Image::make`/facade; see `BannerDataProvider`). The custom `url` binding in `AppServiceProvider` must not call `instance('routes')` again when the collection is unchanged (Laravel 12 rebinds it to the URL generator and recursed until memory ran out). Fortify now pulls `laravel/passkeys` (new `passkeys/*` routes). `php artisan route:cache` still fails on duplicate route names (`verification.*` from `routes/auth.php` vs Fortify): do not enable it until that is decided. The old nwidart scaffold resource routes (`cms/cmsbackend`, `cms/cmsfrontend`, `v1/*`) were removed; `CmsBackendController@index` is the dashboard and stays.
 - Autoload (composer.json): `Modules\CmsBackend\` → `Modules/CmsBackend/app/`, `Modules\CmsFrontend\` → `Modules/CmsFrontend/app/`; global helpers in `app/Helpers/GlobalHelpers.php`.
 - Content deletion: "Xóa" is soft delete; "Xóa vĩnh viễn kèm tập tin" (admin-only) requires the post to be unpublished first, checks menu/banner/child-post links, and must keep files still referenced by other content (never delete a whole folder by post ID alone).
 - Homepage fragment cache is disabled in debug; in production it keys on theme/version/content stamp, and public-visibility rules (approval status, schedule, expiry, internal categories) must be enforced both when querying and when caching.

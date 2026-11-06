@@ -76,7 +76,6 @@ Route::middleware(['cms.developer.enabled'])->prefix('developer-settings')->grou
 });
 
 Route::group([], function () {
-    Route::resource('cmsbackend', CmsBackendController::class)->names('cmsbackend');
     // Cài đặt thông tin trang chủ
 
     Route::middleware('cms.auth')->group(function () {

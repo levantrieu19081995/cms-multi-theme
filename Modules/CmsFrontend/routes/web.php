@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use Modules\CmsBackend\Http\Controllers\CmsBackendController;
 use Modules\CmsFrontend\Http\Controllers\VanBanPublicController;
-use Modules\CmsFrontend\Http\Controllers\CmsFrontendController;
 use Modules\CmsFrontend\Http\Controllers\HomeController;
 use Modules\CmsFrontend\Http\Controllers\SuKienFEController;
 use Modules\CmsFrontend\Http\Controllers\TinTucController;
@@ -38,7 +37,6 @@ Route::group([], function () {
     Route::post('/login', [LoginController::class, 'store'])->name('login.store');
     Route::post('/logout', [LoginController::class, 'destroy'])->middleware('cms.auth')->name('logout');
 
-    Route::resource('cmsfrontend', CmsFrontendController::class)->names('cmsfrontend');
 });
 
 Route::middleware('cms.auth')->group(function () {

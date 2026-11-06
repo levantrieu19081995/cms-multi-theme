@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use Modules\CmsBackend\Http\Controllers\CDNPostController;
 use Modules\CmsFrontend\Http\Controllers\Api\CDNBannerController;
-use Modules\CmsFrontend\Http\Controllers\CmsFrontendController;
 use Modules\CmsFrontend\Http\Controllers\HomeController;
 
 /*
@@ -17,9 +16,6 @@ use Modules\CmsFrontend\Http\Controllers\HomeController;
  *
  */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('cmsfrontend', CmsFrontendController::class)->names('cmsfrontend');
-});
 Route::prefix('api')->name('api.')->group(function () {
     // Banner
     Route::get('/banners/getDsBanner', [CDNBannerController::class, 'getDsBanner'])->name('getDsBanner');

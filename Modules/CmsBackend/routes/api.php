@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use Modules\CmsBackend\Http\Controllers\Api\RoleController;
 use Modules\CmsBackend\Http\Controllers\Api\TinTucController;
-use Modules\CmsBackend\Http\Controllers\CmsBackendController;
 
 /*
  *--------------------------------------------------------------------------
@@ -16,9 +15,6 @@ use Modules\CmsBackend\Http\Controllers\CmsBackendController;
  *
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('cmsbackend', CmsBackendController::class)->names('cmsbackend');
-});
 // Route::prefix('api')->name('api.')->group(function () {
 //     // Vai trò
 //     Route::get('/vai-tro/getDsVaiTro', [RoleController::class, 'getDsVaiTro']);
