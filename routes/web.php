@@ -14,10 +14,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 use Modules\CmsBackend\Http\Controllers\ContentFlagsController;
 use Modules\CmsBackend\Http\Controllers\ContentMediaController;
+use Modules\CmsBackend\Http\Controllers\Shared\VideoController;
 
 // Administration (framework screens). Every administration address lives under the /cms prefix (CMS_ROUTE_PREFIX); the route
 // names are the ones the screens have always used (users.*, roles.*, menus.*, ...), only the addresses changed.
