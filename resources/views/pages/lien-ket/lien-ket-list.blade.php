@@ -29,7 +29,7 @@
                 <div class="row">
                   <div class="mb-6">
                     <button type="submit" class="btn btn-primary waves-effect waves-light">Tìm</button>
-                    <a href="{{ route('lien-ket.create') }}" type="button" class="btn btn-outline-secondary waves-effect">Thêm mới</a>
+                    <a href="{{ \Modules\CmsBackend\Support\ModuleUrl::route('lien-ket.create') }}" type="button" class="btn btn-outline-secondary waves-effect">Thêm mới</a>
                   </div>
                 </div>
               </form>
@@ -64,13 +64,13 @@
                                       <i class="ri-more-2-line ri-20px"></i>
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-end m-0" style="">
-                                      <a href="{{ route('lien-ket.edit', $link) }}" class="dropdown-item">
+                                      <a href="{{ \Modules\CmsBackend\Support\ModuleUrl::route('lien-ket.edit', $link) }}" class="dropdown-item">
                                         <i class="ri-edit-box-line me-2"></i><span>Sửa</span>
                                       </a>
                                       <a href="javascript:void(0)" class="dropdown-item delete-record"
                                           data-action="role-delete"
                                           data-id="{{ $link->id }}"
-                                          data-route="{{ route('lien-ket.destroy', $link) }}">
+                                          data-route="{{ \Modules\CmsBackend\Support\ModuleUrl::route('lien-ket.destroy', $link) }}">
                                         <i class="ri-delete-bin-7-line me-2"></i><span>Xóa</span>
                                       </a>
                                     </div>

@@ -8,7 +8,7 @@
           <h4 class="mb-2">Phản hồi đến tác giả</h4>
           <p>Nhập lý do không duyệt</p>
         </div>
-        <form action="{{ route('bai-viet.reject', $post->id) }}" method="POST">
+        <form action="{{ \Modules\CmsBackend\Support\ModuleUrl::route('bai-viet.reject', $post->id) }}" method="POST">
           @csrf
           <div class="col-12 mb-5">
             <div class="input-group input-group-merge">

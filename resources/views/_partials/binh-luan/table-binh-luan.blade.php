@@ -35,7 +35,7 @@
                     @endif
                     <td class=""> {{ $comment->content }}</td>
                     <td class=""><a style="color:var(--bs-table-color);"
-                            href="{{ route('bai-viet.edit', $comment->post) }}"> {{ $comment->post->title }}</a> </td>
+                            href="{{ \Modules\CmsBackend\Support\ModuleUrl::route('bai-viet.edit', $comment->post) }}"> {{ $comment->post->title }}</a> </td>
                     <td class=""> {{ $comment->created_at }}</td>
                     <td class="">
                         @if ($comment->status === App\Enums\CommentStatus::PENDING->value)

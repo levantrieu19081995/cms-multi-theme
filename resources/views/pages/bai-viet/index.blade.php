@@ -30,7 +30,7 @@
   <h5 class="card-header">{{ __('label.list_post') }}</h5>
   <div class="card-body">
     <div>
-      <form id="searchForm" action="{{ route('bai-viet.index', ['mode' => request()->mode, 'state' => request()->state, 'pageSize' => request()->pageSize]) }}" method="get">
+      <form id="searchForm" action="{{ \Modules\CmsBackend\Support\ModuleUrl::route('bai-viet.index', ['mode' => request()->mode, 'state' => request()->state, 'pageSize' => request()->pageSize]) }}" method="get">
         <div class="input-group input-group-merge mb-6">
           <span class="input-group-text" id="basic-addon-search31"><i class="ri-search-line"></i></span>
           <input type="text" id="filter" name="filter" class="form-control" placeholder="Tìm kiếm..."
@@ -86,7 +86,7 @@
   <div class="row">
     <div class="mb-6">
       <button type="submit" class="btn btn-primary waves-effect waves-light">Tìm</button>
-      <a href="{{ route('bai-viet.create') }}" type="button" class="btn btn-outline-secondary waves-effect">Thêm
+      <a href="{{ \Modules\CmsBackend\Support\ModuleUrl::route('bai-viet.create') }}" type="button" class="btn btn-outline-secondary waves-effect">Thêm
         mới</a>
     </div>
   </div>

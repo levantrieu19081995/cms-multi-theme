@@ -18,7 +18,7 @@ function reloadTable() {
 const formData = form.serialize(); // Lấy dữ liệu từ form
 
 $.ajax({
-    url: form.attr('action') || '{{ route("banner.index")}}', // Sử dụng action của form hoặc route index
+    url: form.attr('action') || '{{ \Modules\CmsBackend\Support\ModuleUrl::route("banner.index")}}', // Sử dụng action của form hoặc route index
     type: 'GET',
     data: formData,
     success: function(response) {

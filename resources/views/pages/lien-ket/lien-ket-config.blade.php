@@ -91,7 +91,7 @@
 
 @section('content')
    
-      <form action="{{ $link->id ? route('lien-ket.update', $link) : route('lien-ket.store') }}" method="post">
+      <form action="{{ $link->id ? \Modules\CmsBackend\Support\ModuleUrl::route('lien-ket.update', $link) : \Modules\CmsBackend\Support\ModuleUrl::route('lien-ket.store') }}" method="post">
         <input type="hidden" name="id" value="{{ $link->id }}">
         <div class="row" id="app">
         <!-- Form controls -->
@@ -120,7 +120,7 @@
                 <hr class="m-0">
                 <div class="card-body">
                   <button type="submit" class="btn btn-primary waves-effect waves-light" name="submit">Lưu</button>
-                  <a href="{{ route('lien-ket.index') }}" type="button" class="btn btn-outline-secondary waves-effect">Hủy bỏ</a>
+                  <a href="{{ \Modules\CmsBackend\Support\ModuleUrl::route('lien-ket.index') }}" type="button" class="btn btn-outline-secondary waves-effect">Hủy bỏ</a>
                 </div>
              
             </div>

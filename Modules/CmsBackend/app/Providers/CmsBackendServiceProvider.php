@@ -101,14 +101,10 @@ class CmsBackendServiceProvider extends ServiceProvider
                 app('router')->getRoutes()->getByName('setting.general.update')?->middleware('cms.settings.common');
             });
             app('router')->aliasMiddleware('cms.editorial.legacy', \Modules\CmsBackend\Http\Middleware\GuardEditorialLegacyRoutes::class);
-            app('router')->aliasMiddleware('cms.legacy.redirect', \Modules\CmsBackend\Http\Middleware\RedirectLegacyAdminRoutes::class);
             $this->app->booted(function () {
                 foreach (app('router')->getRoutes() as $route) {
                     if (str_starts_with($route->getName() ?? '', 'bai-viet.') || in_array($route->uri(), ['api/update-homepage', 'api/update-commentpage', trim((string) config('cmsbackend.route_prefix', 'cms'), '/').'/api/update-homepage', trim((string) config('cmsbackend.route_prefix', 'cms'), '/').'/api/update-commentpage'], true)) {
                         $route->middleware('cms.editorial.legacy');
-                    }
-                    if (preg_match('/^(trang|banner|lien-ket)\./', $route->getName() ?? '') === 1) {
-                        $route->middleware('cms.legacy.redirect');
                     }
                 }
             });

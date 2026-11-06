@@ -57,7 +57,7 @@
         <div class="row">
           <div class="mb-6">
             <button type="submit" class="btn btn-primary waves-effect waves-light">Tìm</button>
-            <a href="{{ route('banner.create') }}" type="button" class="btn btn-outline-secondary waves-effect">Thêm
+            <a href="{{ \Modules\CmsBackend\Support\ModuleUrl::route('banner.create') }}" type="button" class="btn btn-outline-secondary waves-effect">Thêm
               mới</a>
           </div>
         </div>

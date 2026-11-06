@@ -94,6 +94,6 @@ class PageController extends AbstractPostController
             $post = $this->save($request);
         });
 
-        return redirect()->route('trang.index');
+        return redirect()->to(\Modules\CmsBackend\Support\ModuleUrl::route('trang.index'));
     }
 }

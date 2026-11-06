@@ -68,7 +68,7 @@ class LinksWebsiteController extends Controller
             Toastr::success(__('admin.message.them_moi_thanh_cong'));
         });
 
-        return redirect()->route('lien-ket.index');
+        return redirect()->to(\Modules\CmsBackend\Support\ModuleUrl::route('lien-ket.index'));
     }
 
     public function edit($id)

@@ -224,7 +224,7 @@ class BannerController extends AbstractPostController
             }
         });
 
-        return redirect()->route('banner.index');
+        return redirect()->to(\Modules\CmsBackend\Support\ModuleUrl::route('banner.index'));
     }
 
     public function edit($id)
