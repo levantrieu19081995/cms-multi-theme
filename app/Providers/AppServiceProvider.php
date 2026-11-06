@@ -32,7 +32,10 @@ class AppServiceProvider extends ServiceProvider
         // a generator that maps route names to the current public language (see LocalizedUrlGenerator).
         $this->app->singleton('url', function ($app) {
             $routes = $app['router']->getRoutes();
-            $app->instance('routes', $routes);
+            // Laravel 12 rebinds 'routes' to the URL generator (which resolves 'url' again): only publish the collection when it changed.
+            if (! $app->bound('routes') || $app->make('routes') !== $routes) {
+                $app->instance('routes', $routes);
+            }
 
             return new \App\Support\LocalizedUrlGenerator(
                 $routes,

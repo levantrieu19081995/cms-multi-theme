@@ -9,7 +9,8 @@ use App\Enums\PostType;
 use App\Models\Post;
 use App\Models\Comment;
 use Illuminate\Support\Facades\Cache;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -66,22 +67,16 @@ public function getDanhSachBannerWithCache()
             return $disk->url($cacheRelative);
         }
 
-        // 5) Tạo hình ảnh từ file gốc
-        $img = Image::make($sourcePath);
+        // 5) Tạo hình ảnh từ file gốc (Intervention Image v3)
+        $img = (new ImageManager(new Driver()))->read($sourcePath);
 
-        // 6) Resize tối đa theo width
+        // 6) Resize tối đa theo width (giữ tỷ lệ, không phóng to)
         if ($img->width() > $maxWidth) {
-            $img->resize($maxWidth, null, function ($c) {
-                $c->aspectRatio();
-                $c->upsize();
-            });
+            $img = $img->scaleDown(width: $maxWidth);
         }
 
-        // 7) Convert sang WebP
-        $img->encode('webp', 80);
-
-        // 8) Lưu cache
-        $disk->put($cacheRelative, (string) $img);
+        // 7) Convert sang WebP và 8) lưu cache
+        $disk->put($cacheRelative, (string) $img->toWebp(80));
 
         // 9) Trả URL WebP
         return $disk->url($cacheRelative);
