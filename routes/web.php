@@ -18,7 +18,6 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
@@ -62,12 +61,8 @@ Route::prefix($cmsPrefix)->middleware('auth')->group(function () {
     Route::put('/binh-luan/{id}/reply', [CommentController::class, 'reply'])->name('binh-luan.reply');
     Route::delete('/binh-luan/{id}', [CommentController::class, 'destroy'])->name('binh-luan.destroy');
 
-    // Thẻ
-    Route::resource('/the', TagController::class);
-
     // Hình ảnh
     Route::resource('/hinh-anh', ImageLibraryController::class);
-    Route::get('/media-list/{postId}', [ImageLibraryController::class, 'getMediaList']);
 
     // video
     Route::resource('/video', VideoController::class);
@@ -108,7 +103,7 @@ Route::get('/{area}/{rest?}', function (\Illuminate\Http\Request $request, strin
     $query = $request->getQueryString();
 
     return redirect()->to(url('/'.$cmsPrefix.'/'.$area.($rest !== null && $rest !== '' ? '/'.$rest : '')).($query ? '?'.$query : ''), 302);
-})->where('area', 'users|roles|menus|activities|binh-luan|chuyen-muc|the|hinh-anh|video|file|quang-cao|profile|media-list|page-builder|components')->where('rest', '.*');
+})->where('area', 'users|roles|menus|activities|binh-luan|chuyen-muc|hinh-anh|video|file|quang-cao|profile|page-builder|components')->where('rest', '.*');
 Route::get('/setting/{page}', function (\Illuminate\Http\Request $request, string $page) use ($cmsPrefix) {
     $query = $request->getQueryString();
 
