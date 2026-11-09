@@ -24,6 +24,12 @@ class CareerService
 
     public const MAX_MAJORS = 500;
 
+    /** Chức năng "career" đang bật trong Feature Registry (Developer Settings). Cần thêm chức năng Khảo sát (cổng ở route/middleware). */
+    public function enabled(): bool
+    {
+        return app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('career');
+    }
+
     /**
      * Sáu nhóm theo thứ tự R, I, A, S, E, C. Tên/mô tả quản trị đã chỉnh được ưu tiên; thiếu thì lấy chữ mặc định trong lang.
      *

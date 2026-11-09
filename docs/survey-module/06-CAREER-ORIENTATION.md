@@ -49,8 +49,7 @@ quản lý nhóm/ngành, phản hồi, thống kê, xuất Excel, biểu đồ b
 - **Nội dung do quản trị nhập** (tên khảo sát, câu hỏi, tên/mô tả nhóm đã chỉnh, ngành gợi ý) là một ngôn ngữ, vì chưa có bảng bản dịch cho khảo sát/ngành.
   Theo quy ước của dự án (`config/locales.php` → `default_only_routes`), trang công khai của Khảo sát chỉ có địa chỉ mặc định (không có `/en/khao-sat`) và trên trang
   tiếng Anh, liên kết tới Khảo sát dẫn tới thông báo "đang cập nhật". Muốn trang công khai song ngữ thật cần thêm bảng bản dịch cho khảo sát/câu hỏi/ngành.
-- **Feature Registry** (`SurveyFeature`, mã `survey`): chức năng nghề nghiệp nằm trong khảo sát nên dùng chung công tắc, quyền `khaosat-*` và `permission-manifest`;
-  tắt `survey` thì `/cms/khao-sat/nghe-nghiep` và trang công khai trả 404, dữ liệu giữ nguyên (có test). Không có quyền/mã chức năng mới cần khai báo.
+- **Feature Registry** (Developer Settings > tab Chức năng): có mục riêng `career` — "Định hướng nghề nghiệp (RIASEC)" (`Features/Definitions/CareerFeature.php`), nằm cạnh `survey`. Cần `survey` đang bật (route nằm trong nhóm `cms.feature:survey`); `career` là công tắc riêng: tắt thì `/cms/khao-sat/nghe-nghiep` và trang công khai của khảo sát loại career trả 404, khảo sát career không hiện ở danh sách công khai, không tạo được khảo sát loại career mới; khảo sát thường không bị ảnh hưởng và dữ liệu giữ nguyên (có test). Mặc định bật. Chức năng này không có quyền riêng (dùng `khaosat-*` do `survey` sở hữu, nên cũng không thêm gì vào `permission-manifest`) và không có điểm đến menu cố định (mỗi khảo sát có địa chỉ riêng).
 
 ## Việc chủ đầu tư/trường cần quyết định
 - Bộ câu hỏi chính thức và số câu mỗi nhóm (bộ khởi đầu chỉ có 12 câu; các bộ chuẩn như O*NET Interest Profiler có 60 câu).

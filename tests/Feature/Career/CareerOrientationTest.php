@@ -330,4 +330,57 @@ final class CareerOrientationTest extends TestCase
         }
         $this->assertStringNotContainsString('Kết quả định hướng', $html);
     }
+
+    public function test_career_has_its_own_switch_in_the_feature_registry(): void
+    {
+        $registry = app(\Modules\CmsBackend\Features\FeatureRegistry::class);
+        $definition = $registry->find('career');
+        $this->assertNotNull($definition, 'chức năng career phải hiện trong Feature Registry (Developer Settings)');
+        $this->assertSame('cms.khao-sat.career', $definition->adminRoute());
+        $this->assertSame([], $definition->permissions(), 'dùng chung quyền khaosat-* của Khảo sát');
+        $this->assertContains('career', array_column($registry->report(), 'key'));
+        $row = collect($registry->report())->firstWhere('key', 'career');
+        $this->assertTrue($row['routes_ok']);
+
+        $admin = User::query()->whereHas('roles', fn ($q) => $q->where('name', 'Quản trị'))->firstOrFail();
+        $career = $this->careerSurvey();
+        $this->surveys->transition($career, SurveyStatus::Open, null);
+        $general = $this->careerSurvey('general');
+        $this->surveys->transition($general, SurveyStatus::Open, null);
+        $done = $this->complete($career->refresh(), ['5', '5', 'yes']);
+
+        $registry->setEnabled('career', false, null);
+        $this->actingAs($admin)->get(route('cms.khao-sat.career'))->assertNotFound();
+        $this->get(route('cms.frontend.khaosat.show', $career->ks_ma))->assertNotFound();
+        $this->withSession(['survey.done.'.$career->ks_id => $done->ksu_ma])->get(route('cms.frontend.khaosat.thanks', $career->ks_ma))->assertNotFound();
+        $this->get(route('cms.frontend.khaosat.show', $general->ks_ma))->assertOk();   // khảo sát thường không bị ảnh hưởng
+        $list = $this->get(route('cms.frontend.khaosat.index'))->assertOk();
+        $list->assertSee($general->ks_ten)->assertDontSee($career->ks_ten);
+        $this->expectRule(fn () => $this->surveys->create(['ks_ten' => 'Mới', 'ks_loai' => SurveyService::CAREER], null), 'Developer Settings');
+        // Khảo sát career đã có vẫn sửa thông tin được (giữ nguyên loại).
+        $this->surveys->update($career->refresh(), ['ks_ten' => 'Đổi tên', 'ks_loai' => SurveyService::CAREER, 'ks_cho_phep_an_danh' => 1, 'ks_so_lan_gui' => 0], null);
+        $this->assertSame(1, DB::table('ks_khao_sat_users')->where('ksu_id', $done->ksu_id)->count());
+
+        $registry->setEnabled('career', true, null);
+        $this->get(route('cms.khao-sat.career'))->assertOk();
+        $this->get(route('cms.frontend.khaosat.show', $career->ks_ma))->assertOk();
+    }
+
+    public function test_developer_settings_lists_career_and_can_switch_it(): void
+    {
+        $admin = User::query()->whereHas('roles', fn ($q) => $q->where('name', 'Quản trị'))->firstOrFail();
+        $unlocked = [\Modules\CmsBackend\Services\Developer\DeveloperAccess::SESSION_KEY => true];
+
+        $page = $this->actingAs($admin)->withSession($unlocked)->get(route('cms.dashboard.developer-settings'))->assertOk();
+        $page->assertSee('data-feature="career"', false)->assertSee('Định hướng nghề nghiệp (RIASEC)')->assertSee('/cms/khao-sat/nghe-nghiep');
+
+        $this->post(route('cms.dashboard.developer-settings.features.save', 'career'), ['enabled' => 0])->assertRedirect();
+        $this->assertFalse(app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('career'));
+        $this->get(route('cms.khao-sat.career'))->assertNotFound();
+        $this->assertTrue(app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('survey'), 'tắt career không tắt Khảo sát');
+
+        $this->post(route('cms.dashboard.developer-settings.features.save', 'career'), ['enabled' => 1])->assertRedirect();
+        $this->assertTrue(app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('career'));
+        $this->get(route('cms.khao-sat.career'))->assertOk();
+    }
 }

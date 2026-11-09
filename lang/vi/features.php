@@ -4,10 +4,14 @@
 return [
     'survey' => [
         'name' => 'Khảo sát',
-        'description' => 'Tạo khảo sát nhiều phần, thu thập phản hồi công khai, thống kê và xuất Excel; có loại Định hướng nghề nghiệp (RIASEC) với kết quả mã Holland và ngành gợi ý.',
+        'description' => 'Tạo khảo sát nhiều phần, thu thập phản hồi công khai, thống kê và xuất Excel.',
         'targets' => [
             'index' => 'Danh sách khảo sát',
         ],
+    ],
+    'career' => [
+        'name' => 'Định hướng nghề nghiệp (RIASEC)',
+        'description' => 'Loại khảo sát có kết quả mã Holland và ngành gợi ý, cùng màn "Nhóm & ngành nghề". Cần chức năng Khảo sát đang bật; tắt thì khảo sát loại này và trang kết quả ngừng hoạt động (dữ liệu giữ nguyên).',
     ],
     'contact' => [
         'name' => 'Liên hệ – Góp ý',

@@ -4,10 +4,14 @@
 return [
     'survey' => [
         'name' => 'Survey',
-        'description' => 'Create multi-section surveys, collect public responses, view statistics and export to Excel; includes a Career orientation (RIASEC) type with a Holland code result and suggested majors.',
+        'description' => 'Create multi-section surveys, collect public responses, view statistics and export to Excel.',
         'targets' => [
             'index' => 'Survey list',
         ],
+    ],
+    'career' => [
+        'name' => 'Career orientation (RIASEC)',
+        'description' => 'A survey type with a Holland code result and suggested majors, plus the "Groups & majors" screen. Needs the Survey feature to be on; when off, surveys of this type and the result page stop working (data is kept).',
     ],
     'contact' => [
         'name' => 'Contact',

@@ -1121,6 +1121,7 @@ return [
             'publish_choice_options' => 'Câu hỏi ":question" cần ít nhất 2 lựa chọn đang bật trước khi phát hành.',
             'publish_end_in_past' => 'Thời gian kết thúc đã qua; hãy cập nhật trước khi phát hành.',
             'publish_needs_slug' => 'Khảo sát cần có mã (địa chỉ) trước khi phát hành.',
+            'career_disabled' => 'Chức năng Định hướng nghề nghiệp đang tắt trong Developer Settings nên chưa tạo được khảo sát loại này.',
             'career_question_type' => 'Câu :g.:n: khảo sát định hướng nghề nghiệp chỉ dùng câu hỏi Thang điểm hoặc Có/Không.',
             'riasec_required' => 'Câu :g.:n: cần chọn nhóm RIASEC (R, I, A, S, E hoặc C) cho câu hỏi đang bật.',
             'publish_career_question' => 'Câu hỏi ":question" cần là kiểu Thang điểm hoặc Có/Không và có nhóm RIASEC trước khi phát hành.',

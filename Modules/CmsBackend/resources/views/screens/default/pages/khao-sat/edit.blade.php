@@ -113,6 +113,7 @@
                             @if ($collectionLocked)<input type="hidden" name="ks_loai" value="{{ $survey->ks_loai ?: 'general' }}">@endif
                             <select class="form-select" id="ks_loai" @unless ($collectionLocked) name="ks_loai" @endunless @disabled($collectionLocked)>
                                 @foreach (['general', 'satisfaction', 'feedback', 'research', 'career'] as $kind)
+                                    @continue($kind === 'career' && ! $isCareer && ! app(\Modules\CmsBackend\Services\CareerService::class)->enabled())
                                     <option value="{{ $kind }}" @selected(old('ks_loai', $survey->ks_loai) === $kind)>{{ __('admin.survey.kind.'.$kind) }}</option>
                                 @endforeach
                             </select>

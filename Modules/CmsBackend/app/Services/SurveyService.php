@@ -49,6 +49,7 @@ class SurveyService
     {
         return $this->data->transaction(function () use ($info, $userId) {
             $attributes = $this->infoAttributes($info);
+            $this->assertCareerAllowed(null, (string) $attributes['ks_loai']);
             $attributes['ks_ma'] = $this->uniqueSlug($attributes['ks_ma'] ?: $attributes['ks_ten']);
             $attributes += ['ks_status' => SurveyStatus::Draft->value, 'ks_trang_thai' => false, 'ks_created_by' => $userId, 'ks_updated_by' => $userId];
 
@@ -65,6 +66,7 @@ class SurveyService
             throw SurveyRuleException::key('ended_read_only');
         }
         $attributes = $this->infoAttributes($info);
+        $this->assertCareerAllowed($survey, (string) $attributes['ks_loai']);
         $this->guardCollectionRules($survey, $attributes);
         // Địa chỉ công khai chỉ đổi được khi còn là Nháp (đã phát hành thì liên kết không được vỡ).
         if ($survey->status() === SurveyStatus::Draft && $attributes['ks_ma']) {
@@ -77,6 +79,14 @@ class SurveyService
         SurveyAudit::record('update_info', $survey->ks_id);
 
         return $updated;
+    }
+
+    /** Loại "career" chỉ chọn được cho khảo sát mới khi chức năng Định hướng nghề nghiệp đang bật (khảo sát career đã có thì giữ nguyên). */
+    private function assertCareerAllowed(?KhaoSat $survey, string $type): void
+    {
+        if ($type === self::CAREER && ($survey?->ks_loai !== self::CAREER) && ! app(CareerService::class)->enabled()) {
+            throw SurveyRuleException::key('career_disabled');
+        }
     }
 
     /** Các trường quyết định CÁCH thu thập dữ liệu: khóa sau khi rời Nháp hoặc khi đã có lượt tham gia (KS-007). */

@@ -53,14 +53,20 @@ class SurveyPublicService
             return null;
         }
         $survey = $this->surveys->findBySlug($slug);
+        if ($survey === null || $survey->status() === SurveyStatus::Draft) {
+            return null;
+        }
 
-        return $survey === null || $survey->status() === SurveyStatus::Draft ? null : $survey;
+        // Khảo sát nghề nghiệp ngừng hoạt động khi chức năng "career" bị tắt (dữ liệu giữ nguyên).
+        return $survey->ks_loai === SurveyService::CAREER && ! $this->career->enabled() ? null : $survey;
     }
 
     /** Khảo sát đang mở cho trang danh sách công khai (xem SurveyDataProvider::openForPublic). */
     public function openList(): \Illuminate\Support\Collection
     {
-        return $this->surveys->openForPublic(now());
+        $surveys = $this->surveys->openForPublic(now());
+
+        return $this->career->enabled() ? $surveys : $surveys->reject(fn (KhaoSat $s) => $s->ks_loai === SurveyService::CAREER)->values();
     }
 
     /** @return string self::OPEN|PAUSED|NOT_STARTED|ENDED */

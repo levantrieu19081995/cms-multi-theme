@@ -1121,6 +1121,7 @@ return [
             'publish_choice_options' => 'The question ":question" needs at least 2 enabled options before publishing.',
             'publish_end_in_past' => 'The end time has already passed; update it before publishing.',
             'publish_needs_slug' => 'The survey needs a code (address) before publishing.',
+            'career_disabled' => 'The Career orientation feature is switched off in Developer Settings, so a survey of this type cannot be created.',
             'career_question_type' => 'Question :g.:n: a career orientation survey only uses Scale or Yes/No questions.',
             'riasec_required' => 'Question :g.:n: choose a RIASEC group (R, I, A, S, E or C) for every enabled question.',
             'publish_career_question' => 'Question ":question" must be a Scale or Yes/No question with a RIASEC group before publishing.',

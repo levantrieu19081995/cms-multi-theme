@@ -62,7 +62,7 @@ class SurveyDataProvider
             ->where(fn ($q) => $q->whereNull('ks_bat_dau')->orWhere('ks_bat_dau', '<=', $now))
             ->where(fn ($q) => $q->whereNull('ks_ket_thuc')->orWhere('ks_ket_thuc', '>', $now))
             ->orderByDesc('ks_id')
-            ->get(['ks_id', 'ks_ten', 'ks_ma', 'ks_mo_ta_ngan', 'ks_ket_thuc']);
+            ->get(['ks_id', 'ks_ten', 'ks_ma', 'ks_loai', 'ks_mo_ta_ngan', 'ks_ket_thuc']);
     }
 
     public function find(int $id, bool $withTrashed = false): ?KhaoSat

@@ -108,11 +108,12 @@ Route::group([], function () {
 
             // Định hướng nghề nghiệp (RIASEC): nhóm hiển thị + ngành gợi ý do trường khai báo. Quyền xem = xem/sửa khảo sát, ghi = sửa khảo sát.
             $career = KhaoSatNgheNghiepController::class;
-            Route::get('nghe-nghiep', [$career, 'index'])->middleware($can('KHAOSAT_VIEW', 'KHAOSAT_UPDATE'))->name('khao-sat.career');
-            Route::post('nghe-nghiep/nhom', [$career, 'saveGroups'])->middleware($can('KHAOSAT_UPDATE'))->name('khao-sat.career.groups');
-            Route::post('nghe-nghiep/nganh', [$career, 'storeMajor'])->middleware($can('KHAOSAT_UPDATE'))->name('khao-sat.career.major.store');
-            Route::post('nghe-nghiep/nganh/{major}', [$career, 'updateMajor'])->whereNumber('major')->middleware($can('KHAOSAT_UPDATE'))->name('khao-sat.career.major.update');
-            Route::post('nghe-nghiep/nganh/{major}/xoa', [$career, 'destroyMajor'])->whereNumber('major')->middleware($can('KHAOSAT_UPDATE'))->name('khao-sat.career.major.destroy');
+            $careerFeature = 'cms.feature:career';
+            Route::get('nghe-nghiep', [$career, 'index'])->middleware([$careerFeature, $can('KHAOSAT_VIEW', 'KHAOSAT_UPDATE')])->name('khao-sat.career');
+            Route::post('nghe-nghiep/nhom', [$career, 'saveGroups'])->middleware([$careerFeature, $can('KHAOSAT_UPDATE')])->name('khao-sat.career.groups');
+            Route::post('nghe-nghiep/nganh', [$career, 'storeMajor'])->middleware([$careerFeature, $can('KHAOSAT_UPDATE')])->name('khao-sat.career.major.store');
+            Route::post('nghe-nghiep/nganh/{major}', [$career, 'updateMajor'])->whereNumber('major')->middleware([$careerFeature, $can('KHAOSAT_UPDATE')])->name('khao-sat.career.major.update');
+            Route::post('nghe-nghiep/nganh/{major}/xoa', [$career, 'destroyMajor'])->whereNumber('major')->middleware([$careerFeature, $can('KHAOSAT_UPDATE')])->name('khao-sat.career.major.destroy');
 
             // Phản hồi, thống kê, xuất (Phase 5). `khaosat-view` cũ vẫn xem được danh sách/chi tiết phản hồi (tương thích).
             $responses = KhaoSatPhanHoiController::class;
