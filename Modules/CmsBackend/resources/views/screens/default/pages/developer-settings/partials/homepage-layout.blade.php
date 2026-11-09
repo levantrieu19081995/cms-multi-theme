@@ -112,8 +112,9 @@
                     </div>
                 </div>
             @endforeach
-            <div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
-                <span class="text-muted small me-auto">{{ __('homepage.ui.preview_hint') }}</span>
+            <p class="text-muted small mb-0">{{ __('homepage.ui.preview_hint') }}</p>
+            {{-- Nút nổi cố định ở góc dưới phải (ngoài vùng cuộn), như tab Quản lý phân quyền. --}}
+            <div class="developer-floating-actions" role="region" aria-label="{{ __('homepage.ui.tab') }}">
                 <button class="btn btn-outline-primary" type="submit" @disabled(! $hl['ready'])><i class="ri-eye-line me-1" aria-hidden="true"></i>{{ __('homepage.ui.preview') }}</button>
                 <button class="btn btn-success" type="submit" formaction="{{ $route('homepage.save', ['theme' => $hl['theme']]) }}" onclick="return window.confirm(@js(__('homepage.ui.apply_now_confirm')))" @disabled(! $hl['ready'])><i class="ri-check-double-line me-1" aria-hidden="true"></i>{{ __('homepage.ui.apply_now') }}</button>
             </div>

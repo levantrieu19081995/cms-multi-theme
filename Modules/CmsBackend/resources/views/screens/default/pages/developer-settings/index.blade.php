@@ -4,11 +4,14 @@
 
 @section('content')
     <style>
-        #dev-pane-permissions {
+        #dev-pane-permissions,
+        #dev-pane-themes,
+        #dev-pane-layout {
             padding-bottom: 5rem;
         }
 
-        .developer-permission-actions {
+        .developer-permission-actions,
+        .developer-floating-actions {
             position: fixed;
             right: max(1rem, env(safe-area-inset-right));
             bottom: max(1rem, env(safe-area-inset-bottom));
@@ -27,7 +30,8 @@
         }
 
         @media (max-width: 575.98px) {
-            .developer-permission-actions {
+            .developer-permission-actions,
+            .developer-floating-actions {
                 right: max(.75rem, env(safe-area-inset-right));
                 bottom: max(.75rem, env(safe-area-inset-bottom));
                 max-width: calc(100vw - 1.5rem);
@@ -297,7 +301,8 @@
                     @endforeach
                 </div>
                 @if ($theme['can_switch'])
-                    <div class="mt-4">
+                    {{-- Nút nổi cố định ở góc dưới phải (ngoài vùng cuộn), như tab Quản lý phân quyền. --}}
+                    <div class="developer-floating-actions" role="region" aria-label="{{ __('admin.developer.tab_themes') }}">
                         <button type="submit" class="btn btn-primary" id="dev-theme-submit" disabled><i class="ri-palette-line me-1" aria-hidden="true"></i>{{ __('admin.developer.switch_theme') }}</button>
                     </div>
                 @endif
