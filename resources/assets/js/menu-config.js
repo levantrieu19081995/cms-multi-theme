@@ -237,8 +237,12 @@ window.openModal = menuItem => {
     });
     const keySelect = elModel.find('select[name=feature_key]');
     // Mục cũ có thể trỏ tới chức năng không còn trong danh sách: giữ nguyên tham chiếu để người dùng thấy và sửa.
+    // Chức năng đã tắt không có trong danh sách chọn; một mục cũ trỏ tới nó vẫn hiện lại (chỉ cho lần sửa này, gỡ khi mở lần sau).
+    keySelect.find('option[data-edit-only]').remove();
     if (menuItem.feature_key && !keySelect.find(`option[value="${menuItem.feature_key}"]`).length) {
-      keySelect.append($('<option>').val(menuItem.feature_key).text(`${menuItem.feature_key} ${window.featureText?.missing_option ?? ''}`));
+      const known = (window.featureChoices || []).find(c => c.key === menuItem.feature_key);
+      const label = known ? `${known.name} ${window.featureText?.off_suffix ?? ''}` : `${menuItem.feature_key} ${window.featureText?.missing_option ?? ''}`;
+      keySelect.append($('<option>').val(menuItem.feature_key).attr('data-edit-only', '1').text(label));
       keySelect.val(menuItem.feature_key);
     }
     window.populateFeatureTargets(elModel, menuItem.feature_target);

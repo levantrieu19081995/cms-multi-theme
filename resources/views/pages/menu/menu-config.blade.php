@@ -101,7 +101,7 @@
                     <button class="btn btn-primary add-menu-item btn-xs" data-type="url">Thêm liên kết</button>
                     <button class="btn btn-primary add-menu-item btn-xs" data-type="category">Thêm chuyên mục</button>
                     <button class="btn btn-primary add-menu-item btn-xs" data-type="docs">Thêm nhóm văn bản</button>
-                    @if (! empty($features))
+                    @if (collect($features ?? [])->contains('enabled', true))
                         <button class="btn btn-primary add-menu-item btn-xs" data-type="feature">{{ __('admin.menu_feature.add_button') }}</button>
                     @endif
                     @foreach ($menuItemTypes as $postType)

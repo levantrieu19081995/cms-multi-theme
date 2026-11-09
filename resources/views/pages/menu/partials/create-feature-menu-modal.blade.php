@@ -28,8 +28,9 @@
                         <div class="col mb-6 mt-2">
                             <div class="form-floating form-floating-outline">
                                 <select name="feature_key" class="form-control">
-                                    @foreach (($features ?? []) as $feature)
-                                        <option value="{{ $feature['key'] }}">{{ $feature['name'] }}@unless ($feature['enabled']) {{ __('admin.menu_feature.off_suffix') }}@endunless</option>
+                                    {{-- Chỉ chức năng Developer đang bật mới thêm được vào menu mới. Chức năng đã tắt vẫn nằm trong window.featureChoices để mục menu cũ còn hiển thị trạng thái. --}}
+                                    @foreach (collect($features ?? [])->where('enabled', true) as $feature)
+                                        <option value="{{ $feature['key'] }}">{{ $feature['name'] }}</option>
                                     @endforeach
                                 </select>
                                 <label>{{ __('admin.menu_feature.feature') }}</label>
