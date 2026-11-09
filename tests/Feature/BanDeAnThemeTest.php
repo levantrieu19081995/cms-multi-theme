@@ -16,12 +16,15 @@ final class BanDeAnThemeTest extends TestCase
         parent::setUp();
         $this->assertSame('cms_workspace', DB::connection()->getDatabaseName());
         DB::beginTransaction();
+        // Bật/tắt chức năng trên database dev do Developer đặt (có thể đang tắt): test tự bật Liên hệ trong transaction và hoàn lại khi kết thúc.
+        app(\Modules\CmsBackend\Features\FeatureRegistry::class)->setEnabled('contact', true, null);
         Option::query()->updateOrCreate(['key' => 'cms_public_theme'], ['value' => 'ban-de-an', 'autoload' => 1]);
     }
 
     protected function tearDown(): void
     {
         while (DB::connection()->transactionLevel() > 0) DB::rollBack();
+        app(\Modules\CmsBackend\Features\FeatureRegistry::class)->forgetStates();
         parent::tearDown();
     }
 

@@ -26,6 +26,8 @@ final class ScreenThemeHttpTest extends TestCase
         parent::setUp();
         $this->assertSame('cms_workspace', DB::connection()->getDatabaseName());
         DB::beginTransaction();
+        // Bật/tắt chức năng trên database dev do Developer đặt (có thể đang tắt): test tự bật Liên hệ trong transaction và hoàn lại khi kết thúc.
+        app(\Modules\CmsBackend\Features\FeatureRegistry::class)->setEnabled('contact', true, null);
         $this->admin = User::query()->whereHas('roles', fn ($q) => $q->where('name', 'Quản trị'))->firstOrFail();
         config(['cmsbackend.screens.themes.cms-test-http' => ['label' => 'HTTP probe', 'surfaces' => ['admin', 'public']]]);
         foreach (['CmsBackend', 'CmsFrontend'] as $module) {
@@ -54,6 +56,7 @@ final class ScreenThemeHttpTest extends TestCase
                 (new Filesystem)->deleteDirectory($real);
             }
         }
+        app(\Modules\CmsBackend\Features\FeatureRegistry::class)->forgetStates();
         parent::tearDown();
     }
 

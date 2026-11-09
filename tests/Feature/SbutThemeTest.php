@@ -19,6 +19,8 @@ final class SbutThemeTest extends TestCase
         parent::setUp();
         $this->assertSame('cms_workspace', DB::connection()->getDatabaseName());
         DB::beginTransaction();
+        // Bật/tắt chức năng trên database dev do Developer đặt (có thể đang tắt): test tự bật Liên hệ trong transaction và hoàn lại khi kết thúc.
+        app(\Modules\CmsBackend\Features\FeatureRegistry::class)->setEnabled('contact', true, null);
         Option::query()->updateOrCreate(['key' => 'cms_public_theme'], ['value' => 'nam-binh-duong', 'autoload' => 1]);
     }
 
@@ -27,6 +29,7 @@ final class SbutThemeTest extends TestCase
         while (DB::connection()->transactionLevel() > 0) {
             DB::rollBack();
         }
+        app(\Modules\CmsBackend\Features\FeatureRegistry::class)->forgetStates();
         parent::tearDown();
     }
 
