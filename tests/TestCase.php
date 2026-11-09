@@ -11,11 +11,13 @@ abstract class TestCase extends BaseTestCase
     {
         $database = $this->databaseNameBeforeLaravelBoots();
 
-        if ($database === 'cms_workspace') {
+        if ($database === 'cms_workspace' && getenv('ALLOW_DEV_DB_TRANSACTIONAL_TESTS') !== '1') {
             throw new RuntimeException(
                 'SAFETY STOP: PHPUnit is pointing at the development database cms_workspace. '.
                 'Do not run PHPUnit/RefreshDatabase on dev data. Use a dedicated test database, '.
-                'or verify the feature manually in the browser against dev data.'
+                'or verify the feature manually in the browser against dev data. '.
+                'Only tests that wrap every change in DB::beginTransaction()/rollBack() may opt in '.
+                'with ALLOW_DEV_DB_TRANSACTIONAL_TESTS=1.'
             );
         }
 

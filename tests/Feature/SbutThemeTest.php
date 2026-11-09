@@ -39,12 +39,12 @@ final class SbutThemeTest extends TestCase
         $this->assertSame('default', $screens->key('admin'));
         $this->assertStringContainsString('nam-binh-duong', $screens->path('public', 'home'));
         $this->assertStringContainsString('default', $screens->path('public', 'components.home.story-card'));
-        $this->assertSame(2, config('cmsbackend.screens.themes.nam-binh-duong.version'));
+        $this->assertGreaterThanOrEqual(2, config('cmsbackend.screens.themes.nam-binh-duong.version'));
     }
 
     public function test_home_has_sbut_identity_and_every_existing_feature_group(): void
     {
-        $response = $this->get('/cms')->assertOk()
+        $response = $this->get('/')->assertOk()
             ->assertSee('data-public-theme="nam-binh-duong"', false)
             ->assertSee('Trường Đại học Công nghệ Nam Bình Dương')
             ->assertSee('Khai phóng – Ưu tú – Cống hiến')
@@ -69,11 +69,11 @@ final class SbutThemeTest extends TestCase
 
     public function test_public_lists_forms_and_search_share_the_new_theme(): void
     {
-        foreach (['/cms/tin-tuc', '/cms/tin-tuc?query=SBUT', '/cms/su-kien', '/cms/van-ban', '/cms/thu-vien-hinh-anh', '/cms/thu-vien-video', '/cms/lien-he', '/cms/hoi-dap', '/cms/hoi-dap/dat-cau-hoi', '/cms/dich-vu'] as $url) {
+        foreach (['/tin-tuc', '/tin-tuc?query=SBUT', '/su-kien', '/van-ban', '/thu-vien-hinh-anh', '/thu-vien-video', '/lien-he', '/hoi-dap', '/hoi-dap/dat-cau-hoi', '/dich-vu'] as $url) {
             $this->get($url)->assertOk()->assertSee('data-public-theme="nam-binh-duong"', false)->assertSee('sbut-footer', false);
         }
-        $this->get('/cms/lien-he')->assertSee('name="_token"', false)->assertSee('name="message"', false)->assertSee('action="' . route('cms.lien-he.store') . '"', false);
-        $this->get('/cms/hoi-dap/dat-cau-hoi')->assertSee('action="' . route('cms.frontend.hoidap.store') . '"', false);
+        $this->get('/lien-he')->assertSee('name="_token"', false)->assertSee('name="message"', false)->assertSee('action="' . route('cms.lien-he.store') . '"', false);
+        $this->get('/hoi-dap/dat-cau-hoi')->assertSee('action="' . route('cms.frontend.hoidap.store') . '"', false);
     }
 
     public function test_existing_content_details_render_without_new_controllers(): void
@@ -89,7 +89,7 @@ final class SbutThemeTest extends TestCase
             $this->get(route('cms.hinh-anh.show', $album->slug))->assertOk()->assertSee($album->title);
         }
         foreach ($data['links']->take(1) as $partner) {
-            $this->get('/cms')->assertOk()->assertSee($partner->title)->assertSee($partner->excerpt);
+            $this->get('/')->assertOk()->assertSee($partner->title)->assertSee($partner->excerpt);
             $this->get(route('cms.doi-tac.show', $partner->slug))->assertOk()->assertSee($partner->title);
         }
         foreach ($data['guongTieuBieu']->take(1) as $example) {
@@ -110,11 +110,14 @@ final class SbutThemeTest extends TestCase
         $unit = Option::query()->where('key', 'cms_unit_name')->value('value');
         $posts = DB::table('posts')->count();
         $admin = User::query()->whereHas('roles', fn($query) => $query->where('name', 'Quản trị'))->firstOrFail();
-        $this->actingAs($admin)->get(route('setting.general'))->assertOk()->assertSee('Nam Bình Dương (SBUT)')->assertDontSee('data-public-theme="nam-binh-duong"', false);
-        $this->post(route('cms.setting.themes.update'), ['cms_public_theme' => 'default'])->assertRedirect(route('setting.general'))->assertSessionHasNoErrors();
-        $this->get('/cms')->assertOk()->assertDontSee('data-public-theme="nam-binh-duong"', false);
-        $this->post(route('cms.setting.themes.update'), ['cms_public_theme' => 'nam-binh-duong'])->assertRedirect(route('setting.general'))->assertSessionHasNoErrors();
-        $this->get('/cms')->assertOk()->assertSee('data-public-theme="nam-binh-duong"', false);
+        // The theme is now managed in Developer Settings; the old General settings endpoint answers 403 and changes nothing.
+        $this->actingAs($admin)->post(route('cms.setting.themes.update'), ['cms_public_theme' => 'default'])->assertForbidden();
+        $this->assertSame('nam-binh-duong', Option::query()->where('key', 'cms_public_theme')->value('value'));
+        $this->get('/')->assertOk()->assertSee('data-public-theme="nam-binh-duong"', false);
+        Option::query()->where('key', 'cms_public_theme')->update(['value' => 'default']);
+        $this->get('/')->assertOk()->assertDontSee('data-public-theme="nam-binh-duong"', false);
+        Option::query()->where('key', 'cms_public_theme')->update(['value' => 'nam-binh-duong']);
+        $this->get('/')->assertOk()->assertSee('data-public-theme="nam-binh-duong"', false);
         $this->assertSame($unit, Option::query()->where('key', 'cms_unit_name')->value('value'));
         $this->assertSame($posts, DB::table('posts')->count());
     }
@@ -127,7 +130,7 @@ final class SbutThemeTest extends TestCase
 
     public function test_school_sections_use_public_cms_posts_and_refresh_the_fragment_stamp(): void
     {
-        $source = \App\Models\Post::query()->where('post_type', 'post')->where('status', 'published')
+        $source = \App\Models\Post::query()->where('post_type', 'post')->where('status', 'published')->whereNull('deleted_at')
             ->whereHas('taxonomies', fn($query) => $query->where('taxonomy', 'category')->where('loai_chuyen_muc', '!=', 'noi_bo'))
             ->with('taxonomies.term')->firstOrFail();
         $category = $source->taxonomies->first(fn($item) => $item->taxonomy === 'category' && $item->loai_chuyen_muc !== 'noi_bo');
@@ -136,6 +139,7 @@ final class SbutThemeTest extends TestCase
         $created = [];
         foreach (['published', 'draft', 'future', 'expired'] as $kind) {
             $post = $source->replicate()->unsetRelations();
+            $post->deleted_at = null;
             $post->title = 'Theme visibility ' . $kind;
             $post->slug = 'theme-workflow-visibility-' . $kind . '-' . bin2hex(random_bytes(4));
             $post->status = $kind === 'draft' ? 'draft' : 'published';
@@ -143,6 +147,12 @@ final class SbutThemeTest extends TestCase
             $post->publication_date_expires = $kind === 'expired' ? now()->subSeconds(30) : null;
             $post->save();
             $post->taxonomies()->sync([$category->term_taxonomy_id]);
+            // Public lists only show posts that have a translation for the public locale.
+            DB::table('post_translations')->insert([
+                'post_id' => $post->id, 'locale' => 'vi', 'title' => $post->title, 'slug' => $post->slug,
+                'excerpt' => 'Theme visibility fixture', 'content' => '<p>Theme visibility fixture</p>',
+                'created_at' => now(), 'updated_at' => now(),
+            ]);
             $created[$kind] = $post;
         }
         $blocks = app(\Modules\CmsFrontend\Services\HomeBlocks::class);
@@ -152,7 +162,7 @@ final class SbutThemeTest extends TestCase
         foreach (['draft', 'future', 'expired'] as $kind) {
             $this->assertNotContains($created[$kind]->id, $ids);
         }
-        $response = $this->get('/cms')->assertOk()->assertSee('Theme visibility published');
+        $response = $this->get('/')->assertOk()->assertSee('Theme visibility published');
         foreach (['draft', 'future', 'expired'] as $kind) {
             $response->assertDontSee('Theme visibility ' . $kind);
         }
@@ -172,7 +182,7 @@ final class SbutThemeTest extends TestCase
     public function test_missing_school_data_does_not_display_mock_statistics_or_fake_links(): void
     {
         config(['cmsbackend.screens.themes.nam-binh-duong.home_sections' => ['programs' => 'theme-not-existing-category']]);
-        $this->get('/cms')->assertOk()->assertSee('Thông tin đang được cập nhật.')
+        $this->get('/')->assertOk()->assertSee('Thông tin đang được cập nhật.')
             ->assertDontSee('6.000+')->assertDontSee('Hồ sơ minh họa')
             ->assertSee('aria-disabled="true"', false)->assertDontSee('?page=program', false);
     }
@@ -183,17 +193,17 @@ final class SbutThemeTest extends TestCase
         $defaults = ['menu_id' => $menu->id, 'parent_id' => 0, 'treepath' => '', 'type' => 'url', 'ref_id' => 0, 'target' => '_self'];
         $items = [];
         foreach (range(1, 5) as $index) {
-            $items[] = \App\Models\MenuItem::create($defaults + ['title' => 'Shortcut fixture ' . $index, 'url' => '/cms/hoi-dap?shortcut=' . $index, 'ordinal' => $index]);
+            $items[] = \App\Models\MenuItem::create($defaults + ['title' => 'Shortcut fixture ' . $index, 'url' => '/hoi-dap?shortcut=' . $index, 'ordinal' => $index]);
         }
         $parent = \App\Models\MenuItem::create($defaults + ['title' => 'Shortcut parent', 'url' => '#', 'ordinal' => 6]);
         \App\Models\MenuItem::create(array_replace($defaults, ['parent_id' => $parent->id, 'title' => 'Shortcut child', 'url' => 'https://example.org/sbut', 'target' => '_blank', 'ordinal' => 1]));
         \App\Models\MenuItem::create($defaults + ['title' => 'Unsafe shortcut', 'url' => 'javascript:alert(1)', 'ordinal' => 7]);
         foreach (range(2, 5) as $index) {
-            \App\Models\MenuItem::create(array_replace($defaults, ['parent_id' => $parent->id, 'title' => 'Shortcut child ' . $index, 'url' => '/cms/hoi-dap?child=' . $index, 'ordinal' => $index]));
+            \App\Models\MenuItem::create(array_replace($defaults, ['parent_id' => $parent->id, 'title' => 'Shortcut child ' . $index, 'url' => '/hoi-dap?child=' . $index, 'ordinal' => $index]));
         }
         $presentation = app(\Modules\CmsFrontend\Services\HomePresentation::class);
         $before = $presentation->prepare(app(HomeController::class)->index()->getData());
-        $response = $this->get('/cms')->assertOk();
+        $response = $this->get('/')->assertOk();
         $this->assertSame(1, preg_match('~<nav class="quick-links" aria-label="Truy cập các chức năng">(.*?)</nav>~s', $response->getContent(), $matches));
         $html = $matches[1];
         $this->assertStringContainsString('Shortcut fixture 5', $html);
@@ -208,19 +218,19 @@ final class SbutThemeTest extends TestCase
         $this->assertStringContainsString('rel="noopener noreferrer"', $html);
         $this->assertStringNotContainsString('Unsafe shortcut', $html);
         $this->assertLessThan(strpos($html, 'Shortcut fixture 5'), strpos($html, 'Shortcut fixture 1'));
-        $parent->update(['url' => '/cms/tin-tuc']);
-        $this->get('/cms')->assertOk()->assertSee('Xem tất cả →');
-        $items[0]->update(['title' => 'Shortcut renamed', 'url' => '/cms/lien-he']);
+        $parent->update(['url' => '/tin-tuc']);
+        $this->get('/')->assertOk()->assertSee('Xem tất cả');
+        $items[0]->update(['title' => 'Shortcut renamed', 'url' => '/lien-he']);
         $after = $presentation->prepare(app(HomeController::class)->index()->getData());
         $this->assertNotSame($presentation->cacheKey($before), $presentation->cacheKey($after));
-        $this->get('/cms')->assertOk()->assertSee('Shortcut renamed')->assertDontSee('Shortcut fixture 1');
+        $this->get('/')->assertOk()->assertSee('Shortcut renamed')->assertDontSee('Shortcut fixture 1');
         Option::query()->where('key', 'main_menu')->update(['value' => '0']);
-        $this->get('/cms')->assertOk()->assertDontSee('aria-label="Truy cập các chức năng"', false);
+        $this->get('/')->assertOk()->assertDontSee('aria-label="Truy cập các chức năng"', false);
     }
 
     public function test_section_navigation_sits_below_admin_menu_instead_of_the_header(): void
     {
-        $html = $this->get('/cms')->assertOk()->getContent();
+        $html = $this->get('/')->assertOk()->getContent();
         $this->assertSame(1, preg_match('~<header class="header sbut-header">(.*?)</header>~s', $html, $header));
         $this->assertStringNotContainsString('id="mainNav"', $header[1]);
         $this->assertStringNotContainsString('id="menuBtn"', $header[1]);

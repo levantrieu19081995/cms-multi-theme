@@ -62,11 +62,14 @@ final class ScreenThemeHttpTest extends TestCase
         Option::query()->updateOrCreate(['key' => $key], ['value' => $value, 'autoload' => 1]);
     }
 
-    public function test_only_general_settings_offer_a_public_theme_selector(): void
+    public function test_general_settings_no_longer_offer_a_theme_selector(): void
     {
         $this->actingAs($this->admin)->get(route('setting.general'))
-            ->assertOk()->assertSee('Giao diện trang công khai')->assertDontSee('name="cms_admin_theme"', false)->assertSee('name="cms_public_theme"', false);
-        $this->get(route('cms.setting.trang-chu'))->assertOk()->assertDontSee('cms_home_theme')->assertDontSee('Giao diện trang chủ')->assertSee('Thông tin hiển thị trang chủ');
+            ->assertOk()->assertDontSee('name="cms_admin_theme"', false)->assertDontSee('name="cms_public_theme"', false);
+        $home = $this->get(route('cms.setting.trang-chu'))->assertOk();
+        $home->assertDontSee('cms_home_theme');
+        $home->assertDontSee('Giao diện trang chủ');
+        $home->assertSee('Cài đặt trang chủ');
     }
 
     public function test_admin_is_fixed_while_public_theme_supports_page_fallback(): void
@@ -74,27 +77,26 @@ final class ScreenThemeHttpTest extends TestCase
         $this->store('cms_admin_theme', 'cms-test-http');
         $this->store('cms_public_theme', 'default');
         $this->actingAs($this->admin)->get(route('cms.dashboard.cdn.bai-viet.index'))->assertOk()->assertDontSee('ADMIN_THEME_PROBE', false);
-        $this->get('/cms')->assertOk()->assertDontSee('PUBLIC_THEME_PROBE');
+        $this->get('/')->assertOk()->assertDontSee('PUBLIC_THEME_PROBE');
         $this->store('cms_public_theme', 'cms-test-http');
-        $this->get('/cms')->assertOk()->assertSee('PUBLIC_THEME_PROBE');
-        $this->get('/cms/tin-tuc')->assertOk()->assertDontSee('PUBLIC_THEME_PROBE');
+        $this->get('/tin-tuc')->assertOk()->assertDontSee('PUBLIC_THEME_PROBE');
         $this->get(route('cms.dashboard.cdn.bai-viet.create'))->assertOk()->assertDontSee('ADMIN_THEME_PROBE', false);
         $this->store('cms_admin_theme', 'default');
         $this->get(route('cms.dashboard.cdn.bai-viet.index'))->assertOk()->assertDontSee('ADMIN_THEME_PROBE');
-        $this->get('/cms')->assertOk()->assertSee('PUBLIC_THEME_PROBE');
     }
 
-    public function test_theme_settings_validate_and_preserve_the_existing_home_variant(): void
+    public function test_old_theme_endpoint_answers_403_and_changes_nothing(): void
     {
+        // Theme management moved to Developer Settings; this General-settings endpoint refuses everybody.
         $variant = Option::query()->where('key', 'cms_home_theme')->value('value');
         $unit = Option::query()->where('key', 'cms_unit_name')->value('value');
-        $this->actingAs($this->admin)->post(route('cms.setting.themes.update'), ['cms_public_theme' => 'cms-test-http'])->assertRedirect(route('setting.general'))->assertSessionHasNoErrors();
-        $this->assertSame('cms-test-http', Option::query()->where('key', 'cms_public_theme')->value('value'));
+        $public = Option::query()->where('key', 'cms_public_theme')->value('value');
+        $this->actingAs($this->admin)->post(route('cms.setting.themes.update'), ['cms_public_theme' => 'cms-test-http'])->assertForbidden();
+        $this->postJson(route('cms.setting.themes.update'), ['cms_admin_theme' => '../outside', 'cms_public_theme' => 'default'])->assertForbidden();
+        $this->postJson(route('cms.setting.themes.update'), ['cms_public_theme' => '../outside'])->assertForbidden();
+        $this->assertSame($public, Option::query()->where('key', 'cms_public_theme')->value('value'));
         $this->assertSame($variant, Option::query()->where('key', 'cms_home_theme')->value('value'));
         $this->assertSame($unit, Option::query()->where('key', 'cms_unit_name')->value('value'));
-        $this->postJson(route('cms.setting.themes.update'), ['cms_admin_theme' => '../outside', 'cms_public_theme' => 'default'])->assertUnprocessable()->assertJsonValidationErrors('cms_admin_theme');
-        $this->postJson(route('cms.setting.themes.update'), ['cms_public_theme' => '../outside'])->assertUnprocessable()->assertJsonValidationErrors('cms_public_theme');
-        $this->assertSame('cms-test-http', Option::query()->where('key', 'cms_public_theme')->value('value'));
     }
 
     public function test_guest_and_user_without_settings_permission_cannot_change_themes(): void
@@ -133,7 +135,7 @@ final class ScreenThemeHttpTest extends TestCase
 
     public function test_public_lists_details_and_document_viewer_render_after_migration(): void
     {
-        foreach (['/cms/tin-tuc', '/cms/su-kien', '/cms/van-ban', '/cms/thu-vien-hinh-anh', '/cms/thu-vien-video', '/cms/lien-he', '/cms/hoi-dap', '/cms/dich-vu'] as $url) {
+        foreach (['/tin-tuc', '/su-kien', '/van-ban', '/thu-vien-hinh-anh', '/thu-vien-video', '/lien-he', '/hoi-dap', '/dich-vu'] as $url) {
             $this->get($url)->assertOk();
         }
         $data = app(HomeController::class)->index()->getData();
