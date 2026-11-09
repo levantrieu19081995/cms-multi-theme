@@ -67,6 +67,11 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" id="dev-tab-languages" data-bs-toggle="tab" data-bs-target="#dev-pane-languages" type="button" role="tab" aria-controls="dev-pane-languages" aria-selected="false">
+                <i class="ri-translate-2 me-1" aria-hidden="true"></i>{{ __('admin.developer.tab_languages') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" id="dev-tab-layout" data-bs-toggle="tab" data-bs-target="#dev-pane-layout" type="button" role="tab" aria-controls="dev-pane-layout" aria-selected="false">
                 <i class="ri-layout-masonry-line me-1" aria-hidden="true"></i>{{ __('homepage.ui.tab') }}
             </button>
@@ -123,11 +128,20 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-12 col-md-7">
+                        <div class="col-12 col-md-4">
                             <label class="form-label small" for="dev-search">{{ __('admin.developer.search') }}</label>
                             <input id="dev-search" type="search" class="form-control" placeholder="{{ __('admin.developer.search_placeholder') }}" autocomplete="off">
                         </div>
-                        <div class="col-12 col-md-5">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small" for="dev-feature">{{ __('admin.developer.filter_feature') }}</label>
+                            <select id="dev-feature" class="form-select">
+                                <option value="">{{ __('admin.developer.all_features') }}</option>
+                                @foreach (collect($permissions['groups'])->pluck('feature')->filter()->unique('key') as $featureOption)
+                                    <option value="{{ $featureOption['key'] }}">{{ $featureOption['name'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
                             <label class="form-label small" for="dev-group">{{ __('admin.developer.filter_group') }}</label>
                             <select id="dev-group" class="form-select">
                                 <option value="">{{ __('admin.developer.all_groups') }}</option>
@@ -145,9 +159,10 @@
                 @csrf
                 @foreach ($permissions['groups'] as $i => $group)
                     @php $parentOn = $group['permissions'][0]['listed']; @endphp
-                    <div class="card mb-3 dev-group" data-group="g{{ $i }}">
+                    <div class="card mb-3 dev-group" data-group="g{{ $i }}" data-feature="{{ $group['feature']['key'] ?? '' }}">
                         <div class="card-header py-3 d-flex align-items-center justify-content-between gap-2">
-                            <h6 class="mb-0">{{ $group['name'] }}@if ($group['core']) <span class="badge bg-label-danger ms-1">{{ __('admin.developer.core') }}</span>@endif</h6>
+                            <h6 class="mb-0">{{ $group['name'] }}@if ($group['core']) <span class="badge bg-label-danger ms-1">{{ __('admin.developer.core') }}</span>@endif
+                                @if (! empty($group['feature']))<span class="badge bg-label-info ms-1" title="{{ __('admin.developer.group_feature_hint') }}"><i class="{{ $group['feature']['icon'] }} me-1" aria-hidden="true"></i>{{ $group['feature']['name'] }}</span>@endif</h6>
                             <div class="d-flex align-items-center gap-2">
                                 <span class="badge bg-label-secondary">{{ count($group['permissions']) }}</span>
                                 @unless ($group['core'])
@@ -290,6 +305,7 @@
         </div>
 
         @include('cmsbackend::screens.pages.developer-settings.partials.features')
+        @include('cmsbackend::screens.pages.developer-settings.partials.languages')
         @include('cmsbackend::screens.pages.developer-settings.partials.homepage-layout')
         <div class="tab-pane fade" id="dev-pane-accounts" role="tabpanel" aria-labelledby="dev-tab-accounts" tabindex="0">
             @include('cmsbackend::screens.pages.developer-settings.partials.accounts')
@@ -300,6 +316,7 @@
         (function () {
             var search = document.getElementById('dev-search');
             var group = document.getElementById('dev-group');
+            var featureFilter = document.getElementById('dev-feature');
             var count = document.getElementById('dev-count');
             var empty = document.getElementById('dev-empty');
             var form = document.getElementById('dev-perm-form');
@@ -310,9 +327,10 @@
             function applyFilter() {
                 var q = search.value.trim().toLowerCase();
                 var g = group.value;
+                var f = featureFilter ? featureFilter.value : '';
                 var shown = 0;
                 document.querySelectorAll('.dev-group').forEach(function (card) {
-                    var inGroup = g === '' || card.getAttribute('data-group') === g;
+                    var inGroup = (g === '' || card.getAttribute('data-group') === g) && (f === '' || card.getAttribute('data-feature') === f);
                     var any = 0;
                     card.querySelectorAll('.dev-row').forEach(function (row) {
                         var ok = inGroup && (q === '' || row.getAttribute('data-search').indexOf(q) !== -1);
@@ -395,7 +413,10 @@
                     if (!chosen || chosen.getAttribute('data-active') === '1' || !window.confirm(confirmTheme.replace(':theme', chosen.value))) { event.preventDefault(); }
                 });
             }
-            var tabByQuery = { theme: 'dev-tab-themes', features: 'dev-tab-features', layout: 'dev-tab-layout', accounts: 'dev-tab-accounts' };
+            var tabByQuery = { permissions: 'dev-tab-permissions', theme: 'dev-tab-themes', features: 'dev-tab-features', languages: 'dev-tab-languages', layout: 'dev-tab-layout', accounts: 'dev-tab-accounts' };
+            // ?tab=permissions&feature=career opens the permission list already filtered to the permissions of one feature.
+            var featureParam = new URLSearchParams(window.location.search).get('feature');
+            if (featureFilter && featureParam) { featureFilter.value = featureParam; }
             var requestedTab = tabByQuery[new URLSearchParams(window.location.search).get('tab')];
             if (requestedTab) {
                 // Open the Theme / Feature tab after a save (the tab button's own Bootstrap handler does the work once the page loaded).
@@ -421,6 +442,7 @@
 
             search.addEventListener('input', applyFilter);
             group.addEventListener('change', applyFilter);
+            if (featureFilter) { featureFilter.addEventListener('change', applyFilter); }
             applyFilter();
             totals();
         })();

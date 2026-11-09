@@ -40,7 +40,9 @@ nhưng không viết lại gì: dùng chung model, service, trình dựng câu h
 1. **Tab Chức năng**: có dòng "Định hướng nghề nghiệp (RIASEC)" (`career`) với công tắc riêng; tắt thì cả quản trị lẫn trang công khai trả 404, dữ liệu giữ nguyên.
 2. **Tab Quyền** (manifest quyền của dự án): bộ `nghenghiep-*` là quyền mới nên phải **bật trong Developer Settings** nếu bản triển khai có `permission-manifest.json` (không bật thì mọi người,
    kể cả "Quản trị", đều bị 403 ở cụm này); sau đó gán quyền cho vai trò ở màn Vai trò. Chưa có manifest thì mọi quyền khả dụng.
-3. Trên database cần có các quyền: tạo bằng `PermissionSeeder` (hoặc `firstOrCreate` theo `PermissionsEnum` + `parentChildren`).
+3. Trên database cần có các quyền: `php artisan features:sync-permissions [--dry-run]` tạo các quyền mà Feature Registry khai báo nhưng chưa có trong bảng `permissions` (chỉ thêm, không gán vai trò, không đổi quyền đã có); tab Chức năng báo "chưa có trong DB" khi còn thiếu.
+4. Quyền của chức năng nằm trong tab **Quản lý phân quyền**: mỗi nhóm quyền mang nhãn chức năng sở hữu, có bộ lọc "Chức năng", và ô Quyền ở tab Chức năng là liên kết sang tab này đã lọc (`?tab=permissions&feature=career`).
+5. **Đa ngôn ngữ** (`multilingual`) là cấu hình hệ thống nên có tab **Ngôn ngữ** riêng (công tắc, danh sách ngôn ngữ, các trang chỉ có ngôn ngữ mặc định), không còn nằm trong danh sách chức năng.
 
 ## Dữ liệu khởi đầu (tùy chọn)
 `php artisan survey:career-starter [--dry-run]` tạo MỘT bài *Nháp* (6 phần × 2 câu thang 1–5) và 7 ngành mẫu để quản trị chỉnh trong giao diện; không phát hành, không ghi đè.

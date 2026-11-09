@@ -173,7 +173,11 @@ final class PermissionAvailability
             foreach ($items as $item) {
                 $available += $item['effective'] ? 1 : 0;
             }
-            $groups[] = ['id' => $row['id'], 'code' => $slug, 'name' => $row['name'], 'core' => in_array($slug, self::CORE, true), 'permissions' => $items];
+            // Chức năng hệ thống (Feature Registry) sở hữu nhóm quyền này, để Developer thấy quyền nào thuộc chức năng nào.
+            $registry = app(\Modules\CmsBackend\Features\FeatureRegistry::class);
+            $owner = $registry->featureOfPermission($slug);
+            $feature = $owner === null ? null : ['key' => $owner, 'name' => $registry->find($owner)?->name() ?? $owner, 'icon' => $registry->find($owner)?->icon() ?? 'ri-apps-2-line'];
+            $groups[] = ['id' => $row['id'], 'code' => $slug, 'name' => $row['name'], 'core' => in_array($slug, self::CORE, true), 'feature' => $feature, 'permissions' => $items];
         }
 
         return ['total' => count($rows), 'available' => $available, 'disabled' => count($rows) - $available, 'groups' => $groups];

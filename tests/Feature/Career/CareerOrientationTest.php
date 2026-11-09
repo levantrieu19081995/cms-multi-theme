@@ -481,4 +481,44 @@ final class CareerOrientationTest extends TestCase
         $expected = array_values(array_filter(array_map(fn ($c) => $c->value, \Modules\CmsBackend\Enums\PermissionsEnum::cases()), fn ($v) => str_starts_with($v, 'nghenghiep-')));
         $this->assertEqualsCanonicalizing($expected, $entry['roler'], 'menu liệt kê đủ quyền của cụm');
     }
+
+    public function test_developer_settings_separates_languages_from_features_and_ties_permissions_to_features(): void
+    {
+        $admin = $this->admin();
+        $unlocked = [\Modules\CmsBackend\Services\Developer\DeveloperAccess::SESSION_KEY => true];
+        $html = $this->actingAs($admin)->withSession($unlocked)->get(route('cms.dashboard.developer-settings'))->assertOk()->getContent();
+
+        // Tab Chức năng: chức năng nghiệp vụ, KHÔNG có Đa ngôn ngữ.
+        $features = substr($html, strpos($html, 'id="dev-features-table"'), strpos($html, 'id="dev-pane-languages"') - strpos($html, 'id="dev-features-table"'));
+        foreach (['career', 'contact', 'survey'] as $key) {
+            $this->assertStringContainsString('data-feature="'.$key.'"', $features);
+        }
+        $this->assertStringNotContainsString('data-feature="multilingual"', $features);
+
+        // Tab Ngôn ngữ riêng, có công tắc multilingual.
+        $this->assertStringContainsString('id="dev-tab-languages"', $html);
+        $languages = substr($html, strpos($html, 'id="dev-pane-languages"'));
+        $this->assertStringContainsString('features/multilingual', $languages);
+        $this->assertStringContainsString('<code>vi</code>', $languages);
+
+        // Ô Quyền của chức năng dẫn sang tab Quản lý phân quyền đã lọc theo chức năng; nhóm quyền mang nhãn chức năng.
+        $this->assertStringContainsString('tab=permissions', $features);
+        $this->assertStringContainsString('feature=career', $features);
+        $this->assertStringContainsString('data-feature="career"', substr($html, 0, strpos($html, 'id="dev-features-table"')), 'nhóm quyền nghenghiep-* mang chức năng career');
+        $this->assertStringContainsString('id="dev-feature"', $html);
+
+        // Bật/tắt Đa ngôn ngữ quay lại đúng tab Ngôn ngữ.
+        $this->post(route('cms.dashboard.developer-settings.features.save', 'multilingual'), ['enabled' => 1])->assertRedirect(route('cms.dashboard.developer-settings', ['tab' => 'languages']));
+        $this->post(route('cms.dashboard.developer-settings.features.save', 'career'), ['enabled' => 1])->assertRedirect(route('cms.dashboard.developer-settings', ['tab' => 'features']));
+    }
+
+    public function test_feature_permissions_exist_in_the_database_after_sync(): void
+    {
+        $this->artisan('features:sync-permissions')->assertSuccessful();
+        $registry = app(\Modules\CmsBackend\Features\FeatureRegistry::class);
+        foreach ($registry->report() as $row) {
+            $this->assertSame([], $row['permissions_missing_db'], 'quyền của chức năng '.$row['key'].' phải có trong bảng permissions');
+        }
+        $this->artisan('features:sync-permissions', ['--dry-run' => true])->assertSuccessful();
+    }
 }

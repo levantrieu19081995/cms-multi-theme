@@ -43,7 +43,11 @@
                                     @endforeach
                                 </td>
                                 <td class="small">
-                                    {{ __('admin.developer.feature_permissions_declared', ['count' => $feature['permissions_declared']]) }}
+                                    @if ($feature['permissions_declared'] > 0)
+                                        <a href="{{ \Modules\CmsBackend\Support\ModuleUrl::route('cms.dashboard.developer-settings', ['tab' => 'permissions', 'feature' => $feature['key']]) }}" title="{{ __('admin.developer.feature_permissions_link') }}"><i class="ri-shield-keyhole-line me-1" aria-hidden="true"></i>{{ __('admin.developer.feature_permissions_declared', ['count' => $feature['permissions_declared']]) }}</a>
+                                    @else
+                                        {{ __('admin.developer.feature_permissions_declared', ['count' => $feature['permissions_declared']]) }}
+                                    @endif
                                     @if ($feature['permissions_missing_code'])<div class="text-danger">{{ __('admin.developer.feature_permissions_missing_code', ['list' => implode(', ', $feature['permissions_missing_code'])]) }}</div>@endif
                                     @if ($feature['permissions_missing_db'])<div class="text-warning">{{ __('admin.developer.feature_permissions_missing_db', ['list' => implode(', ', $feature['permissions_missing_db'])]) }}</div>@endif
                                     @if (! $feature['permissions_missing_code'] && ! $feature['permissions_missing_db'])<div class="text-success">{{ __('admin.developer.feature_permissions_ok') }}</div>@endif

@@ -42,7 +42,9 @@ final class DeveloperSettingsController extends Controller
         return view('cmsbackend::screens.pages.developer-settings.index', [
             'permissions' => $this->availability->overview(),
             'theme' => $this->settings->themes(),
-            'features' => $this->features->report(),
+            // "Đa ngôn ngữ" là cấu hình hệ thống chứ không phải chức năng nghiệp vụ: có tab riêng, không nằm trong danh sách chức năng.
+            'features' => array_values(array_filter($this->features->report(), fn (array $row) => $row['key'] !== 'multilingual')),
+            'language' => $this->languagePanel(),
             'featureErrors' => $this->features->errors(),
             'homepageLayout' => app(\Modules\CmsBackend\Services\Developer\HomepageLayoutAdmin::class)->panel($request->query('layout_theme') ? (string) $request->query('layout_theme') : null),
             'accounts' => app(\Modules\CmsBackend\Services\Developer\AccountAdmin::class)->panel(),
@@ -153,7 +155,31 @@ final class DeveloperSettingsController extends Controller
         }
         Toastr::success(__($enabled ? 'admin.developer.feature_on' : 'admin.developer.feature_off', ['name' => $definition->name()]), __('admin.message.thanh_cong'));
 
-        return redirect(ModuleUrl::route(self::ROUTE, ['tab' => 'features']));
+        return redirect(ModuleUrl::route(self::ROUTE, ['tab' => $feature === 'multilingual' ? 'languages' : 'features']));
+    }
+
+    /**
+     * Dữ liệu tab Ngôn ngữ: công tắc `multilingual` (Feature Registry) và các ngôn ngữ đã cấu hình.
+     *
+     * @return array<string, mixed>
+     */
+    private function languagePanel(): array
+    {
+        $locales = app(\App\Services\LocaleManager::class);
+        $row = collect($this->features->report())->firstWhere('key', 'multilingual');
+        $configured = $locales->configured();
+        $default = $locales->default();
+
+        return [
+            'enabled' => (bool) ($row['enabled'] ?? false),
+            'overridden' => (bool) ($row['overridden'] ?? false),
+            'name' => $row['name'] ?? '',
+            'description' => $row['description'] ?? '',
+            'icon' => $row['icon'] ?? 'ri-translate-2',
+            'default' => $default,
+            'locales' => array_map(fn (string $code, string $label) => ['code' => $code, 'label' => $label, 'default' => $code === $default], array_keys($configured), $configured),
+            'default_only' => (array) config('locales.default_only_routes', []),
+        ];
     }
 
     private function failed(string $key, ?string $tab = null): RedirectResponse
