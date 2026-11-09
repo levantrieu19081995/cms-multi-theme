@@ -48,7 +48,7 @@ final class PhaseOneIsolationTest extends TestCase
             $checked++;
         }
         $this->assertGreaterThan(50, $checked);
-        $this->assertSame('/cms', rtrim(route('cms.trang-chu', [], false), '/'));
+        $this->assertSame('', rtrim(route('cms.trang-chu', [], false), '/'));
         $this->assertFalse(Route::has('knct.trang-chu'));
         $this->assertSame('cms.trang-chu', \Modules\CmsBackend\Support\ModuleUrl::name('cms.trang-chu'));
         $this->assertSame('cms.trang-chu', \Modules\CmsBackend\Support\ModuleUrl::name('trang-chu'));
@@ -70,8 +70,8 @@ final class PhaseOneIsolationTest extends TestCase
 
     public function test_login_and_homepage_render_with_the_new_build(): void
     {
-        $this->get('/cms/login')->assertOk();
-        $this->get('/cms')->assertOk();
+        $this->get('/login')->assertOk();
+        $this->get('/')->assertOk();
     }
 
     public function test_guest_cannot_access_administration(): void

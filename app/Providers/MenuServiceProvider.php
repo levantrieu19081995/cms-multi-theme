@@ -61,7 +61,7 @@ class MenuServiceProvider extends ServiceProvider
     public function getTwinMenu()
     {
         $cacheKey = 'twin_menu';
-        if (env('APP_DEBUG') == false) {
+        if (! config('app.debug')) {
             if (Cache::has($cacheKey)) {
                 return Cache::get($cacheKey);
             }

@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        if (env('APP_DEBUG') == true) {
+        if (config('app.debug')) {
             $this->debugbar();
         }
         $this->app->singleton(Downloader::class, CustomDownloader::class);

@@ -117,7 +117,7 @@ Route::group([], function () {
         Route::name('dashboard.')->group(function () {
             Route::get('con-so-noi-bat', [FeaturedStatisticController::class, 'index'])->name('con-so-noi-bat.index');
             Route::put('con-so-noi-bat', [FeaturedStatisticController::class, 'update'])->name('con-so-noi-bat.update');
-            Route::resource('hoi-dap', HoiDapAdminController::class)->names('hoi-dap');
+            Route::resource('hoi-dap', HoiDapAdminController::class)->only(['index', 'edit', 'update', 'destroy'])->names('hoi-dap');
             Route::put('hoi-dap/{id}/approve', [HoiDapAdminController::class, 'approve'])->name('hoi-dap.approve');
             // Liên hệ – Góp ý: chỉ xem / xóa mềm / khôi phục / xóa vĩnh viễn (quản trị không nhập liên hệ nên không có create/edit/update).
             // Cổng chức năng cms.feature:contact; quyền ở từng route (đã tính quyền cha lienhe-manager). POST vì production từ chối method-override.

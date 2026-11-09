@@ -30,11 +30,8 @@ class AnalyticsTraffic extends Component
 
         try {
             //  Thiết lập biến môi trường
-            $path =
-                env('GA4_ENV') === 'prod'
-                ? storage_path(env('GA4_CREDENTIALS_PATH_PROD'))
-                : storage_path(env('GA4_CREDENTIALS_PATH_DEV'));
-            $propertyId = env('GA4_ENV') === 'prod' ? env('GA4_PROPERTY_ID_PROD') : env('GA4_PROPERTY_ID_DEV');
+            $path = config('analytics.service_account_credentials_json');
+            $propertyId = config('analytics.property_id');
             putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $path);
 
             $client = new BetaAnalyticsDataClient();

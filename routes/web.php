@@ -77,7 +77,7 @@ Route::prefix($cmsPrefix)->middleware('auth')->group(function () {
     Route::resource('/quang-cao', AdsController::class);
 
     // Log hành động
-    Route::resource('activities', ActivityLogController::class);
+    Route::resource('activities', ActivityLogController::class)->only(['index']);
 
     if (app()->environment('local')) {
         Route::get('/components', function () {

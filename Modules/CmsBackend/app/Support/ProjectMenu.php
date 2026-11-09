@@ -133,7 +133,7 @@ class ProjectMenu extends ServiceProvider
     public function getTwinMenu()
     {
         $cacheKey = 'cms_twin_menu';
-        if (env('APP_DEBUG') == false) {
+        if (! config('app.debug')) {
             if (Cache::has($cacheKey)) {
                 return Cache::get($cacheKey);
             }
