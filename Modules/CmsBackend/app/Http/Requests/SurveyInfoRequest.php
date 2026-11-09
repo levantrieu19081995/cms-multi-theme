@@ -19,7 +19,7 @@ class SurveyInfoRequest extends FormRequest
             'ks_ma' => ['nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9\-_ ]+$/'],
             'ks_mo_ta_ngan' => ['nullable', 'string', 'max:500'],
             'ks_gioi_thieu' => ['nullable', 'string', 'max:100000'],
-            'ks_loai' => ['nullable', 'string', 'in:general,satisfaction,feedback,research'],
+            'ks_loai' => ['nullable', 'string', 'in:general,satisfaction,feedback,research,career'],
             'ks_bat_dau' => ['nullable', 'date'],
             'ks_ket_thuc' => ['nullable', 'date', 'after:ks_bat_dau'],
             'ks_cho_phep_an_danh' => ['sometimes', 'boolean'],

@@ -52,6 +52,17 @@
     @else
         <p class="sv-muted">{{ __('survey.intro.privacy') }}</p>
     @endif
+    @if (! empty($schools))
+        <div class="sv-field">
+            <label class="sv-label" for="truong">{{ __('survey.intro.school') }}</label>
+            <select id="truong" name="truong" style="width:100%;padding:10px 12px;border:1px solid var(--sv-border);border-radius:var(--sv-radius);font:inherit;background:#fff">
+                <option value="">{{ __('survey.intro.school_none') }}</option>
+                @foreach ($schools as $school)
+                    <option value="{{ $school['key'] }}" @selected(old('truong') === $school['key'])>{{ $school['name'] }}</option>
+                @endforeach
+            </select>
+        </div>
+    @endif
     <button type="submit" class="sv-btn">{{ $resuming ? __('survey.intro.resume') : __('survey.intro.start') }}</button>
 </form>
 @endsection

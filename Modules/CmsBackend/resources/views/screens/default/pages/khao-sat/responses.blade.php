@@ -38,6 +38,7 @@
                             <th>{{ __('admin.survey_report.completed_at') }}</th>
                             <th>{{ __('admin.survey_report.duration') }}</th>
                             <th>{{ __('admin.survey_report.status') }}</th>
+                            @if ($survey->ks_loai === \Modules\CmsBackend\Services\SurveyService::CAREER)<th>{{ __('career.stats.result_column') }}</th>@endif
                             <th style="width:1%">{{ __('admin.ui.hanh_dong') }}</th>
                         </tr>
                     </thead>
@@ -50,6 +51,7 @@
                             <td>{{ $p->ksu_hoan_thanh_at?->format('H:i d/m/Y') ?? '—' }}</td>
                             <td>{{ \Modules\CmsBackend\Services\SurveyReportService::duration($p->ksu_thoi_luong) }}</td>
                             <td><span class="badge bg-{{ $p->isCompleted() ? 'success' : 'secondary' }}">{{ $p->isCompleted() ? __('admin.survey_report.completed') : __('admin.survey_report.in_progress') }}</span></td>
+                            @if ($survey->ks_loai === \Modules\CmsBackend\Services\SurveyService::CAREER)<td>@if ($p->ksu_ket_qua)<strong>{{ $p->ksu_ket_qua }}</strong>@else—@endif</td>@endif
                             <td class="text-nowrap">
                                 <a class="btn btn-sm btn-outline-primary" href="{{ $route('cms.khao-sat.show', $p->ksu_id) }}" title="{{ __('admin.survey_report.view') }}"><i class="ri-eye-line" aria-hidden="true"></i><span class="visually-hidden">{{ __('admin.survey_report.view') }}</span></a>
                                 @if ($canDelete)

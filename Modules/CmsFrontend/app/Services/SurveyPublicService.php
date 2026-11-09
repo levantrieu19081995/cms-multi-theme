@@ -11,6 +11,9 @@ use Modules\CmsBackend\Enums\SurveyQuestionType;
 use Modules\CmsBackend\Enums\SurveyStatus;
 use Modules\CmsBackend\Exceptions\SurveyRuleException;
 use Modules\CmsBackend\Services\SurveyFormService;
+use Modules\CmsBackend\Services\CareerService;
+use Modules\CmsBackend\Services\SurveyService;
+use Modules\CmsBackend\Support\Riasec;
 use Modules\CmsBackend\Support\SurveyHtmlSanitizer;
 use Modules\CmsFrontend\Models\KhaoSat;
 use Modules\CmsFrontend\Models\KhaoSatUser;
@@ -38,6 +41,7 @@ class SurveyPublicService
         private SurveyResponseDataProvider $responses,
         private SurveyFormService $forms,
         private SurveyHtmlSanitizer $sanitizer,
+        private CareerService $career,
     ) {}
 
     // ------------------------------------------------------------------ truy cập
@@ -132,6 +136,11 @@ class SurveyPublicService
             'ksu_so_dien_thoai' => $anonymous ? '' : (string) ($identity['so_dien_thoai'] ?? ''),
             'ksu_email' => $anonymous ? null : ($identity['email'] ?? null),
         ];
+        if ($survey->ks_loai === SurveyService::CAREER) {
+            $school = $this->career->school($identity['truong'] ?? null);
+            $attributes['school_key'] = $school['key'] ?? null;
+            $attributes['school_name'] = $school['name'] ?? null;
+        }
 
         return $this->responses->transaction(function () use ($survey, $ctx, $attributes) {
             // Khóa dòng khảo sát: mọi bắt đầu/gửi của CÙNG khảo sát được tuần tự hóa, nên kiểm tra giới hạn và ghi là một thao tác
@@ -246,7 +255,7 @@ class SurveyPublicService
                 'ksu_trang_thai' => KhaoSatUser::STATUS_COMPLETED,
                 'ksu_hoan_thanh_at' => $now,
                 'ksu_thoi_luong' => max(0, (int) $participation->ksu_created_at?->diffInSeconds($now, true)),
-            ]);
+            ] + $this->careerAttributes($survey, $answers));
 
             return ['participation' => $participation, 'already' => false];
         });
@@ -258,6 +267,44 @@ class SurveyPublicService
      *
      * @return array<int, array<string, mixed>>
      */
+    /**
+     * Khảo sát định hướng nghề nghiệp: cộng điểm theo 6 nhóm RIASEC và lấy 3 nhóm cao nhất làm mã Holland (ghi vào ksu_ket_qua).
+     * Khảo sát khác không có thuộc tính thêm. Gọi sau buildAnswerRows() nên cấu trúc đã được nạp.
+     *
+     * @param  array<string, mixed>  $answers
+     * @return array<string, mixed>
+     */
+    private function careerAttributes(KhaoSat $survey, array $answers): array
+    {
+        if ($survey->ks_loai !== SurveyService::CAREER) {
+            return [];
+        }
+        $questions = $survey->nhom->flatMap->cauHoi->concat($survey->cauHoi)->filter(fn ($q) => $q->ch_trang_thai && $q->ch_ma !== null);
+        $scores = Riasec::score($questions, $answers);
+
+        return [
+            'ksu_ket_qua' => Riasec::holland($scores),
+            'ksu_diem' => json_encode(array_map(fn (array $row) => ['pct' => $row['pct'], 'answered' => $row['answered'], 'questions' => $row['questions']], $scores)),
+        ];
+    }
+
+    /** Danh sách trường để chọn ở trang giới thiệu (chỉ khảo sát định hướng nghề nghiệp). @return array<int, array{key: string, name: string}> */
+    public function schools(KhaoSat $survey): array
+    {
+        return $survey->ks_loai === SurveyService::CAREER ? $this->career->schools() : [];
+    }
+
+    /** Kết quả định hướng nghề nghiệp của lượt vừa hoàn thành (theo mã lượt trong phiên); null nếu không phải khảo sát nghề nghiệp. */
+    public function careerResult(KhaoSat $survey, string $code): ?array
+    {
+        if ($survey->ks_loai !== SurveyService::CAREER || $code === '') {
+            return null;
+        }
+        $participation = $this->responses->findParticipationByCode($survey->ks_id, $code);
+
+        return $participation !== null && $participation->isCompleted() ? $this->career->resultFor($participation) : null;
+    }
+
     private function buildAnswerRows(KhaoSat $survey, array $answers): array
     {
         $this->surveys->withStructure($survey);

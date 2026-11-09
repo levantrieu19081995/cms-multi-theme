@@ -18,15 +18,17 @@ class SurveyStartRequest extends FormRequest
     public function rules(SurveyPublicService $service): array
     {
         $survey = $service->find((string) $this->route('slug'));
+        // Khảo sát định hướng nghề nghiệp có thể kèm trường người làm đang học (danh sách trong tùy chọn school_list; khóa lạ bị bỏ qua).
+        $school = $survey?->ks_loai === \Modules\CmsBackend\Services\SurveyService::CAREER ? ['truong' => ['nullable', 'string', 'max:100']] : [];
         if ($survey === null || ! $survey->ks_yeu_cau_thong_tin) {
-            return [];
+            return $school;
         }
         $anonymous = $survey->ks_cho_phep_an_danh && $this->boolean('an_danh');
         if ($anonymous) {
-            return ['an_danh' => ['boolean']];
+            return ['an_danh' => ['boolean']] + $school;
         }
 
-        return [
+        return $school + [
             'an_danh' => ['sometimes', 'boolean'],
             'dong_y' => ['accepted'],
             'ho_ten' => ['required', 'string', 'max:255'],

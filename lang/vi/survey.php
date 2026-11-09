@@ -13,6 +13,8 @@ return [
     'intro' => [
         'questions' => ':count câu hỏi',
         'closes' => 'Khảo sát đóng lúc :time',
+        'school' => 'Trường bạn đang học (không bắt buộc)',
+        'school_none' => '— Không chọn —',
         'start' => 'Bắt đầu làm khảo sát',
         'resume' => 'Tiếp tục làm khảo sát',
         'privacy' => 'Câu trả lời của bạn được dùng cho mục đích của khảo sát này.',

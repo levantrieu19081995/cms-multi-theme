@@ -6,6 +6,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 use Modules\CmsBackend\DataProviders\SurveyDataProvider;
 use Modules\CmsBackend\Enums\SurveyQuestionType;
+use Modules\CmsBackend\Support\Riasec;
 use Modules\CmsBackend\Enums\SurveyStatus;
 use Modules\CmsBackend\Exceptions\SurveyRuleException;
 use Modules\CmsBackend\Support\SurveyAudit;
@@ -196,6 +197,9 @@ class SurveyService
         });
     }
 
+    /** Giá trị ks_loai của khảo sát Định hướng nghề nghiệp (RIASEC). */
+    public const CAREER = 'career';
+
     public const MAX_GROUP_NAME = 255;
 
     public const MAX_GROUP_DESC = 2000;
@@ -223,6 +227,7 @@ class SurveyService
         }
         $known = $survey?->exists ? $this->data->structureIds($survey->ks_id) : null;
         $seen = ['g' => [], 'q' => [], 'o' => []];
+        $career = $survey?->ks_loai === self::CAREER;
         $total = 0;
         $out = [];
         foreach ($groups as $gi => $group) {
@@ -235,7 +240,7 @@ class SurveyService
             $questions = [];
             foreach ($this->listOfArrays($group['questions'] ?? []) as $qi => $q) {
                 $total++;
-                $questions[] = $this->normalizeQuestion($q, $g, $qi + 1, $seen, $known);
+                $questions[] = $this->normalizeQuestion($q, $g, $qi + 1, $seen, $known, $career);
             }
             $out[] = [
                 'id' => $groupId,
@@ -276,12 +281,15 @@ class SurveyService
      * @param  ?array{groups: array<int, true>, questions: array<int, array<int, true>>}  $known
      * @return array<string, mixed>
      */
-    private function normalizeQuestion(array $q, int $g, int $n, array &$seen, ?array $known): array
+    private function normalizeQuestion(array $q, int $g, int $n, array &$seen, ?array $known, bool $career = false): array
     {
         $at = ['g' => $g, 'n' => $n];
         $type = SurveyQuestionType::tryFrom(is_string($q['type'] ?? null) ? $q['type'] : '');
         if ($type === null) {
             throw SurveyRuleException::key('question_type_invalid', $at);
+        }
+        if ($career && ! Riasec::supports($type)) {
+            throw SurveyRuleException::key('career_question_type', $at);
         }
         $text = $this->text($q['text'] ?? '', self::MAX_QUESTION_TEXT, 'question_text', $at);
         if ($text === '') {
@@ -318,6 +326,21 @@ class SurveyService
                 'min_label' => $this->text($cfg['min_label'] ?? '', self::MAX_SCALE_LABEL, 'scale_label', $at),
                 'max_label' => $this->text($cfg['max_label'] ?? '', self::MAX_SCALE_LABEL, 'scale_label', $at),
             ];
+        }
+
+        if ($career) {
+            // Khảo sát định hướng nghề nghiệp: mỗi câu hỏi (đang bật) thuộc đúng một nhóm RIASEC, lưu trong cấu hình câu hỏi.
+            $letter = is_array($q['config'] ?? null) ? ($q['config']['riasec'] ?? null) : null;
+            $enabled = (bool) ($q['enabled'] ?? true);
+            if (! Riasec::isLetter($letter)) {
+                if ($enabled) {
+                    throw SurveyRuleException::key('riasec_required', $at);
+                }
+                $letter = null;
+            }
+            if ($letter !== null) {
+                $config['riasec'] = $letter;
+            }
         }
 
         return [
@@ -446,6 +469,22 @@ class SurveyService
         }
         if (empty($survey->ks_ma)) {
             throw SurveyRuleException::key('publish_needs_slug');
+        }
+        if ($survey->ks_loai === self::CAREER) {
+            $groups = [];
+            foreach ($questions as $q) {
+                if (! $q->ch_trang_thai) {
+                    continue;
+                }
+                $letter = $q->ch_cau_hinh['riasec'] ?? null;
+                if (! Riasec::supports($q->kieu()) || ! Riasec::isLetter($letter)) {
+                    throw SurveyRuleException::key('publish_career_question', ['question' => Str::limit($q->ch_noidung, 60)]);
+                }
+                $groups[$letter] = true;
+            }
+            if (count($groups) < 2) {
+                throw SurveyRuleException::key('publish_career_groups');
+            }
         }
     }
 

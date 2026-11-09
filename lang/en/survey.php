@@ -13,6 +13,8 @@ return [
     'intro' => [
         'questions' => ':count questions',
         'closes' => 'The survey closes at :time',
+        'school' => 'School you attend (optional)',
+        'school_none' => '— Not selected —',
         'start' => 'Start the survey',
         'resume' => 'Continue the survey',
         'privacy' => 'Your answers are used only for the purpose of this survey.',

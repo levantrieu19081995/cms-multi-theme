@@ -39,6 +39,19 @@
             </div></section>
         </div>
         <div class="col-lg-8">
+            @if (! empty($career))
+                <section class="card mb-3"><div class="card-body">
+                    <h5>{{ __('career.result.title') }}</h5>
+                    <p class="mb-2">{{ __('career.result.code') }}: @foreach (str_split($career['code']) as $letter)<span class="badge bg-primary fs-6 me-1">{{ $letter }}</span>@endforeach</p>
+                    <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+                        @foreach ($career['scores'] as $row)
+                            <tr><td style="width:40%"><strong>{{ $row['code'] }}</strong> {{ $row['name'] }}@if ($row['rank'])<span class="badge bg-label-primary ms-1">#{{ $row['rank'] }}</span>@endif</td>
+                                <td aria-hidden="true"><div class="progress" style="height:8px"><div class="progress-bar" style="width: {{ $row['pct'] ?? 0 }}%"></div></div></td>
+                                <td class="text-end" style="width:70px">{{ $row['pct'] === null ? '—' : $row['pct'].'%' }}</td></tr>
+                        @endforeach
+                    </table></div>
+                </div></section>
+            @endif
             <section class="card"><div class="card-body">
                 <h5>{{ __('admin.survey_report.answers') }}</h5>
                 @forelse ($answers as $item)

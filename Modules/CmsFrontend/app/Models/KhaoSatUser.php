@@ -25,7 +25,7 @@ class KhaoSatUser extends Model
     protected $fillable = [
         'ks_id', 'ksu_ma', 'ksu_trang_thai', 'ksu_hoan_thanh_at', 'ksu_thoi_luong', 'ksu_an_danh',
         'ksu_ho_ten', 'ksu_so_dien_thoai', 'ksu_email', 'ksu_dau_vet', 'ksu_ip_hash', 'ksu_user_agent',
-        'ksu_ket_qua', 'school_key', 'school_name',
+        'ksu_ket_qua', 'ksu_diem', 'school_key', 'school_name',
     ];
 
     protected $casts = [

@@ -48,6 +48,7 @@ class KhaoSatPublicController extends Controller
             'introHtml' => $this->service->introHtml($survey),
             'identity' => $this->identityMode($survey),
             'questionCount' => $this->service->form($survey)['question_count'],
+            'schools' => $this->service->schools($survey),
         ]), $ctx);
     }
 
@@ -59,7 +60,7 @@ class KhaoSatPublicController extends Controller
         }
         $ctx = $this->service->clientContext($request);
         try {
-            $participation = $this->service->start($survey, $request->safe()->only(['ho_ten', 'so_dien_thoai', 'email', 'an_danh']), $ctx);
+            $participation = $this->service->start($survey, $request->safe()->only(['ho_ten', 'so_dien_thoai', 'email', 'an_danh', 'truong']), $ctx);
         } catch (SurveyRuleException $e) {
             return $this->withClientCookie(redirect()->route('cms.frontend.khaosat.show', $slug)->withErrors(['survey' => $e->getMessage()]), $ctx);
         }
@@ -128,7 +129,10 @@ class KhaoSatPublicController extends Controller
             return redirect()->route('cms.frontend.khaosat.show', $slug);
         }
 
-        return response()->view(self::VIEW.'cam-on', ['survey' => $survey]);
+        return response()->view(self::VIEW.'cam-on', [
+            'survey' => $survey,
+            'result' => $this->service->careerResult($survey, (string) $request->session()->get($this->sessionKey($survey, 'done'))),
+        ]);
     }
 
     // ------------------------------------------------------------------

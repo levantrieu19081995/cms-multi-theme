@@ -23,6 +23,55 @@
         @endforeach
     </div>
 
+    @if (! empty($survey) && $survey->ks_loai === \Modules\CmsBackend\Services\SurveyService::CAREER)
+        <section class="card mb-3"><div class="card-body">
+            <h5>{{ __('career.stats.title') }}</h5>
+            @if (empty($stats['career']) || $stats['career']['total'] === 0)
+                <p class="text-muted mb-0">{{ __('career.stats.no_data') }}</p>
+            @else
+                @php $career = $stats['career']; @endphp
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <h6>{{ __('career.stats.by_code') }}</h6>
+                        <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+                            <thead><tr><th>{{ __('career.stats.code') }}</th><th class="text-end" style="width:90px">{{ __('career.stats.count') }}</th><th class="text-end" style="width:90px">{{ __('career.stats.percent') }}</th><th aria-hidden="true"></th></tr></thead>
+                            <tbody>
+                            @foreach ($career['by_code'] as $r)
+                                <tr><td><strong>{{ $r['code'] }}</strong></td><td class="text-end">{{ $r['count'] }}</td><td class="text-end">{{ $r['percent'] }}%</td>
+                                    <td aria-hidden="true"><div class="progress" style="height:8px"><div class="progress-bar" style="width: {{ $r['percent'] }}%"></div></div></td></tr>
+                            @endforeach
+                            </tbody>
+                        </table></div>
+                    </div>
+                    <div class="col-lg-6">
+                        <h6>{{ __('career.stats.by_group') }}</h6>
+                        <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+                            <thead><tr><th>{{ __('career.stats.group') }}</th><th class="text-end" style="width:90px">{{ __('career.stats.count') }}</th><th class="text-end" style="width:90px">{{ __('career.stats.percent') }}</th><th aria-hidden="true"></th></tr></thead>
+                            <tbody>
+                            @foreach ($career['by_group'] as $r)
+                                <tr><td><strong>{{ $r['code'] }}</strong> {{ $r['name'] }}</td><td class="text-end">{{ $r['count'] }}</td><td class="text-end">{{ $r['percent'] }}%</td>
+                                    <td aria-hidden="true"><div class="progress" style="height:8px"><div class="progress-bar bg-success" style="width: {{ $r['percent'] }}%"></div></div></td></tr>
+                            @endforeach
+                            </tbody>
+                        </table></div>
+                    </div>
+                    <div class="col-12">
+                        <h6>{{ __('career.stats.by_school') }}</h6>
+                        <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+                            <thead><tr><th>{{ __('career.stats.school') }}</th><th class="text-end" style="width:90px">{{ __('career.stats.count') }}</th><th class="text-end" style="width:90px">{{ __('career.stats.percent') }}</th><th>{{ __('career.stats.group') }}</th></tr></thead>
+                            <tbody>
+                            @foreach ($career['by_school'] as $r)
+                                <tr><td>{{ $r['school'] !== '' ? $r['school'] : __('career.stats.no_school') }}</td><td class="text-end">{{ $r['count'] }}</td><td class="text-end">{{ $r['percent'] }}%</td>
+                                    <td>@foreach ($r['groups'] as $letter => $n)<span class="badge bg-label-primary me-1">{{ $letter }} · {{ $n }}</span>@endforeach</td></tr>
+                            @endforeach
+                            </tbody>
+                        </table></div>
+                    </div>
+                </div>
+            @endif
+        </div></section>
+    @endif
+
     @if ($canExport)
         <p><a class="btn btn-sm btn-outline-success" href="{{ $route('cms.khao-sat.export', $survey->ks_id) }}?{{ http_build_query($exportQuery + ['type' => 'summary']) }}">{{ __('admin.survey_report.export_summary') }}</a></p>
     @endif

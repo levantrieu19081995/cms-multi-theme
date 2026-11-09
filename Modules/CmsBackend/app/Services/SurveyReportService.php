@@ -136,7 +136,49 @@ class SurveyReportService
             $questions[] = $this->questionStats($q, $counts);
         }
 
-        return ['overview' => $overview, 'daily' => $daily, 'questions' => $questions];
+        $career = $survey->ks_loai === SurveyService::CAREER ? $this->careerStats($survey, $range) : null;
+
+        return ['overview' => $overview, 'daily' => $daily, 'questions' => $questions, 'career' => $career];
+    }
+
+    /**
+     * Thống kê định hướng nghề nghiệp: theo mã Holland, theo nhóm nổi bật nhất (chữ đầu của mã) và theo trường.
+     *
+     * @param  array{from: ?string, to: ?string}  $range
+     * @return array{total: int, by_code: array<int, array<string, mixed>>, by_group: array<int, array<string, mixed>>, by_school: array<int, array<string, mixed>>}
+     */
+    private function careerStats(KhaoSat $survey, array $range): array
+    {
+        $rows = $this->data->careerBreakdown($survey->ks_id, $range);
+        $total = array_sum(array_column($rows, 'n'));
+        $pct = fn (int $n) => $total > 0 ? round($n / $total * 100, 1) : 0.0;
+        $groups = app(CareerService::class)->groups();
+
+        $byCode = [];
+        $byGroup = [];
+        $bySchool = [];
+        foreach ($rows as $r) {
+            $byCode[$r['code']] = ($byCode[$r['code']] ?? 0) + $r['n'];
+            $first = substr($r['code'], 0, 1);
+            $byGroup[$first] = ($byGroup[$first] ?? 0) + $r['n'];
+            $school = trim((string) ($r['school_name'] ?: $r['school_key'])) !== '' ? trim((string) ($r['school_name'] ?: $r['school_key'])) : '';
+            $bySchool[$school]['n'] = ($bySchool[$school]['n'] ?? 0) + $r['n'];
+            $bySchool[$school]['groups'][$first] = ($bySchool[$school]['groups'][$first] ?? 0) + $r['n'];
+        }
+        arsort($byCode);
+        arsort($byGroup);
+        uasort($bySchool, fn (array $a, array $b) => $b['n'] <=> $a['n']);
+
+        return [
+            'total' => $total,
+            'by_code' => array_map(fn (string $code, int $n) => ['code' => $code, 'count' => $n, 'percent' => $pct($n)], array_keys($byCode), $byCode),
+            'by_group' => array_map(fn (string $code, int $n) => ['code' => $code, 'name' => $groups[$code]['name'] ?? $code, 'count' => $n, 'percent' => $pct($n)], array_keys($byGroup), $byGroup),
+            'by_school' => array_map(function (string $school, array $row) use ($pct) {
+                arsort($row['groups']);
+
+                return ['school' => $school, 'count' => $row['n'], 'percent' => $pct($row['n']), 'groups' => $row['groups']];
+            }, array_keys($bySchool), $bySchool),
+        ];
     }
 
     /** @return array<string, mixed> */
@@ -255,23 +297,27 @@ class SurveyReportService
         if ($includeContact) {
             array_push($headings, $t('full_name'), $t('phone'), $t('email'));
         }
+        $career = $survey->ks_loai === SurveyService::CAREER;
+        if ($career) {
+            array_push($headings, __('career.stats.result_column'), __('career.stats.school'));
+        }
         foreach ($questions as $q) {
             $headings[] = self::cell(trim(($q->nhom?->nhom_ten ? $q->nhom->nhom_ten.' / ' : '').$q->ch_noidung));
         }
         $filters['status'] = KhaoSatUser::STATUS_COMPLETED;
 
-        $rows = function () use ($survey, $filters, $includeContact, $questions) {
+        $rows = function () use ($survey, $filters, $includeContact, $questions, $career) {
             $chunk = [];
             foreach ($this->data->participationsQuery($survey->ks_id, $filters)->lazyById(500, 'ksu_id') as $participation) {
                 $chunk[] = $participation;
                 if (count($chunk) < 500) {
                     continue;
                 }
-                yield from $this->detailRows($chunk, $questions, $includeContact);
+                yield from $this->detailRows($chunk, $questions, $includeContact, $career);
                 $chunk = [];
             }
             if ($chunk !== []) {
-                yield from $this->detailRows($chunk, $questions, $includeContact);
+                yield from $this->detailRows($chunk, $questions, $includeContact, $career);
             }
         };
 
@@ -279,7 +325,7 @@ class SurveyReportService
     }
 
     /** @param array<int, KhaoSatUser> $participations */
-    private function detailRows(array $participations, Collection $questions, bool $includeContact): \Generator
+    private function detailRows(array $participations, Collection $questions, bool $includeContact, bool $career = false): \Generator
     {
         $answers = $this->data->answersByParticipation(array_map(fn ($p) => $p->ksu_id, $participations));
         foreach ($participations as $p) {
@@ -292,6 +338,9 @@ class SurveyReportService
             ];
             if ($includeContact) {
                 array_push($row, self::cell($p->ksu_ho_ten), self::cell($p->ksu_so_dien_thoai), self::cell($p->ksu_email));
+            }
+            if ($career) {
+                array_push($row, self::cell($p->ksu_ket_qua), self::cell($p->school_name));
             }
             $byQuestion = ($answers[$p->ksu_id] ?? collect())->groupBy('ch_id');
             foreach ($questions as $q) {

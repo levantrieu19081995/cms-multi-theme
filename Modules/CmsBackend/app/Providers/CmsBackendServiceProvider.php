@@ -171,6 +171,7 @@ class CmsBackendServiceProvider extends ServiceProvider
             \Modules\CmsBackend\Console\InstallHomeBlocks::class,
             \Modules\CmsBackend\Console\InstallLegacyMedia::class,
             \Modules\CmsBackend\Console\AssignPostProject::class,
+            \Modules\CmsBackend\Console\InstallCareerStarter::class,
         ]);
     }
 

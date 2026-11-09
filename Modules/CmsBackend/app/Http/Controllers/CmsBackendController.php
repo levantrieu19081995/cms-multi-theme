@@ -190,7 +190,8 @@ class CmsBackendController extends Controller
         $groupedBySchool = $records->groupBy('school_key');
 
         $schoolNames = $groupedBySchool->map(function ($items) {
-            return $items->first()->school_name;
+            // Lượt không khai báo trường có school_name = null: biểu đồ cần một nhãn chữ, không được là null.
+            return $items->first()->school_name ?: __('career.stats.no_school');
         })->values()->all();
 
         $allResults = $records->groupBy('ksu_ket_qua');

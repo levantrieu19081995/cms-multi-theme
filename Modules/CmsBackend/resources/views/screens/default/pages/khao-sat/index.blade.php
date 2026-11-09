@@ -17,6 +17,7 @@
 @endphp
 @section('cms-list-create')
 <div class="cms-page-actions">
+@if ($canView)<a class="btn btn-outline-secondary" href="{{ $route('cms.khao-sat.career') }}"><i class="ri-compass-3-line" aria-hidden="true"></i>{{ __('career.admin.menu_link') }}</a>@endif
 @if ($canCreate)<a class="btn btn-primary" href="{{ $route('cms.khao-sat.create') }}"><i class="ri-add-line" aria-hidden="true"></i>{{ __('admin.survey.create') }}</a>@endif
 </div>
 @endsection

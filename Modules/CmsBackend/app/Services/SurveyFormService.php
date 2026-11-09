@@ -65,7 +65,7 @@ class SurveyFormService
                 'text' => $q->ch_noidung,
                 'description' => $q->ch_mo_ta,
                 'required' => (bool) $q->ch_bat_buoc,
-                'config' => $type === SurveyQuestionType::Scale ? ($q->ch_cau_hinh ?? ['min' => 1, 'max' => 5]) : [],
+                'config' => $type === SurveyQuestionType::Scale ? array_intersect_key($q->ch_cau_hinh ?? ['min' => 1, 'max' => 5], array_flip(['min', 'max', 'min_label', 'max_label'])) : [],
                 'options' => $options,
             ];
         }

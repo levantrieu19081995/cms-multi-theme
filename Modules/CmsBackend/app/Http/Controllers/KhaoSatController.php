@@ -14,6 +14,7 @@ use Modules\CmsBackend\Http\Requests\SurveyInfoRequest;
 use Modules\CmsBackend\Http\Requests\SurveyStructureRequest;
 use Modules\CmsBackend\Services\SurveyFormService;
 use Modules\CmsBackend\Services\SurveyService;
+use Modules\CmsBackend\Support\Riasec;
 use Modules\CmsFrontend\Models\KhaoSat;
 
 /**
@@ -149,8 +150,10 @@ class KhaoSatController extends Controller
     }
 
     /** Kiểu câu hỏi cho trình dựng (nhãn đã dịch). */
-    public static function questionTypes(): array
+    public static function questionTypes(bool $career = false): array
     {
-        return array_map(fn (SurveyQuestionType $t) => ['value' => $t->value, 'label' => $t->label(), 'options' => $t->hasOptions()], SurveyQuestionType::cases());
+        $types = $career ? array_filter(SurveyQuestionType::cases(), fn (SurveyQuestionType $t) => Riasec::supports($t)) : SurveyQuestionType::cases();
+
+        return array_values(array_map(fn (SurveyQuestionType $t) => ['value' => $t->value, 'label' => $t->label(), 'options' => $t->hasOptions()], $types));
     }
 }

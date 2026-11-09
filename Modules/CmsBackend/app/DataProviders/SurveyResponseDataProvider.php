@@ -175,6 +175,21 @@ class SurveyResponseDataProvider
         return ['started' => $started, 'completed' => $completed, 'avg_seconds' => $avg === null ? null : (float) $avg];
     }
 
+    /**
+     * Số lượt hoàn thành có kết quả định hướng nghề nghiệp, gom theo mã Holland và trường (school_key/school_name).
+     *
+     * @return array<int, array{code: string, school_key: ?string, school_name: ?string, n: int}>
+     */
+    public function careerBreakdown(int $surveyId, array $f): array
+    {
+        return $this->participationsQuery($surveyId, ['from' => $f['from'] ?? null, 'to' => $f['to'] ?? null])
+            ->where('ksu_trang_thai', KhaoSatUser::STATUS_COMPLETED)
+            ->whereNotNull('ksu_ket_qua')->where('ksu_ket_qua', '!=', '')
+            ->reorder()->selectRaw('ksu_ket_qua as code, school_key, school_name, COUNT(*) as n')
+            ->groupBy('ksu_ket_qua', 'school_key', 'school_name')->get()
+            ->map(fn ($r) => ['code' => (string) $r->code, 'school_key' => $r->school_key, 'school_name' => $r->school_name, 'n' => (int) $r->n])->all();
+    }
+
     /** @return array<int, array{day: string, started: int, completed: int}> */
     public function daily(int $surveyId, array $f): array
     {

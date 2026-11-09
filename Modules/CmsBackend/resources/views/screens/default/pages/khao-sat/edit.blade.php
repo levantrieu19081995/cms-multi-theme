@@ -17,11 +17,15 @@
     $draft = session('structure_draft');
     $initial = is_array($draft) ? $draft : $structure;
     $dt = fn ($v) => $v ? \Carbon\Carbon::parse($v)->format('Y-m-d\TH:i') : '';
+    $isCareer = $survey->ks_loai === \Modules\CmsBackend\Services\SurveyService::CAREER;
+    $careerGroups = $isCareer ? app(\Modules\CmsBackend\Services\CareerService::class)->groups() : [];
     $builderConfig = [
         'initial' => $initial,
         'readonly' => ! $structureEditable,
-        'types' => \Modules\CmsBackend\Http\Controllers\KhaoSatController::questionTypes(),
+        'types' => \Modules\CmsBackend\Http\Controllers\KhaoSatController::questionTypes($isCareer),
         'i18n' => __('admin.survey.builder'),
+        'career' => $isCareer,
+        'riasec' => array_values(array_map(fn ($g) => ['value' => $g['code'], 'label' => $g['code'].' — '.$g['name']], $careerGroups)),
     ];
 @endphp
 @section('title', $exists ? $survey->ks_ten : __('admin.survey.create'))
@@ -108,7 +112,7 @@
                             <label class="form-label fw-bold" for="ks_loai">{{ __('admin.survey.field.type') }}</label>
                             @if ($collectionLocked)<input type="hidden" name="ks_loai" value="{{ $survey->ks_loai ?: 'general' }}">@endif
                             <select class="form-select" id="ks_loai" @unless ($collectionLocked) name="ks_loai" @endunless @disabled($collectionLocked)>
-                                @foreach (['general', 'satisfaction', 'feedback', 'research'] as $kind)
+                                @foreach (['general', 'satisfaction', 'feedback', 'research', 'career'] as $kind)
                                     <option value="{{ $kind }}" @selected(old('ks_loai', $survey->ks_loai) === $kind)>{{ __('admin.survey.kind.'.$kind) }}</option>
                                 @endforeach
                             </select>

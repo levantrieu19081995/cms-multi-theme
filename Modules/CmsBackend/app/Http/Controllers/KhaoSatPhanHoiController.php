@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use Modules\CmsBackend\Services\CareerService;
 use Modules\CmsBackend\Services\SurveyReportService;
+use Modules\CmsBackend\Services\SurveyService;
 use Modules\CmsFrontend\Models\KhaoSat;
 use Modules\CmsFrontend\Models\KhaoSatUser;
 
@@ -37,6 +39,7 @@ class KhaoSatPhanHoiController extends Controller
             'participation' => $participation,
             'survey' => $participation->khaoSat,
             'answers' => $this->reports->detail($participation),
+            'career' => $participation->khaoSat?->ks_loai === SurveyService::CAREER ? app(CareerService::class)->resultFor($participation) : null,
         ]);
     }
 

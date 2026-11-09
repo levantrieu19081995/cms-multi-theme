@@ -15,6 +15,8 @@
     var cfg = JSON.parse(cfgEl.textContent);
     var t = cfg.i18n || {};
     var types = cfg.types || [];
+    var career = !!cfg.career; // khảo sát Định hướng nghề nghiệp: mỗi câu hỏi thuộc một nhóm RIASEC (config.riasec)
+    var riasecOptions = cfg.riasec || [];
     var readonly = !!cfg.readonly;
     var uidSeq = 0;
     var registry = {}; // _uid -> đối tượng trạng thái
@@ -43,7 +45,7 @@
 
     function newOption(text) { return reg({ id: null, text: text || '', enabled: true }); }
     function newQuestion(type) {
-        var q = reg({ id: null, type: type || 'single', text: '', description: '', required: false, enabled: true, config: {}, options: [] });
+        var q = reg({ id: null, type: type || (career ? 'scale' : 'single'), text: '', description: '', required: false, enabled: true, config: {}, options: [] });
         normalizeQuestion(q);
         return q;
     }
@@ -56,11 +58,13 @@
         } else {
             q.options = [];
         }
+        var riasec = (q.config && !Array.isArray(q.config) && q.config.riasec) || '';
         if (q.type === 'scale') {
             q.config = Object.assign({ min: 1, max: 5, min_label: '', max_label: '' }, Array.isArray(q.config) ? {} : q.config);
         } else {
             q.config = {};
         }
+        if (career && riasec) q.config.riasec = riasec;
     }
 
     function hydrate(groups) {
@@ -141,6 +145,18 @@
         return el('div', { class: 'row g-2' }, [num('min', t.scale_min), num('max', t.scale_max), txt('min_label', t.scale_min_label), txt('max_label', t.scale_max_label)]);
     }
 
+    // Nhóm RIASEC của câu hỏi (chỉ khảo sát định hướng nghề nghiệp). Lưu ở q.config.riasec.
+    function renderRiasec(q) {
+        var sel = el('select', { class: 'form-select', disabled: readonly, 'aria-label': t.riasec }, [el('option', { value: '', text: t.riasec_pick })].concat(riasecOptions.map(function (o) {
+            return el('option', { value: o.value, text: o.label, selected: o.value === (q.config && q.config.riasec) });
+        })));
+        sel.onchange = function (e) {
+            if (!q.config || Array.isArray(q.config)) q.config = {};
+            if (e.target.value) q.config.riasec = e.target.value; else delete q.config.riasec;
+        };
+        return el('div', { class: 'mb-2 d-flex align-items-center gap-2' }, [el('label', { class: 'form-label small mb-0 text-nowrap', text: t.riasec }), el('div', { class: 'flex-grow-1' }, [sel])]);
+    }
+
     function renderQuestion(g, q, index) {
         var select = el('select', { class: 'form-select', disabled: readonly, 'aria-label': t.type }, types.map(function (ty) {
             return el('option', { value: ty.value, text: ty.label, selected: ty.value === q.type });
@@ -163,6 +179,7 @@
                     el('div', { style: 'min-width:170px' }, [select])
                 ]),
                 el('div', { class: 'mb-2' }, [input(q, 'description', { placeholder: t.question_hint_placeholder, maxlength: 1000, 'aria-label': t.question_hint_placeholder })]),
+                career ? renderRiasec(q) : null,
                 el('div', { class: 'mb-3' }, body),
                 el('div', { class: 'd-flex flex-wrap align-items-center gap-3 border-top pt-2' }, [
                     check(q, 'required', t.required),
@@ -183,7 +200,7 @@
         var qList = el('div', { class: 'sv-questions', 'data-role': 'questions', 'data-g': g._uid });
         g.questions.forEach(function (q, qi) { qList.appendChild(renderQuestion(g, q, qi)); });
         var addBar = readonly ? null : el('div', { class: 'd-flex flex-wrap gap-2' }, [
-            el('button', { type: 'button', class: 'btn btn-sm btn-primary', onclick: function () { g.questions.push(newQuestion('single')); render(); } }, [el('i', { class: 'ri-add-line me-1' }), t.add_question])
+            el('button', { type: 'button', class: 'btn btn-sm btn-primary', onclick: function () { g.questions.push(newQuestion(career ? 'scale' : 'single')); render(); } }, [el('i', { class: 'ri-add-line me-1' }), t.add_question])
         ]);
         return el('section', { class: 'sv-group card mb-4 border-primary', 'data-uid': g._uid }, [
             el('div', { class: 'card-header d-flex align-items-center gap-2 bg-label-primary' }, [
@@ -291,6 +308,7 @@
                     var filled = q.options.filter(function (o) { return o.text.trim(); }).length;
                     if (filled < 2) return t.err_options.replace(':at', at);
                 }
+                if (career && q.enabled && !(q.config && q.config.riasec)) return t.err_riasec.replace(':at', at);
             }
         }
         return null;
