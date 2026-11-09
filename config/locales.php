@@ -25,12 +25,13 @@ return [
 
     /**
      * Public routes of content that lives in tables of its own and has no translation tables yet (documents, Q&A, services,
-     * partners, role models). They exist for the default language only: on a page in another language a link to them goes to
+     * partners, role models, surveys). They exist for the default language only: on a page in another language a link to them goes to
      * the "content is being updated" notice instead of opening the Vietnamese page.
      */
     'default_only_routes' => [
         'cms.frontend.vanban.',
         'cms.frontend.hoidap.',
+        'cms.frontend.khaosat.',   // Khảo sát (gồm Định hướng nghề nghiệp): câu hỏi/ngành do quản trị nhập, chưa có bảng bản dịch
         'cms.frontend.dichvu.',
         'cms.doi-tac.',
         'cms.guong-tieu-bieu.',

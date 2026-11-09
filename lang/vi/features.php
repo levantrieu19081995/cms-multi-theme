@@ -4,7 +4,7 @@
 return [
     'survey' => [
         'name' => 'Khảo sát',
-        'description' => 'Tạo khảo sát nhiều phần, thu thập phản hồi công khai, thống kê và xuất Excel.',
+        'description' => 'Tạo khảo sát nhiều phần, thu thập phản hồi công khai, thống kê và xuất Excel; có loại Định hướng nghề nghiệp (RIASEC) với kết quả mã Holland và ngành gợi ý.',
         'targets' => [
             'index' => 'Danh sách khảo sát',
         ],

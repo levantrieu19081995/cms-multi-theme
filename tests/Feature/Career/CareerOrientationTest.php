@@ -269,9 +269,65 @@ final class CareerOrientationTest extends TestCase
         $this->assertNull(CareerMajor::query()->find($major->cm_id));
     }
 
+    public function test_survey_pages_are_declared_default_language_only(): void
+    {
+        // Câu hỏi/ngành do quản trị nhập, chưa có bảng bản dịch: theo quy ước của dự án, trang công khai chỉ có ngôn ngữ mặc định và
+        // trên trang tiếng Anh, liên kết tới Khảo sát dẫn tới thông báo "đang cập nhật" (config/locales.php).
+        $this->assertContains('cms.frontend.khaosat.', config('locales.default_only_routes'));
+        $this->assertFalse(\Illuminate\Support\Facades\Route::has('cms.en.frontend.khaosat.show'));
+    }
+
     public function test_career_screens_need_a_logged_in_user_with_survey_permission(): void
     {
         $this->get(route('cms.khao-sat.career'))->assertRedirect(route('cms.login'));
         $this->post(route('cms.khao-sat.career.major.store'), ['name' => 'X', 'code' => 'I'])->assertRedirect(route('cms.login'));
+    }
+
+    public function test_career_screens_follow_the_survey_feature_switch(): void
+    {
+        $admin = User::query()->whereHas('roles', fn ($q) => $q->where('name', 'Quản trị'))->firstOrFail();
+        $survey = $this->careerSurvey();
+        $this->surveys->transition($survey, SurveyStatus::Open, null);
+        $done = $this->complete($survey->refresh(), ['5', '5', 'yes']);
+        $session = ['survey.done.'.$survey->ks_id => $done->ksu_ma];
+        $registry = app(\Modules\CmsBackend\Features\FeatureRegistry::class);
+
+        $this->actingAs($admin)->get(route('cms.khao-sat.career'))->assertOk();
+        $this->withSession($session)->get(route('cms.frontend.khaosat.thanks', $survey->ks_ma))->assertOk();
+
+        $registry->setEnabled('survey', false, null);
+        $this->get(route('cms.khao-sat.career'))->assertNotFound();
+        $this->post(route('cms.khao-sat.career.major.store'), ['name' => 'X', 'code' => 'I'])->assertNotFound();
+        $this->withSession($session)->get(route('cms.frontend.khaosat.thanks', $survey->ks_ma))->assertNotFound();
+        $this->get(route('cms.frontend.khaosat.show', $survey->ks_ma))->assertNotFound();
+        $this->assertSame(1, DB::table('ks_khao_sat_users')->where('ksu_id', $done->ksu_id)->count(), 'dữ liệu giữ nguyên khi tắt chức năng');
+
+        $registry->setEnabled('survey', true, null);
+        $this->get(route('cms.khao-sat.career'))->assertOk();
+    }
+
+    public function test_english_texts_exist_for_the_admin_screen_and_the_result_partial(): void
+    {
+        $admin = User::query()->whereHas('roles', fn ($q) => $q->where('name', 'Quản trị'))->firstOrFail();
+        CareerGroup::query()->delete();
+        CareerMajor::query()->delete();
+        $survey = $this->careerSurvey();
+        $this->surveys->transition($survey, SurveyStatus::Open, null);
+        $done = $this->complete($survey->refresh(), ['5', '5', 'yes']);
+
+        // Chức năng "Đa ngôn ngữ" (Developer Settings) đang tắt thì quản trị chỉ còn tiếng Việt: bật trong test để kiểm tra bản EN.
+        app(\Modules\CmsBackend\Features\FeatureRegistry::class)->setEnabled('multilingual', true, null);
+        // Quản trị chọn ngôn ngữ theo session (LocaleMiddleware).
+        $this->actingAs($admin)->withSession(['locale' => 'en'])->get(route('cms.khao-sat.career'))->assertOk()
+            ->assertSee('Groups &amp; majors (Career orientation)', false)->assertSee('The six RIASEC groups')->assertSee('Add major')
+            ->assertDontSee('Sáu nhóm RIASEC')->assertDontSee('Thêm ngành');
+
+        // Trang công khai của Khảo sát chỉ có địa chỉ mặc định (không có /en/khao-sat, xem docs): kiểm tra riêng khối kết quả bằng bản EN.
+        app()->setLocale('en');
+        $html = view('cmsfrontend::screens.pages.khao-sat._career-result', ['result' => $this->career->resultFor($done)])->render();
+        foreach (['Career orientation result', 'Your Holland code', 'Technical – Hands-on (Realistic)', 'Score for each of the 6 groups', 'Information is being updated.'] as $text) {
+            $this->assertStringContainsString($text, $html);
+        }
+        $this->assertStringNotContainsString('Kết quả định hướng', $html);
     }
 }

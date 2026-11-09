@@ -4,7 +4,7 @@
 return [
     'survey' => [
         'name' => 'Survey',
-        'description' => 'Create multi-section surveys, collect public responses, view statistics and export to Excel.',
+        'description' => 'Create multi-section surveys, collect public responses, view statistics and export to Excel; includes a Career orientation (RIASEC) type with a Holland code result and suggested majors.',
         'targets' => [
             'index' => 'Survey list',
         ],
