@@ -311,7 +311,7 @@ final class ContactFeatureTest extends SurveySqliteTestCase
 
     public function test_ban_de_an_home_form_is_not_embedded_when_feature_is_off(): void
     {
-        $block = file_get_contents(base_path('Modules/CmsFrontend/resources/views/screens/ban-de-an/components/home/home-content.blade.php'));
+        $block = file_get_contents(base_path('Modules/CmsFrontend/resources/views/screens/ban-de-an/components/home/blocks/contact.blade.php'));
         $this->assertMatchesRegularExpression("/isEnabled\('contact'\)\)\s*@include\('cmsfrontend::screens\.components\.home\.proposal-contact'\)\s*@endif/", (string) $block);
         $form = (string) file_get_contents(base_path('Modules/CmsFrontend/resources/views/screens/ban-de-an/components/home/proposal-contact.blade.php'));
         $this->assertStringContainsString('contact-honeypot', $form);
