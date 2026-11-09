@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Modules\CmsBackend\Http\Controllers\Shared;
 
 use App\DataProviders\AdsDataProvider;
 use App\DataProviders\OptionDataProvider;

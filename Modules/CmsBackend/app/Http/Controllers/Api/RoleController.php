@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace Modules\CmsBackend\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Role\UpdateRoleRequest;

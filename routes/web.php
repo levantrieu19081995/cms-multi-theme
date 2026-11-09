@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\ActivityLogController;
-use App\Http\Controllers\AdsController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\CommentController;
+use Modules\CmsBackend\Http\Controllers\Shared\ActivityLogController;
+use Modules\CmsBackend\Http\Controllers\Shared\AdsController;
+use Modules\CmsBackend\Http\Controllers\Shared\CategoryController;
+use Modules\CmsBackend\Http\Controllers\Shared\CommentController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LayoutController;
-use App\Http\Controllers\MenuController;
+use Modules\CmsBackend\Http\Controllers\Shared\MenuController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RoleController;
+use Modules\CmsBackend\Http\Controllers\Shared\RoleController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\UserController;
+use Modules\CmsBackend\Http\Controllers\Shared\UserController;
 use Illuminate\Support\Facades\Route;
 use Modules\CmsBackend\Http\Controllers\ContentFlagsController;
 use Modules\CmsBackend\Http\Controllers\ContentMediaController;

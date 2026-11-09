@@ -6,7 +6,7 @@ use Modules\CmsFrontend\Http\Controllers\HomeController;
 use Modules\CmsFrontend\Http\Controllers\SuKienFEController;
 use Modules\CmsFrontend\Http\Controllers\TinTucController;
 use Modules\CmsFrontend\Http\Controllers\LienHeController;
-use App\Http\Controllers\CommentController;
+use Modules\CmsBackend\Http\Controllers\Shared\CommentController;
 use Modules\CmsBackend\Http\Controllers\DoiTacController;
 use Modules\CmsBackend\Http\Controllers\GuongTieuBieuController;
 use Modules\CmsFrontend\Http\Controllers\HoiDapPublicController;

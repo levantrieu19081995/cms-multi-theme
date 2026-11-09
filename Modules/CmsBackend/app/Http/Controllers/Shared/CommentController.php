@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Modules\CmsBackend\Http\Controllers\Shared;
 
+use App\Http\Controllers\Controller;
 use App\DataProviders\CommentDataProvider;
 use App\Enums\CommentStatus;
 use App\Enums\PermissionsEnum;

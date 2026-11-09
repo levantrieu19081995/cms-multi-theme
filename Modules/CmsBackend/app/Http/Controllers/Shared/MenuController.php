@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Modules\CmsBackend\Http\Controllers\Shared;
 
+use App\Http\Controllers\Controller;
 use App\DataProviders\MenuDataProvider;
 use App\DataProviders\MenuItemDataProvider;
 use App\DataProviders\OptionDataProvider;

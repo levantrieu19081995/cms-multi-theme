@@ -10,7 +10,7 @@ use Modules\CmsFrontend\Http\Controllers\LienHeController;
 use Modules\CmsFrontend\Http\Controllers\HoiDapController;
 use Modules\CmsFrontend\Http\Controllers\HoiDapPublicController;
 use Modules\CmsBackend\Http\Controllers\SettingController;
-use App\Http\Controllers\CommentController;
+use Modules\CmsBackend\Http\Controllers\Shared\CommentController;
 use Modules\CmsBackend\Http\Controllers\DoiTacController;
 use Modules\CmsBackend\Http\Controllers\GuongTieuBieuController;
 use Modules\CmsFrontend\Http\Controllers\DichVuPublicController;

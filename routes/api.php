@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\RoleController as ApiRoleController;
+use Modules\CmsBackend\Http\Controllers\Api\RoleController as ApiRoleController;
 
 // Role administration (/cms/api/vai-tro/...): same permission as the /cms/roles screen ("Quản lý vai trò", slug category-manager
 // in the database).

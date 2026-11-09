@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Modules\CmsBackend\Http\Controllers\Shared;
 
 use App\DataProviders\UserDataProvider;
 use App\Enums\RolesEnum;

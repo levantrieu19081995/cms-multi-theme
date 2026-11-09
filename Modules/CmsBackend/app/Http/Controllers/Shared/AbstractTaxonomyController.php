@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Modules\CmsBackend\Http\Controllers\Shared;
 
+use App\Http\Controllers\Controller;
 use App\DataProviders\TaxonomyDataProvider;
 use App\Facades\Toastr;
 use App\Http\Requests\Category\CategoryCreateRequest;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace Modules\CmsBackend\Http\Controllers\Shared;
 
 use App\DataProviders\TaxonomyDataProvider;
 use App\Enums\Taxonomy as EnumsTaxonomy;
