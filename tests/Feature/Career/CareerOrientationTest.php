@@ -40,6 +40,31 @@ final class CareerOrientationTest extends TestCase
         $this->public = app(SurveyPublicService::class);
     }
 
+    /** Quản trị có đủ quyền nghenghiep-* và manifest không chặn (manifest của máy dev thuộc môi trường, không phụ thuộc vào test). */
+    private function admin(): User
+    {
+        config(['cmsbackend.developer.manifest_path' => sys_get_temp_dir().DIRECTORY_SEPARATOR.'no-manifest-'.bin2hex(random_bytes(4)).'.json']);
+        app(\Modules\CmsBackend\Services\Developer\PermissionAvailability::class)->forget();
+        $admin = User::query()->whereHas('roles', fn ($q) => $q->where('name', 'Quản trị'))->firstOrFail();
+        $labels = [];
+        foreach (\Modules\CmsBackend\Enums\PermissionsEnum::cases() as $case) {
+            if (str_starts_with($case->value, 'nghenghiep-')) {
+                \Spatie\Permission\Models\Permission::findOrCreate($case->label(), 'web');
+                $labels[] = $case->label();
+            }
+        }
+        $admin->givePermissionTo($labels);
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
+        return $admin;
+    }
+
+    /** Người dùng không có vai trò nào (factory của dự án thiếu cột status nên tạo trực tiếp). */
+    private function plainUser(string $tag): User
+    {
+        return User::query()->create(['name' => 'Test '.$tag, 'username' => 'test-'.$tag.'-'.bin2hex(random_bytes(3)), 'email' => $tag.'-'.bin2hex(random_bytes(3)).'@example.test', 'password' => bcrypt('Zz!pass-'.$tag), 'status' => 1, 'type' => 0]);
+    }
+
     protected function tearDown(): void
     {
         while (DB::connection()->transactionLevel() > 0) {
@@ -213,19 +238,19 @@ final class CareerOrientationTest extends TestCase
         $done = $this->complete($survey->refresh(), ['5', '5', 'no']);
         $session = ['survey.done.'.$survey->ks_id => $done->ksu_ma];
 
-        $empty = $this->withSession($session)->get(route('cms.frontend.khaosat.thanks', $survey->ks_ma))->assertOk();
+        $empty = $this->withSession($session)->get(route('cms.frontend.nghenghiep.thanks', $survey->ks_ma))->assertOk();
         $empty->assertSee('Kết quả định hướng nghề nghiệp')->assertSee('Mã Holland của bạn')->assertSee('Thông tin đang được cập nhật.')
             ->assertDontSee('"riasec"', false);
         $this->assertSame('SI', $done->ksu_ket_qua);
 
         $this->career->saveMajor(null, ['name' => 'Ngành xã hội thử', 'code' => 'S', 'url' => 'https://example.org/x'], null);
         $this->career->saveMajor(null, ['name' => 'Ngành link xấu', 'code' => 'S', 'url' => 'javascript:alert(1)'], null);
-        $page = $this->withSession($session)->get(route('cms.frontend.khaosat.thanks', $survey->ks_ma))->assertOk();
+        $page = $this->withSession($session)->get(route('cms.frontend.nghenghiep.thanks', $survey->ks_ma))->assertOk();
         $page->assertSee('Ngành xã hội thử')->assertSee('href="https://example.org/x"', false)->assertDontSee('javascript:alert', false);
 
         // Không có mã lượt trong phiên: quay lại trang giới thiệu, không lộ kết quả của người khác.
         $this->flushSession();
-        $this->get(route('cms.frontend.khaosat.thanks', $survey->ks_ma))->assertRedirect(route('cms.frontend.khaosat.show', $survey->ks_ma));
+        $this->get(route('cms.frontend.nghenghiep.thanks', $survey->ks_ma))->assertRedirect(route('cms.frontend.nghenghiep.show', $survey->ks_ma));
     }
 
     public function test_group_text_can_be_customised_and_falls_back_to_defaults(): void
@@ -251,21 +276,21 @@ final class CareerOrientationTest extends TestCase
 
     public function test_admin_pages_open_and_save_majors_through_http(): void
     {
-        $admin = User::query()->whereHas('roles', fn ($q) => $q->where('name', 'Quản trị'))->firstOrFail();
-        $this->actingAs($admin)->get(route('cms.khao-sat.career'))->assertOk()->assertSee('Sáu nhóm RIASEC')->assertSee('Thêm ngành');
+        $admin = $this->admin();
+        $this->actingAs($admin)->get(route('cms.nghe-nghiep.catalog'))->assertOk()->assertSee('Sáu nhóm RIASEC')->assertSee('Thêm ngành');
 
-        $this->post(route('cms.khao-sat.career.major.store'), ['name' => 'Ngành thử HTTP', 'code' => 'ia', 'order' => 3, 'active' => 1])->assertRedirect(route('cms.khao-sat.career'));
+        $this->post(route('cms.nghe-nghiep.catalog.major.store'), ['name' => 'Ngành thử HTTP', 'code' => 'ia', 'order' => 3, 'active' => 1])->assertRedirect(route('cms.nghe-nghiep.catalog'));
         $major = CareerMajor::query()->where('cm_ten', 'Ngành thử HTTP')->firstOrFail();
         $this->assertSame('IA', $major->cm_ma_riasec);
         $this->assertTrue($major->cm_trang_thai);
 
-        $this->post(route('cms.khao-sat.career.major.store'), ['name' => 'Sai mã', 'code' => 'zzz'])->assertSessionHasErrors('code');
-        $this->post(route('cms.khao-sat.career.major.update', $major->cm_id), ['name' => 'Ngành thử HTTP', 'code' => 'I', 'order' => 1])->assertRedirect(route('cms.khao-sat.career'));
+        $this->post(route('cms.nghe-nghiep.catalog.major.store'), ['name' => 'Sai mã', 'code' => 'zzz'])->assertSessionHasErrors('code');
+        $this->post(route('cms.nghe-nghiep.catalog.major.update', $major->cm_id), ['name' => 'Ngành thử HTTP', 'code' => 'I', 'order' => 1])->assertRedirect(route('cms.nghe-nghiep.catalog'));
         $major->refresh();
         $this->assertSame('I', $major->cm_ma_riasec);
         $this->assertFalse($major->cm_trang_thai);   // không gửi "active" nghĩa là ẩn
 
-        $this->post(route('cms.khao-sat.career.major.destroy', $major->cm_id))->assertRedirect(route('cms.khao-sat.career'));
+        $this->post(route('cms.nghe-nghiep.catalog.major.destroy', $major->cm_id))->assertRedirect(route('cms.nghe-nghiep.catalog'));
         $this->assertNull(CareerMajor::query()->find($major->cm_id));
     }
 
@@ -274,41 +299,38 @@ final class CareerOrientationTest extends TestCase
         // Câu hỏi/ngành do quản trị nhập, chưa có bảng bản dịch: theo quy ước của dự án, trang công khai chỉ có ngôn ngữ mặc định và
         // trên trang tiếng Anh, liên kết tới Khảo sát dẫn tới thông báo "đang cập nhật" (config/locales.php).
         $this->assertContains('cms.frontend.khaosat.', config('locales.default_only_routes'));
+        $this->assertContains('cms.frontend.nghenghiep.', config('locales.default_only_routes'));
         $this->assertFalse(\Illuminate\Support\Facades\Route::has('cms.en.frontend.khaosat.show'));
     }
 
     public function test_career_screens_need_a_logged_in_user_with_survey_permission(): void
     {
-        $this->get(route('cms.khao-sat.career'))->assertRedirect(route('cms.login'));
-        $this->post(route('cms.khao-sat.career.major.store'), ['name' => 'X', 'code' => 'I'])->assertRedirect(route('cms.login'));
+        $this->get(route('cms.nghe-nghiep.catalog'))->assertRedirect(route('cms.login'));
+        $this->post(route('cms.nghe-nghiep.catalog.major.store'), ['name' => 'X', 'code' => 'I'])->assertRedirect(route('cms.login'));
     }
 
-    public function test_career_screens_follow_the_survey_feature_switch(): void
+    public function test_career_cluster_does_not_depend_on_the_survey_feature(): void
     {
-        $admin = User::query()->whereHas('roles', fn ($q) => $q->where('name', 'Quản trị'))->firstOrFail();
+        $admin = $this->admin();
         $survey = $this->careerSurvey();
         $this->surveys->transition($survey, SurveyStatus::Open, null);
         $done = $this->complete($survey->refresh(), ['5', '5', 'yes']);
         $session = ['survey.done.'.$survey->ks_id => $done->ksu_ma];
         $registry = app(\Modules\CmsBackend\Features\FeatureRegistry::class);
 
-        $this->actingAs($admin)->get(route('cms.khao-sat.career'))->assertOk();
-        $this->withSession($session)->get(route('cms.frontend.khaosat.thanks', $survey->ks_ma))->assertOk();
-
         $registry->setEnabled('survey', false, null);
-        $this->get(route('cms.khao-sat.career'))->assertNotFound();
-        $this->post(route('cms.khao-sat.career.major.store'), ['name' => 'X', 'code' => 'I'])->assertNotFound();
-        $this->withSession($session)->get(route('cms.frontend.khaosat.thanks', $survey->ks_ma))->assertNotFound();
-        $this->get(route('cms.frontend.khaosat.show', $survey->ks_ma))->assertNotFound();
-        $this->assertSame(1, DB::table('ks_khao_sat_users')->where('ksu_id', $done->ksu_id)->count(), 'dữ liệu giữ nguyên khi tắt chức năng');
-
+        $this->actingAs($admin)->get(route('cms.nghe-nghiep'))->assertOk();
+        $this->get(route('cms.nghe-nghiep.catalog'))->assertOk();
+        $this->get(route('cms.khao-sat'))->assertNotFound();
+        $this->withSession($session)->get(route('cms.frontend.nghenghiep.thanks', $survey->ks_ma))->assertOk();
+        $this->get(route('cms.frontend.khaosat.index'))->assertNotFound();
+        $this->assertSame(1, DB::table('ks_khao_sat_users')->where('ksu_id', $done->ksu_id)->count());
         $registry->setEnabled('survey', true, null);
-        $this->get(route('cms.khao-sat.career'))->assertOk();
     }
 
     public function test_english_texts_exist_for_the_admin_screen_and_the_result_partial(): void
     {
-        $admin = User::query()->whereHas('roles', fn ($q) => $q->where('name', 'Quản trị'))->firstOrFail();
+        $admin = $this->admin();
         CareerGroup::query()->delete();
         CareerMajor::query()->delete();
         $survey = $this->careerSurvey();
@@ -318,7 +340,7 @@ final class CareerOrientationTest extends TestCase
         // Chức năng "Đa ngôn ngữ" (Developer Settings) đang tắt thì quản trị chỉ còn tiếng Việt: bật trong test để kiểm tra bản EN.
         app(\Modules\CmsBackend\Features\FeatureRegistry::class)->setEnabled('multilingual', true, null);
         // Quản trị chọn ngôn ngữ theo session (LocaleMiddleware).
-        $this->actingAs($admin)->withSession(['locale' => 'en'])->get(route('cms.khao-sat.career'))->assertOk()
+        $this->actingAs($admin)->withSession(['locale' => 'en'])->get(route('cms.nghe-nghiep.catalog'))->assertOk()
             ->assertSee('Groups &amp; majors (Career orientation)', false)->assertSee('The six RIASEC groups')->assertSee('Add major')
             ->assertDontSee('Sáu nhóm RIASEC')->assertDontSee('Thêm ngành');
 
@@ -331,18 +353,38 @@ final class CareerOrientationTest extends TestCase
         $this->assertStringNotContainsString('Kết quả định hướng', $html);
     }
 
+    public function test_developer_settings_lists_career_and_can_switch_it(): void
+    {
+        $admin = $this->admin();
+        $unlocked = [\Modules\CmsBackend\Services\Developer\DeveloperAccess::SESSION_KEY => true];
+
+        $page = $this->actingAs($admin)->withSession($unlocked)->get(route('cms.dashboard.developer-settings'))->assertOk();
+        $page->assertSee('data-feature="career"', false)->assertSee('Định hướng nghề nghiệp (RIASEC)')->assertSee('/cms/dinh-huong-nghe-nghiep');
+
+        $this->post(route('cms.dashboard.developer-settings.features.save', 'career'), ['enabled' => 0])->assertRedirect();
+        $this->assertFalse(app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('career'));
+        $this->get(route('cms.nghe-nghiep.catalog'))->assertNotFound();
+        $this->assertTrue(app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('survey'), 'tắt career không tắt Khảo sát');
+
+        $this->post(route('cms.dashboard.developer-settings.features.save', 'career'), ['enabled' => 1])->assertRedirect();
+        $this->assertTrue(app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('career'));
+        $this->get(route('cms.nghe-nghiep.catalog'))->assertOk();
+    }
+
     public function test_career_has_its_own_switch_in_the_feature_registry(): void
     {
         $registry = app(\Modules\CmsBackend\Features\FeatureRegistry::class);
         $definition = $registry->find('career');
         $this->assertNotNull($definition, 'chức năng career phải hiện trong Feature Registry (Developer Settings)');
-        $this->assertSame('cms.khao-sat.career', $definition->adminRoute());
-        $this->assertSame([], $definition->permissions(), 'dùng chung quyền khaosat-* của Khảo sát');
-        $this->assertContains('career', array_column($registry->report(), 'key'));
-        $row = collect($registry->report())->firstWhere('key', 'career');
-        $this->assertTrue($row['routes_ok']);
+        $this->assertSame('cms.nghe-nghiep', $definition->adminRoute());
+        $this->assertContains('nghenghiep-manager', $definition->permissions(), 'quyền riêng nghenghiep-*, không dùng chung khaosat-*');
+        $this->assertNotContains('khaosat-view', $definition->permissions());
+        $this->assertSame('career', $registry->featureOfPermission('nghenghiep-view'));
+        $this->assertSame('survey', $registry->featureOfPermission('khaosat-view'));
+        $this->assertSame('cms.frontend.nghenghiep.index', $definition->publicTargets()[0]['route']);
+        $this->assertTrue(collect($registry->report())->firstWhere('key', 'career')['routes_ok']);
 
-        $admin = User::query()->whereHas('roles', fn ($q) => $q->where('name', 'Quản trị'))->firstOrFail();
+        $admin = $this->admin();
         $career = $this->careerSurvey();
         $this->surveys->transition($career, SurveyStatus::Open, null);
         $general = $this->careerSurvey('general');
@@ -350,37 +392,93 @@ final class CareerOrientationTest extends TestCase
         $done = $this->complete($career->refresh(), ['5', '5', 'yes']);
 
         $registry->setEnabled('career', false, null);
-        $this->actingAs($admin)->get(route('cms.khao-sat.career'))->assertNotFound();
-        $this->get(route('cms.frontend.khaosat.show', $career->ks_ma))->assertNotFound();
-        $this->withSession(['survey.done.'.$career->ks_id => $done->ksu_ma])->get(route('cms.frontend.khaosat.thanks', $career->ks_ma))->assertNotFound();
+        $this->actingAs($admin)->get(route('cms.nghe-nghiep.catalog'))->assertNotFound();
+        $this->get(route('cms.nghe-nghiep'))->assertNotFound();
+        $this->get(route('cms.frontend.nghenghiep.show', $career->ks_ma))->assertNotFound();
+        $this->get(route('cms.frontend.nghenghiep.index'))->assertNotFound();
+        $this->withSession(['survey.done.'.$career->ks_id => $done->ksu_ma])->get(route('cms.frontend.nghenghiep.thanks', $career->ks_ma))->assertNotFound();
         $this->get(route('cms.frontend.khaosat.show', $general->ks_ma))->assertOk();   // khảo sát thường không bị ảnh hưởng
-        $list = $this->get(route('cms.frontend.khaosat.index'))->assertOk();
-        $list->assertSee($general->ks_ten)->assertDontSee($career->ks_ten);
+        $this->get(route('cms.khao-sat'))->assertOk();
         $this->expectRule(fn () => $this->surveys->create(['ks_ten' => 'Mới', 'ks_loai' => SurveyService::CAREER], null), 'Developer Settings');
-        // Khảo sát career đã có vẫn sửa thông tin được (giữ nguyên loại).
+        // Khảo sát career đã có vẫn sửa thông tin được (giữ nguyên loại) và dữ liệu giữ nguyên.
         $this->surveys->update($career->refresh(), ['ks_ten' => 'Đổi tên', 'ks_loai' => SurveyService::CAREER, 'ks_cho_phep_an_danh' => 1, 'ks_so_lan_gui' => 0], null);
         $this->assertSame(1, DB::table('ks_khao_sat_users')->where('ksu_id', $done->ksu_id)->count());
 
         $registry->setEnabled('career', true, null);
-        $this->get(route('cms.khao-sat.career'))->assertOk();
-        $this->get(route('cms.frontend.khaosat.show', $career->ks_ma))->assertOk();
+        $this->get(route('cms.nghe-nghiep.catalog'))->assertOk();
+        $this->get(route('cms.frontend.nghenghiep.show', $career->ks_ma))->assertOk();
     }
 
-    public function test_developer_settings_lists_career_and_can_switch_it(): void
+    public function test_surveys_stay_in_their_own_cluster(): void
     {
-        $admin = User::query()->whereHas('roles', fn ($q) => $q->where('name', 'Quản trị'))->firstOrFail();
-        $unlocked = [\Modules\CmsBackend\Services\Developer\DeveloperAccess::SESSION_KEY => true];
+        $admin = $this->admin();
+        $career = $this->careerSurvey();
+        $general = $this->careerSurvey('general');
+        $this->surveys->transition($career, SurveyStatus::Open, null);
+        $this->surveys->transition($general, SurveyStatus::Open, null);
 
-        $page = $this->actingAs($admin)->withSession($unlocked)->get(route('cms.dashboard.developer-settings'))->assertOk();
-        $page->assertSee('data-feature="career"', false)->assertSee('Định hướng nghề nghiệp (RIASEC)')->assertSee('/cms/khao-sat/nghe-nghiep');
+        // Danh sách quản trị tách theo cụm.
+        $this->actingAs($admin)->get(route('cms.nghe-nghiep'))->assertOk()->assertSee($career->ks_ten)->assertDontSee($general->ks_ten);
+        $this->get(route('cms.khao-sat'))->assertOk()->assertSee($general->ks_ten)->assertDontSee($career->ks_ten);
 
-        $this->post(route('cms.dashboard.developer-settings.features.save', 'career'), ['enabled' => 0])->assertRedirect();
-        $this->assertFalse(app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('career'));
-        $this->get(route('cms.khao-sat.career'))->assertNotFound();
-        $this->assertTrue(app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('survey'), 'tắt career không tắt Khảo sát');
+        // Mở nhầm cụm bằng GET: chuyển sang cùng màn của cụm đúng; ghi dữ liệu nhầm cụm: 404.
+        $this->get(route('cms.khao-sat.edit', $career->ks_id))->assertRedirect(route('cms.nghe-nghiep.edit', $career->ks_id));
+        $this->get(route('cms.nghe-nghiep.statistics', $general->ks_id))->assertRedirect(route('cms.khao-sat.statistics', $general->ks_id));
+        $this->post(route('cms.khao-sat.update', $career->ks_id), ['ks_ten' => 'x'])->assertNotFound();
+        $this->get(route('cms.nghe-nghiep.edit', $career->ks_id))->assertOk();
+        $this->get(route('cms.khao-sat.edit', $general->ks_id))->assertOk();
 
-        $this->post(route('cms.dashboard.developer-settings.features.save', 'career'), ['enabled' => 1])->assertRedirect();
-        $this->assertTrue(app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('career'));
-        $this->get(route('cms.khao-sat.career'))->assertOk();
+        // Trang công khai tách theo cụm; địa chỉ cũ chuyển sang địa chỉ mới.
+        $this->get(route('cms.frontend.nghenghiep.index'))->assertOk()->assertSee($career->ks_ten)->assertDontSee($general->ks_ten);
+        $this->get(route('cms.frontend.khaosat.index'))->assertOk()->assertSee($general->ks_ten)->assertDontSee($career->ks_ten);
+        $this->get(route('cms.frontend.khaosat.show', $career->ks_ma))->assertRedirect(route('cms.frontend.nghenghiep.show', $career->ks_ma));
+        $this->get(route('cms.frontend.nghenghiep.show', $general->ks_ma))->assertRedirect(route('cms.frontend.khaosat.show', $general->ks_ma));
+        $this->post(route('cms.frontend.khaosat.start', $career->ks_ma))->assertNotFound();
+    }
+
+    public function test_each_cluster_forces_its_own_survey_type(): void
+    {
+        $this->actingAs($this->admin());
+
+        $this->post(route('cms.nghe-nghiep.store'), ['ks_ten' => 'Bài nghề nghiệp mới', 'ks_loai' => 'general'])->assertRedirect();
+        $this->assertSame('career', KhaoSat::query()->where('ks_ten', 'Bài nghề nghiệp mới')->value('ks_loai'), 'cụm nghề nghiệp luôn tạo loại career');
+
+        $this->post(route('cms.khao-sat.store'), ['ks_ten' => 'Khảo sát ép loại', 'ks_loai' => 'career'])->assertSessionHasErrors('ks_loai');
+        $this->assertNull(KhaoSat::query()->where('ks_ten', 'Khảo sát ép loại')->first());
+        $this->post(route('cms.khao-sat.store'), ['ks_ten' => 'Khảo sát thường', 'ks_loai' => 'feedback'])->assertRedirect();
+        $this->assertSame('feedback', KhaoSat::query()->where('ks_ten', 'Khảo sát thường')->value('ks_loai'));
+    }
+
+    public function test_career_has_its_own_permissions_separate_from_survey_permissions(): void
+    {
+        $this->admin();   // chuẩn bị quyền và manifest mở, rồi dùng hai người dùng khác
+        $surveyOnly = $this->plainUser('survey');
+        \Spatie\Permission\Models\Permission::findOrCreate(\Modules\CmsBackend\Enums\PermissionsEnum::KHAOSAT_MANAGER->label(), 'web');
+        $surveyOnly->givePermissionTo(\Modules\CmsBackend\Enums\PermissionsEnum::KHAOSAT_MANAGER->label());
+        $viewer = $this->plainUser('viewer');
+        $viewer->givePermissionTo(\Modules\CmsBackend\Enums\PermissionsEnum::NGHENGHIEP_VIEW->label());
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
+        // Chỉ có quyền khảo sát: vào được Khảo sát nhưng KHÔNG vào được Định hướng nghề nghiệp.
+        $this->actingAs($surveyOnly)->get(route('cms.khao-sat'))->assertOk();
+        $this->get(route('cms.nghe-nghiep'))->assertForbidden();
+        $this->get(route('cms.nghe-nghiep.catalog'))->assertForbidden();
+
+        // Chỉ có quyền xem nghề nghiệp: xem danh sách, không tạo/sửa được và không vào Khảo sát.
+        $this->actingAs($viewer)->get(route('cms.nghe-nghiep'))->assertOk();
+        $this->get(route('cms.khao-sat'))->assertForbidden();
+        $this->get(route('cms.nghe-nghiep.create'))->assertForbidden();
+        $this->post(route('cms.nghe-nghiep.catalog.major.store'), ['name' => 'X', 'code' => 'I'])->assertForbidden();
+    }
+
+    public function test_career_admin_menu_entry_exists_and_lists_only_career_permissions(): void
+    {
+        $menu = json_decode((string) file_get_contents(base_path('Modules/CmsBackend/resources/menu/project-verticalMenu.json')), true)['menu'];
+        $entry = collect($menu)->firstWhere('slug', 'cms.nghe-nghiep');
+        $this->assertNotNull($entry);
+        $this->assertSame('/cms/dinh-huong-nghe-nghiep', $entry['url']);
+        $this->assertNotContains('khaosat-manager', $entry['roler']);
+        $expected = array_values(array_filter(array_map(fn ($c) => $c->value, \Modules\CmsBackend\Enums\PermissionsEnum::cases()), fn ($v) => str_starts_with($v, 'nghenghiep-')));
+        $this->assertEqualsCanonicalizing($expected, $entry['roler'], 'menu liệt kê đủ quyền của cụm');
     }
 }

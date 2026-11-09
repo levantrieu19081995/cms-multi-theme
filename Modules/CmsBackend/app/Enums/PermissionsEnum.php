@@ -89,6 +89,18 @@ enum PermissionsEnum: string
     case KHAOSAT_STATISTICS_VIEW = 'khaosat-statistics-view';
     case KHAOSAT_EXPORT = 'khaosat-export';
 
+    // Định hướng nghề nghiệp (RIASEC): cụm riêng nhưng dùng chung bộ máy khảo sát; bộ quyền song song với khaosat-*.
+    case NGHENGHIEP_MANAGER = 'nghenghiep-manager'; // parent
+    case NGHENGHIEP_VIEW = 'nghenghiep-view';
+    case NGHENGHIEP_CREATE = 'nghenghiep-create';
+    case NGHENGHIEP_UPDATE = 'nghenghiep-update';
+    case NGHENGHIEP_PUBLISH = 'nghenghiep-publish';
+    case NGHENGHIEP_DELETE = 'nghenghiep-delete';
+    case NGHENGHIEP_RESPONSE_VIEW = 'nghenghiep-response-view';
+    case NGHENGHIEP_RESPONSE_DELETE = 'nghenghiep-response-delete';
+    case NGHENGHIEP_STATISTICS_VIEW = 'nghenghiep-statistics-view';
+    case NGHENGHIEP_EXPORT = 'nghenghiep-export';
+
     case SHARED_FOLDER_MANAGER = 'shared-folder-manager';
 
     // Truyền thông đa kênh (Facebook / Zalo). Quyền sửa bài viết không kéo theo các quyền này.
@@ -132,6 +144,17 @@ enum PermissionsEnum: string
             static::KHAOSAT_RESPONSE_DELETE => 'Xóa phản hồi khảo sát',
             static::KHAOSAT_STATISTICS_VIEW => 'Xem thống kê khảo sát',
             static::KHAOSAT_EXPORT => 'Xuất dữ liệu khảo sát',
+
+            static::NGHENGHIEP_MANAGER => 'Quản lý định hướng nghề nghiệp',
+            static::NGHENGHIEP_VIEW => 'Xem kết quả định hướng nghề nghiệp',
+            static::NGHENGHIEP_CREATE => 'Thêm bài định hướng nghề nghiệp',
+            static::NGHENGHIEP_UPDATE => 'Cập nhật bài định hướng nghề nghiệp',
+            static::NGHENGHIEP_PUBLISH => 'Phát hành bài định hướng nghề nghiệp',
+            static::NGHENGHIEP_DELETE => 'Xóa bài định hướng nghề nghiệp',
+            static::NGHENGHIEP_RESPONSE_VIEW => 'Xem phản hồi định hướng nghề nghiệp',
+            static::NGHENGHIEP_RESPONSE_DELETE => 'Xóa phản hồi định hướng nghề nghiệp',
+            static::NGHENGHIEP_STATISTICS_VIEW => 'Xem thống kê định hướng nghề nghiệp',
+            static::NGHENGHIEP_EXPORT => 'Xuất dữ liệu định hướng nghề nghiệp',
 
             static::DOITAC_MANAGER => 'Quản lý đối tác',
             static::DOITAC_VIEW => 'Xem đối tác',
@@ -235,6 +258,17 @@ enum PermissionsEnum: string
                 static::KHAOSAT_RESPONSE_DELETE->label(),
                 static::KHAOSAT_STATISTICS_VIEW->label(),
                 static::KHAOSAT_EXPORT->label(),
+            ],
+            static::NGHENGHIEP_MANAGER->label() => [
+                static::NGHENGHIEP_VIEW->label(),
+                static::NGHENGHIEP_CREATE->label(),
+                static::NGHENGHIEP_UPDATE->label(),
+                static::NGHENGHIEP_PUBLISH->label(),
+                static::NGHENGHIEP_DELETE->label(),
+                static::NGHENGHIEP_RESPONSE_VIEW->label(),
+                static::NGHENGHIEP_RESPONSE_DELETE->label(),
+                static::NGHENGHIEP_STATISTICS_VIEW->label(),
+                static::NGHENGHIEP_EXPORT->label(),
             ],
             static::DOITAC_MANAGER->label() => [
                 // static::DOITAC_VIEW->label(),

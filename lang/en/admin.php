@@ -59,6 +59,7 @@ return [
         'quan_ly_dich_vu' => 'Manage services',
         'quan_ly_doi_tac' => 'Manage partners',
         'quan_ly_guong_tieu_bieu' => 'Manage role models',
+        'dinh_huong_nghe_nghiep' => 'Career orientation',
         'quan_ly_khao_sat' => 'Manage surveys',
         'quan_ly_khao_sat_dhnn' => 'Manage surveys',
         'quan_ly_lien_ket_website' => 'Manage website links',

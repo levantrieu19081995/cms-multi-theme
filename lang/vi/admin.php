@@ -60,6 +60,7 @@ return [
         'quan_ly_doi_tac' => 'Quản lý đối tác',
         'quan_ly_guong_tieu_bieu' => 'Quản lý gương tiêu biểu',
         'quan_ly_khao_sat' => 'Quản lý khảo sát',
+        'dinh_huong_nghe_nghiep' => 'Định hướng nghề nghiệp',
         'quan_ly_khao_sat_dhnn' => 'Quản lý khảo sát ĐHNN',
         'quan_ly_lien_ket_website' => 'Quản lý liên kết website',
         'quan_ly_loai_van_ban' => 'Quản lý loại văn bản',

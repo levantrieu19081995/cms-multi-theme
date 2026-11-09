@@ -13,6 +13,7 @@ return [
     ],
 
     'admin' => [
+        'cluster_title' => 'Career orientation',
         'title' => 'Groups & majors (Career orientation)',
         'back' => 'Surveys',
         'intro' => 'Edit how the 6 RIASEC groups are shown and declare the suggested majors for people taking a career orientation survey. Questions are built in each survey (type "Career orientation").',
@@ -44,6 +45,12 @@ return [
         'delete' => 'Delete',
         'actions' => 'Actions',
         'menu_link' => 'Groups & majors',
+    ],
+
+    'public' => [
+        'list_title' => 'Career orientation',
+        'list_subtitle' => 'Choose a questionnaire to discover your career interest groups.',
+        'list_empty' => 'No career orientation questionnaire is open right now.',
     ],
 
     'result' => [

@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\CmsBackend\Features\Definitions;
 
+use Modules\CmsBackend\Enums\PermissionsEnum;
 use Modules\CmsBackend\Features\Contracts\FeatureDefinition;
 
 /**
- * Định hướng nghề nghiệp (RIASEC). Là phần mở rộng của Khảo sát nên cần chức năng "survey" đang bật; công tắc riêng này chỉ bật/tắt
- * loại khảo sát "career", màn "Nhóm & ngành nghề" và trang kết quả. Dùng chung quyền `khaosat-*` của Khảo sát (không khai báo quyền
- * riêng ở đây để chức năng Khảo sát vẫn là chủ sở hữu của các quyền đó). Tên và mô tả lấy từ lang/{locale}/features.php.
+ * Định hướng nghề nghiệp (RIASEC): cụm chức năng riêng (menu, địa chỉ /dinh-huong-nghe-nghiep, quyền nghenghiep-*, công tắc riêng) nhưng dùng
+ * chung bộ máy khảo sát (dựng câu hỏi, trang làm bài, phản hồi, thống kê, xuất) nên KHÔNG cần chức năng Khảo sát đang bật.
+ * Tên và mô tả lấy từ lang/{locale}/features.php.
  */
 final class CareerFeature implements FeatureDefinition
 {
@@ -35,18 +36,30 @@ final class CareerFeature implements FeatureDefinition
 
     public function adminRoute(): ?string
     {
-        return 'cms.khao-sat.career';
+        return 'cms.nghe-nghiep';
     }
 
-    /** Khảo sát nghề nghiệp được mở bằng địa chỉ riêng của từng khảo sát (có tham số), nên không có điểm đến gắn menu cố định. */
     public function publicTargets(): array
     {
-        return [];
+        return [
+            ['key' => 'index', 'name' => (string) __('features.career.targets.index'), 'route' => 'cms.frontend.nghenghiep.index'],
+        ];
     }
 
     public function permissions(): array
     {
-        return [];
+        return array_map(fn (PermissionsEnum $case) => $case->value, [
+            PermissionsEnum::NGHENGHIEP_MANAGER,
+            PermissionsEnum::NGHENGHIEP_VIEW,
+            PermissionsEnum::NGHENGHIEP_CREATE,
+            PermissionsEnum::NGHENGHIEP_UPDATE,
+            PermissionsEnum::NGHENGHIEP_PUBLISH,
+            PermissionsEnum::NGHENGHIEP_DELETE,
+            PermissionsEnum::NGHENGHIEP_RESPONSE_VIEW,
+            PermissionsEnum::NGHENGHIEP_RESPONSE_DELETE,
+            PermissionsEnum::NGHENGHIEP_STATISTICS_VIEW,
+            PermissionsEnum::NGHENGHIEP_EXPORT,
+        ]);
     }
 
     public function enabledByDefault(): bool

@@ -3,7 +3,7 @@
 @php
     $user = auth()->user();
     $canExport = \Modules\CmsBackend\Support\SurveyPermissions::map(auth()->user())['khaosat-export'];
-    $route = fn (string $name, mixed $params = []) => \Modules\CmsBackend\Support\ModuleUrl::route($name, $params);
+    $route = fn (string $name, mixed $params = []) => \Modules\CmsBackend\Support\ModuleUrl::route(\Modules\CmsBackend\Support\SurveyCluster::name($name), $params);
     $o = $stats['overview'];
     $exportQuery = array_filter($filters, fn ($v) => $v !== null && $v !== '');
 @endphp

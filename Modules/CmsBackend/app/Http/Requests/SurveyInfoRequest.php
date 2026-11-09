@@ -3,6 +3,7 @@
 namespace Modules\CmsBackend\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Modules\CmsBackend\Support\SurveyCluster;
 
 /** Thông tin chung của khảo sát. Quyền được kiểm tra ở route (cms.check.permission), không ở đây. */
 class SurveyInfoRequest extends FormRequest
@@ -19,7 +20,8 @@ class SurveyInfoRequest extends FormRequest
             'ks_ma' => ['nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9\-_ ]+$/'],
             'ks_mo_ta_ngan' => ['nullable', 'string', 'max:500'],
             'ks_gioi_thieu' => ['nullable', 'string', 'max:100000'],
-            'ks_loai' => ['nullable', 'string', 'in:general,satisfaction,feedback,research,career'],
+            // Cụm Khảo sát không chọn được loại career (thuộc cụm Định hướng nghề nghiệp); cụm nghề nghiệp luôn là career.
+            'ks_loai' => ['nullable', 'string', SurveyCluster::isCareer($this) ? 'in:career' : 'in:general,satisfaction,feedback,research'],
             'ks_bat_dau' => ['nullable', 'date'],
             'ks_ket_thuc' => ['nullable', 'date', 'after:ks_bat_dau'],
             'ks_cho_phep_an_danh' => ['sometimes', 'boolean'],
@@ -33,6 +35,7 @@ class SurveyInfoRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
+            'ks_loai' => SurveyCluster::isCareer($this) ? 'career' : $this->input('ks_loai'),
             'ks_cho_phep_an_danh' => $this->boolean('ks_cho_phep_an_danh'),
             'ks_yeu_cau_thong_tin' => $this->boolean('ks_yeu_cau_thong_tin'),
             'ks_so_lan_gui' => $this->input('ks_so_lan_gui', 1) === '' ? 1 : $this->input('ks_so_lan_gui', 1),

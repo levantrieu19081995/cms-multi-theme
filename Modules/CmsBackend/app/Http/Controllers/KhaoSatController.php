@@ -15,6 +15,7 @@ use Modules\CmsBackend\Http\Requests\SurveyStructureRequest;
 use Modules\CmsBackend\Services\SurveyFormService;
 use Modules\CmsBackend\Services\SurveyService;
 use Modules\CmsBackend\Support\Riasec;
+use Modules\CmsBackend\Support\SurveyCluster;
 use Modules\CmsFrontend\Models\KhaoSat;
 
 /**
@@ -26,7 +27,7 @@ class KhaoSatController extends Controller
 
     public function index(Request $request)
     {
-        $filters = ['q' => trim((string) $request->query('q')), 'status' => $request->query('status')];
+        $filters = ['q' => trim((string) $request->query('q')), 'status' => $request->query('status'), 'cluster' => SurveyCluster::current()];
         if ($filters['status'] !== null && ! in_array($filters['status'], [...SurveyStatus::values(), 'trashed'], true)) {
             $filters['status'] = null;
         }
@@ -40,7 +41,7 @@ class KhaoSatController extends Controller
 
     public function create()
     {
-        return view('cmsbackend::screens.pages.khao-sat.edit', ['survey' => new KhaoSat(['ks_status' => 'draft', 'ks_cho_phep_an_danh' => true, 'ks_so_lan_gui' => 1, 'ks_loai' => 'general']), 'caps' => null, 'structure' => []]);
+        return view('cmsbackend::screens.pages.khao-sat.edit', ['survey' => new KhaoSat(['ks_status' => 'draft', 'ks_cho_phep_an_danh' => true, 'ks_so_lan_gui' => 1, 'ks_loai' => SurveyCluster::isCareer() ? SurveyService::CAREER : 'general']), 'caps' => null, 'structure' => []]);
     }
 
     public function store(SurveyInfoRequest $request): RedirectResponse
@@ -52,7 +53,7 @@ class KhaoSatController extends Controller
         }
         Toastr::success(__('admin.survey.saved'), __('admin.survey.ok'));
 
-        return redirect()->route('cms.khao-sat.edit', $survey->ks_id)->with('tab', 'builder');
+        return redirect()->route(SurveyCluster::name('cms.khao-sat.edit'), $survey->ks_id)->with('tab', 'builder');
     }
 
     public function edit(KhaoSat $survey)
@@ -73,7 +74,7 @@ class KhaoSatController extends Controller
         }
         Toastr::success(__('admin.survey.saved'), __('admin.survey.ok'));
 
-        return redirect()->route('cms.khao-sat.edit', $survey->ks_id)->with('tab', 'info');
+        return redirect()->route(SurveyCluster::name('cms.khao-sat.edit'), $survey->ks_id)->with('tab', 'info');
     }
 
     public function saveStructure(SurveyStructureRequest $request, KhaoSat $survey): RedirectResponse
@@ -86,7 +87,7 @@ class KhaoSatController extends Controller
         }
         Toastr::success(__('admin.survey.structure_saved'), __('admin.survey.ok'));
 
-        return redirect()->route('cms.khao-sat.edit', $survey->ks_id)->with('tab', 'builder');
+        return redirect()->route(SurveyCluster::name('cms.khao-sat.edit'), $survey->ks_id)->with('tab', 'builder');
     }
 
     public function changeStatus(Request $request, KhaoSat $survey): RedirectResponse
@@ -112,7 +113,7 @@ class KhaoSatController extends Controller
         $copy = $this->surveys->duplicate($survey, Auth::id());
         Toastr::success(__('admin.survey.duplicated'), __('admin.survey.ok'));
 
-        return redirect()->route('cms.khao-sat.edit', $copy->ks_id);
+        return redirect()->route(SurveyCluster::name('cms.khao-sat.edit'), $copy->ks_id);
     }
 
     /** Xem trước = trang công khai thật nhưng không ghi dữ liệu, không phụ thuộc trạng thái/thời gian. */
@@ -138,7 +139,7 @@ class KhaoSatController extends Controller
         }
         Toastr::success(__('admin.survey.deleted'), __('admin.survey.ok'));
 
-        return redirect()->route('cms.khao-sat');
+        return redirect()->route(SurveyCluster::name('cms.khao-sat'));
     }
 
     public function restore(KhaoSat $survey): RedirectResponse
@@ -146,7 +147,7 @@ class KhaoSatController extends Controller
         $this->surveys->restore($survey);
         Toastr::success(__('admin.survey.restored'), __('admin.survey.ok'));
 
-        return redirect()->route('cms.khao-sat.edit', $survey->ks_id);
+        return redirect()->route(SurveyCluster::name('cms.khao-sat.edit'), $survey->ks_id);
     }
 
     /** Kiểu câu hỏi cho trình dựng (nhãn đã dịch). */

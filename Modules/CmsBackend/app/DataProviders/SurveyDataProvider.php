@@ -36,6 +36,12 @@ class SurveyDataProvider
             $like = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], mb_strtolower((string) $filters['q'])).'%';
             $query->where(fn ($q) => $q->whereRaw('LOWER(ks_ten) LIKE ?', [$like])->orWhereRaw('LOWER(ks_ma) LIKE ?', [$like]));
         }
+        // Cụm Định hướng nghề nghiệp chỉ có khảo sát loại career; cụm Khảo sát có mọi loại còn lại.
+        if (($filters['cluster'] ?? null) === 'career') {
+            $query->where('ks_loai', 'career');
+        } elseif (($filters['cluster'] ?? null) === 'survey') {
+            $query->where(fn ($q) => $q->whereNull('ks_loai')->orWhere('ks_loai', '!=', 'career'));
+        }
 
         return $query
             ->withCount([

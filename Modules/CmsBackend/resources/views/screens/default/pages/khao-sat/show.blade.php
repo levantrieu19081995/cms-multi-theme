@@ -1,7 +1,7 @@
 @extends('cmsbackend::screens.components.shared.layouts.layoutMaster')
 @section('title', __('admin.survey_report.detail_title'))
 @php
-    $route = fn (string $name, mixed $params = []) => \Modules\CmsBackend\Support\ModuleUrl::route($name, $params);
+    $route = fn (string $name, mixed $params = []) => \Modules\CmsBackend\Support\ModuleUrl::route(\Modules\CmsBackend\Support\SurveyCluster::name($name), $params);
     $hasContact = ! $participation->ksu_an_danh && (trim((string) $participation->ksu_ho_ten) !== '' || trim((string) $participation->ksu_so_dien_thoai) !== '' || trim((string) $participation->ksu_email) !== '');
     $device = \Illuminate\Support\Str::limit((string) $participation->ksu_user_agent, 120);
 @endphp

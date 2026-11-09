@@ -101,6 +101,26 @@
       ]
     },
     {
+      "order": 106,
+      "name": "Định hướng nghề nghiệp",
+      "i18n": "admin.menu.dinh_huong_nghe_nghiep",
+      "icon": "menu-icon tf-icons ri-compass-3-line",
+      "slug": "cms.nghe-nghiep",
+      "url": "/cms/dinh-huong-nghe-nghiep",
+      "roler": [
+        "nghenghiep-manager",
+        "nghenghiep-view",
+        "nghenghiep-create",
+        "nghenghiep-update",
+        "nghenghiep-publish",
+        "nghenghiep-delete",
+        "nghenghiep-response-view",
+        "nghenghiep-response-delete",
+        "nghenghiep-statistics-view",
+        "nghenghiep-export"
+      ]
+    },
+    {
       "key": "cdn_baiviet",
       "order": 101,
       "name": "Quản lý bài viết",

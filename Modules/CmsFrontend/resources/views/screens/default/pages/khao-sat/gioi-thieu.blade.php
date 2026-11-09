@@ -17,7 +17,7 @@
     </div>
 @endif
 
-<form method="post" action="{{ route('cms.frontend.khaosat.start', $survey->ks_ma) }}" class="sv-card" novalidate>
+<form method="post" action="{{ \Modules\CmsBackend\Support\SurveyCluster::route('cms.frontend.khaosat.start', $survey->ks_ma) }}" class="sv-card" novalidate>
     @csrf
     @if ($identity['collect'])
         <h2>{{ __('survey.intro.identity_title') }}</h2>

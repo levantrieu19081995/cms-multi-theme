@@ -19,7 +19,9 @@ final class SurveyPermissions
             return false;
         }
 
-        return $user->can($permission->label()) || $user->can(PermissionsEnum::KHAOSAT_MANAGER->label());
+        $parent = str_starts_with($permission->value, 'nghenghiep-') ? PermissionsEnum::NGHENGHIEP_MANAGER : PermissionsEnum::KHAOSAT_MANAGER;
+
+        return $user->can($permission->label()) || $user->can($parent->label());
     }
 
     /** Một trong các quyền (ANY-of), như middleware nhiều quyền. */
@@ -34,13 +36,20 @@ final class SurveyPermissions
         return false;
     }
 
-    /** @return array<string, bool> khóa là giá trị enum (vd. 'khaosat-update'), cho view */
-    public static function map(?User $user): array
+    /**
+     * Khóa luôn là giá trị quyền của cụm Khảo sát (vd. 'khaosat-update') để các view dùng chung không phải đổi; giá trị là quyền TƯƠNG ỨNG
+     * của cụm đang chạy (cụm Định hướng nghề nghiệp thì kiểm tra nghenghiep-*).
+     *
+     * @return array<string, bool>
+     */
+    public static function map(?User $user, ?string $cluster = null): array
     {
+        $cluster ??= SurveyCluster::current();
         $map = [];
         foreach (PermissionsEnum::cases() as $case) {
             if (str_starts_with($case->value, 'khaosat-') && $case !== PermissionsEnum::KHAOSAT_MANAGER) {
-                $map[$case->value] = self::can($user, $case);
+                $suffix = strtoupper(str_replace('-', '_', substr($case->value, strlen('khaosat-'))));
+                $map[$case->value] = self::can($user, SurveyCluster::permission($suffix, $cluster));
             }
         }
 

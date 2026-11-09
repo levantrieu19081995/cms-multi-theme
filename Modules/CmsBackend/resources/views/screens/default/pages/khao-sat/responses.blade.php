@@ -6,7 +6,7 @@
     $perm = fn (string $slug) => (bool) ($permMap[$slug] ?? false);
     $canDelete = $perm('khaosat-response-delete');
     $canExport = $perm('khaosat-export');
-    $route = fn (string $name, mixed $params = []) => \Modules\CmsBackend\Support\ModuleUrl::route($name, $params);
+    $route = fn (string $name, mixed $params = []) => \Modules\CmsBackend\Support\ModuleUrl::route(\Modules\CmsBackend\Support\SurveyCluster::name($name), $params);
     $base = $route('cms.khao-sat.responses', $survey->ks_id);
     $exportQuery = array_filter($filters, fn ($v) => $v !== null && $v !== '');
 @endphp

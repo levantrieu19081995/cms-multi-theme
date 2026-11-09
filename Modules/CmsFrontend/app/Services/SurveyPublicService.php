@@ -14,6 +14,7 @@ use Modules\CmsBackend\Services\SurveyFormService;
 use Modules\CmsBackend\Services\CareerService;
 use Modules\CmsBackend\Services\SurveyService;
 use Modules\CmsBackend\Support\Riasec;
+use Modules\CmsBackend\Support\SurveyCluster;
 use Modules\CmsBackend\Support\SurveyHtmlSanitizer;
 use Modules\CmsFrontend\Models\KhaoSat;
 use Modules\CmsFrontend\Models\KhaoSatUser;
@@ -61,15 +62,15 @@ class SurveyPublicService
         return $survey->ks_loai === SurveyService::CAREER && ! $this->career->enabled() ? null : $survey;
     }
 
-    /** Khảo sát đang mở cho trang danh sách công khai (xem SurveyDataProvider::openForPublic). */
-    public function openList(): \Illuminate\Support\Collection
+    /**
+     * Khảo sát đang mở cho trang danh sách công khai của MỘT cụm (xem SurveyDataProvider::openForPublic): cụm Khảo sát không có khảo sát
+     * loại career, cụm Định hướng nghề nghiệp chỉ có loại career.
+     */
+    public function openList(string $cluster = SurveyCluster::SURVEY): \Illuminate\Support\Collection
     {
-        $surveys = $this->surveys->openForPublic(now());
-
-        return $this->career->enabled() ? $surveys : $surveys->reject(fn (KhaoSat $s) => $s->ks_loai === SurveyService::CAREER)->values();
+        return $this->surveys->openForPublic(now())->filter(fn (KhaoSat $s) => SurveyCluster::of($s) === $cluster)->values();
     }
 
-    /** @return string self::OPEN|PAUSED|NOT_STARTED|ENDED */
     public function availability(KhaoSat $survey): string
     {
         $now = now();

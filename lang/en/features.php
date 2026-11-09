@@ -11,7 +11,10 @@ return [
     ],
     'career' => [
         'name' => 'Career orientation (RIASEC)',
-        'description' => 'A survey type with a Holland code result and suggested majors, plus the "Groups & majors" screen. Needs the Survey feature to be on; when off, surveys of this type and the result page stop working (data is kept).',
+        'description' => 'A feature cluster of its own (built on the survey engine): RIASEC questionnaires, Holland code results, suggested majors, statistics and Excel export. When off, both the administration and the public pages stop working (data is kept); it does not depend on the Survey feature.',
+        'targets' => [
+            'index' => 'Career orientation list',
+        ],
     ],
     'contact' => [
         'name' => 'Contact',

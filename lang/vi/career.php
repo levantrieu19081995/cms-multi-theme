@@ -12,8 +12,9 @@ return [
         'C' => ['name' => 'Nghiệp vụ – Tổ chức (Conventional)', 'description' => 'Thích công việc có quy trình rõ ràng, số liệu, hồ sơ, sổ sách; làm việc cẩn thận, ngăn nắp và chính xác.'],
     ],
 
-    // Màn quản trị: /cms/khao-sat/nghe-nghiep
+    // Màn quản trị: /cms/dinh-huong-nghe-nghiep/nhom-nganh
     'admin' => [
+        'cluster_title' => 'Định hướng nghề nghiệp',
         'title' => 'Nhóm & ngành nghề (Định hướng nghề nghiệp)',
         'back' => 'Khảo sát',
         'intro' => 'Chỉnh cách hiển thị 6 nhóm RIASEC và khai báo các ngành gợi ý cho người làm khảo sát định hướng nghề nghiệp. Câu hỏi được dựng trong từng khảo sát (loại "Định hướng nghề nghiệp").',
@@ -45,6 +46,13 @@ return [
         'delete' => 'Xóa',
         'actions' => 'Thao tác',
         'menu_link' => 'Nhóm & ngành nghề',
+    ],
+
+    // Danh sách công khai /dinh-huong-nghe-nghiep
+    'public' => [
+        'list_title' => 'Định hướng nghề nghiệp',
+        'list_subtitle' => 'Chọn một bài trắc nghiệm để khám phá nhóm sở thích nghề nghiệp của bạn.',
+        'list_empty' => 'Hiện chưa có bài định hướng nghề nghiệp nào đang mở.',
     ],
 
     // Trang kết quả công khai và màn xem lượt

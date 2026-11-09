@@ -3,7 +3,7 @@
 @php
     $sections = $form['sections'];
     $total = count($sections);
-    $action = $preview ? '#' : route('cms.frontend.khaosat.submit', $survey->ks_ma);
+    $action = $preview ? '#' : \Modules\CmsBackend\Support\SurveyCluster::route('cms.frontend.khaosat.submit', $survey->ks_ma);
 @endphp
 @section('content')
 <article class="sv-card">

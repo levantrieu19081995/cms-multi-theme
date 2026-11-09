@@ -9,7 +9,7 @@
     $canPublish = $perm('khaosat-publish');
     $canResponses = $perm('khaosat-response-view') || $perm('khaosat-view');
     $canStats = $perm('khaosat-statistics-view');
-    $route = fn (string $name, mixed $params = []) => \Modules\CmsBackend\Support\ModuleUrl::route($name, $params);
+    $route = fn (string $name, mixed $params = []) => \Modules\CmsBackend\Support\ModuleUrl::route(\Modules\CmsBackend\Support\SurveyCluster::name($name), $params);
     $infoEditable = $exists ? ($caps['edit_info'] && $canUpdate) : true;
     $structureEditable = $exists && $caps['edit_structure'] && $canUpdate;
     $collectionLocked = $exists && ($caps['collection_locked'] ?? false);
@@ -33,7 +33,7 @@
 <div class="cms-native-record">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <div>
-            <a href="{{ $route('cms.khao-sat') }}" class="text-muted"><i class="ri-arrow-left-line" aria-hidden="true"></i> {{ __('admin.survey.title') }}</a>
+            <a href="{{ $route('cms.khao-sat') }}" class="text-muted"><i class="ri-arrow-left-line" aria-hidden="true"></i> {{ \Modules\CmsBackend\Support\SurveyCluster::title() }}</a>
             <h3 class="mb-0 mt-1">{{ $exists ? $survey->ks_ten : __('admin.survey.create') }}</h3>
         </div>
         @if ($exists)
@@ -54,10 +54,10 @@
                         'url' => $route('cms.frontend.khaosat.show', $survey->ks_ma),
                     ])
                 @endif
-                @if ($canResponses && \Illuminate\Support\Facades\Route::has('cms.khao-sat.responses'))
+                @if ($canResponses && \Illuminate\Support\Facades\Route::has(\Modules\CmsBackend\Support\SurveyCluster::name('cms.khao-sat.responses')))
                     <a class="btn btn-sm btn-outline-secondary" href="{{ $route('cms.khao-sat.responses', $survey->ks_id) }}">{{ __('admin.survey.responses') }}</a>
                 @endif
-                @if ($canStats && \Illuminate\Support\Facades\Route::has('cms.khao-sat.statistics'))
+                @if ($canStats && \Illuminate\Support\Facades\Route::has(\Modules\CmsBackend\Support\SurveyCluster::name('cms.khao-sat.statistics')))
                     <a class="btn btn-sm btn-outline-secondary" href="{{ $route('cms.khao-sat.statistics', $survey->ks_id) }}">{{ __('admin.survey.statistics') }}</a>
                 @endif
             </div>
@@ -108,16 +108,19 @@
                             <textarea class="form-control" id="ks_gioi_thieu" name="ks_gioi_thieu" rows="6">{{ old('ks_gioi_thieu', $survey->ks_gioi_thieu) }}</textarea>
                             <div class="form-text">{{ __('admin.survey.intro_hint') }}</div>
                         </div>
+                        @if ($isCareer || \Modules\CmsBackend\Support\SurveyCluster::isCareer())
+                            <input type="hidden" name="ks_loai" value="career">
+                        @else
                         <div class="col-md-4">
                             <label class="form-label fw-bold" for="ks_loai">{{ __('admin.survey.field.type') }}</label>
                             @if ($collectionLocked)<input type="hidden" name="ks_loai" value="{{ $survey->ks_loai ?: 'general' }}">@endif
                             <select class="form-select" id="ks_loai" @unless ($collectionLocked) name="ks_loai" @endunless @disabled($collectionLocked)>
-                                @foreach (['general', 'satisfaction', 'feedback', 'research', 'career'] as $kind)
-                                    @continue($kind === 'career' && ! $isCareer && ! app(\Modules\CmsBackend\Services\CareerService::class)->enabled())
+                                @foreach (['general', 'satisfaction', 'feedback', 'research'] as $kind)
                                     <option value="{{ $kind }}" @selected(old('ks_loai', $survey->ks_loai) === $kind)>{{ __('admin.survey.kind.'.$kind) }}</option>
                                 @endforeach
                             </select>
                         </div>
+                        @endif
                         <div class="col-md-4">
                             <label class="form-label fw-bold" for="ks_bat_dau">{{ __('admin.survey.field.start') }}</label>
                             @if ($collectionLocked)<input type="hidden" name="ks_bat_dau" value="{{ $dt($survey->ks_bat_dau) }}">@endif

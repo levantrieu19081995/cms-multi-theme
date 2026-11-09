@@ -9,7 +9,7 @@ final class AdminTheme
 {
     public static function request(Request $request): bool
     {
-        return (bool) $request->user() && ($request->routeIs('cms.dashboard*', 'cms.setting.*', 'cms.khao-sat', 'cms.khao-sat.show') || self::sharedRequest($request));
+        return (bool) $request->user() && ($request->routeIs('cms.dashboard*', 'cms.setting.*', 'cms.khao-sat', 'cms.khao-sat.show', 'cms.nghe-nghiep', 'cms.nghe-nghiep.show') || self::sharedRequest($request));
     }
 
     public static function sharedRequest(Request $request): bool
@@ -45,7 +45,7 @@ final class AdminTheme
     public static function listPage(Request $request): bool
     {
         return str_ends_with($request->route()?->getName() ?? '', '.index')
-            || ($request->routeIs('cms.khao-sat', 'cms.dashboard.khao-sat') && $request->route()?->getActionMethod() === 'index');
+            || ($request->routeIs('cms.khao-sat', 'cms.nghe-nghiep', 'cms.dashboard.khao-sat') && $request->route()?->getActionMethod() === 'index');
     }
 
     public static function recordPage(Request $request): ?array
@@ -64,8 +64,8 @@ final class AdminTheme
         ];
         $mode = $request->route()->getActionMethod();
         $resource = preg_replace('/\.(create|edit|show)$/', '', $request->route()->getName() ?? '');
-        if ($mode === 'show' && $request->routeIs('cms.dashboard.khao-sat', 'cms.khao-sat.show')) {
-            return ['title' => __('admin.record.show').' '.__('admin.resource.survey'), 'mode' => $mode, 'index' => \Modules\CmsBackend\Support\ModuleUrl::route('cms.khao-sat')];
+        if ($mode === 'show' && $request->routeIs('cms.dashboard.khao-sat', 'cms.khao-sat.show', 'cms.nghe-nghiep.show')) {
+            return ['title' => __('admin.record.show').' '.__('admin.resource.survey'), 'mode' => $mode, 'index' => \Modules\CmsBackend\Support\ModuleUrl::route(\Modules\CmsBackend\Support\SurveyCluster::name('cms.khao-sat'))];
         }
         if (! isset($resources[$resource])) {
             return null;
@@ -95,6 +95,9 @@ final class AdminTheme
     {
         if (in_array($route, ['cms.khao-sat', 'cms.dashboard.khao-sat'], true)) {
             return __('admin.menu.quan_ly_khao_sat_dhnn');
+        }
+        if ($route === 'cms.nghe-nghiep') {
+            return __('admin.menu.dinh_huong_nghe_nghiep');
         }
         foreach ($items as $item) {
             if (isset($item->submenu)) {

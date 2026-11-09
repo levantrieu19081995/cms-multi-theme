@@ -182,8 +182,8 @@ class CmsBackendController extends Controller
 
     private function getKhaoSatStats($year): array
     {
-        // Feature Registry đang tắt Khảo sát: không đọc dữ liệu khảo sát cho bảng điều khiển.
-        if (! app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('survey')) {
+        // Biểu đồ này là của cụm Định hướng nghề nghiệp: Feature Registry đang tắt `career` thì không đọc dữ liệu cho bảng điều khiển.
+        if (! app(\Modules\CmsBackend\Features\FeatureRegistry::class)->isEnabled('career')) {
             return [[], [], 0];
         }
         $records = $this->khaoSatService->getUsersWithFilter(['year' => $year, 'has_result' => true]);

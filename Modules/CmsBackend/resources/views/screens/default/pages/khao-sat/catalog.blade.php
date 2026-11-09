@@ -3,9 +3,9 @@
 @php
     $permMap = \Modules\CmsBackend\Support\SurveyPermissions::map(auth()->user());
     $canWrite = (bool) ($permMap['khaosat-update'] ?? false);
-    $route = fn (string $name, mixed $params = []) => \Modules\CmsBackend\Support\ModuleUrl::route($name, $params);
+    $route = fn (string $name, mixed $params = []) => \Modules\CmsBackend\Support\ModuleUrl::route(\Modules\CmsBackend\Support\SurveyCluster::name($name), $params);
     $editing = $editing ?? null;
-    $formAction = $editing ? $route('cms.khao-sat.career.major.update', $editing->cm_id) : $route('cms.khao-sat.career.major.store');
+    $formAction = $editing ? $route('cms.khao-sat.catalog.major.update', $editing->cm_id) : $route('cms.khao-sat.catalog.major.store');
     $val = fn (string $field, string $column, mixed $default = '') => old($field, $editing?->{$column} ?? $default);
 @endphp
 @section('content')
@@ -21,7 +21,7 @@
             <h5>{{ __('career.admin.groups_title') }}</h5>
             <p class="text-muted small">{{ __('career.admin.groups_hint') }}</p>
             @error('groups')<div class="alert alert-danger" role="alert">{{ $message }}</div>@enderror
-            <form method="post" action="{{ $route('cms.khao-sat.career.groups') }}">
+            <form method="post" action="{{ $route('cms.khao-sat.catalog.groups') }}">
                 @csrf
                 @foreach ($groups as $letter => $group)
                     <div class="row g-2 align-items-start mb-3">
@@ -70,8 +70,8 @@
                                 <td>@unless ($major->cm_trang_thai)<span class="badge bg-label-secondary">{{ __('career.admin.major_inactive') }}</span>@endunless</td>
                                 @if ($canWrite)
                                     <td class="text-nowrap">
-                                        <a class="btn btn-sm btn-outline-secondary" href="{{ $route('cms.khao-sat.career') }}?sua={{ $major->cm_id }}#major-form">{{ __('career.admin.edit') }}</a>
-                                        <form method="post" action="{{ $route('cms.khao-sat.career.major.destroy', $major->cm_id) }}" class="d-inline" onsubmit="return confirm(@js(__('career.admin.major_confirm_delete')))">
+                                        <a class="btn btn-sm btn-outline-secondary" href="{{ $route('cms.khao-sat.catalog') }}?sua={{ $major->cm_id }}#major-form">{{ __('career.admin.edit') }}</a>
+                                        <form method="post" action="{{ $route('cms.khao-sat.catalog.major.destroy', $major->cm_id) }}" class="d-inline" onsubmit="return confirm(@js(__('career.admin.major_confirm_delete')))">
                                             @csrf <button class="btn btn-sm btn-outline-danger" type="submit">{{ __('career.admin.delete') }}</button>
                                         </form>
                                     </td>
@@ -122,7 +122,7 @@
                     </div>
                     <div class="col-12">
                         <button class="btn btn-primary" type="submit"><i class="ri-save-line me-1" aria-hidden="true"></i>{{ __('career.admin.major_save') }}</button>
-                        @if ($editing)<a class="btn btn-outline-secondary" href="{{ $route('cms.khao-sat.career') }}">{{ __('career.admin.cancel') }}</a>@endif
+                        @if ($editing)<a class="btn btn-outline-secondary" href="{{ $route('cms.khao-sat.catalog') }}">{{ __('career.admin.cancel') }}</a>@endif
                     </div>
                 </form>
             @endif

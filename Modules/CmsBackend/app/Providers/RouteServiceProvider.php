@@ -23,6 +23,7 @@ class RouteServiceProvider extends ServiceProvider
         app('router')->aliasMiddleware('cms.check.permission', CDNCheckPermission::class);
         app('router')->aliasMiddleware('cms.auth', Authenticate::class);
         app('router')->aliasMiddleware('cms.feature', \Modules\CmsBackend\Http\Middleware\RequireFeature::class);
+        app('router')->aliasMiddleware('survey.cluster', \Modules\CmsBackend\Http\Middleware\SurveyClusterGuard::class);
         app('router')->aliasMiddleware('cms.developer', \Modules\CmsBackend\Http\Middleware\DeveloperGate::class);
         app('router')->aliasMiddleware('cms.developer.enabled', \Modules\CmsBackend\Http\Middleware\DeveloperEnabled::class);
         // 404 for a disabled feature must come before the sign-in redirect.

@@ -12,7 +12,7 @@ use Modules\CmsFrontend\Models\KhaoSat;
 
 /**
  * Tạo bộ khởi đầu cho khảo sát Định hướng nghề nghiệp (RIASEC): MỘT khảo sát Nháp với vài câu hỏi mỗi nhóm và vài ngành gợi ý.
- * Đây chỉ là điểm xuất phát để quản trị chỉnh trong giao diện (câu hỏi ở tab "Câu hỏi", ngành ở màn "Nhóm & ngành nghề"); không
+ * Đây chỉ là điểm xuất phát để quản trị chỉnh trong giao diện (câu hỏi ở tab "Câu hỏi", ngành ở màn "Định hướng nghề nghiệp > Nhóm & ngành nghề"); không
  * chạy tự động, không phát hành, và không ghi đè dữ liệu đã có (khảo sát loại career đã tồn tại thì bỏ qua; đã có ngành thì không thêm ngành).
  */
 class InstallCareerStarter extends Command
@@ -78,7 +78,7 @@ class InstallCareerStarter extends Command
                     ];
                 }
                 $surveys->saveStructure($survey, $groups, null);
-                $this->info('Đã tạo khảo sát #'.$survey->ks_id.' (Nháp). Vào Khảo sát để chỉnh câu hỏi rồi phát hành.');
+                $this->info('Đã tạo khảo sát #'.$survey->ks_id.' (Nháp). Vào Định hướng nghề nghiệp để chỉnh câu hỏi rồi phát hành.');
             }
         }
 
@@ -90,7 +90,7 @@ class InstallCareerStarter extends Command
                 foreach (self::MAJORS as $order => [$name, $code, $description]) {
                     $career->saveMajor(null, ['name' => $name, 'code' => $code, 'description' => $description, 'order' => ($order + 1) * 10, 'active' => true], null);
                 }
-                $this->info('Đã thêm ngành khởi đầu. Vào Khảo sát > Nhóm & ngành nghề để thay bằng ngành thực tế của trường.');
+                $this->info('Đã thêm ngành khởi đầu. Vào Định hướng nghề nghiệp > Nhóm & ngành nghề để thay bằng ngành thực tế của trường.');
             }
         }
 

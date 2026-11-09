@@ -11,7 +11,10 @@ return [
     ],
     'career' => [
         'name' => 'Định hướng nghề nghiệp (RIASEC)',
-        'description' => 'Loại khảo sát có kết quả mã Holland và ngành gợi ý, cùng màn "Nhóm & ngành nghề". Cần chức năng Khảo sát đang bật; tắt thì khảo sát loại này và trang kết quả ngừng hoạt động (dữ liệu giữ nguyên).',
+        'description' => 'Cụm chức năng riêng (dựa trên bộ máy khảo sát): bài trắc nghiệm RIASEC, kết quả mã Holland, ngành gợi ý, thống kê và xuất Excel. Tắt thì cả phần quản trị lẫn trang công khai ngừng hoạt động (dữ liệu giữ nguyên); không phụ thuộc chức năng Khảo sát.',
+        'targets' => [
+            'index' => 'Danh sách bài định hướng nghề nghiệp',
+        ],
     ],
     'contact' => [
         'name' => 'Liên hệ – Góp ý',

@@ -15,10 +15,10 @@ use Modules\CmsBackend\Support\Riasec;
 use Modules\CmsFrontend\Models\CareerMajor;
 
 /**
- * Định hướng nghề nghiệp (RIASEC): tên/mô tả 6 nhóm và ngành gợi ý do trường tự khai báo. Quyền theo từng route (routes/web.php):
- * xem = khaosat-view/khaosat-update, ghi = khaosat-update. Không có dữ liệu mẫu; câu hỏi dựng trong từng khảo sát loại "career".
+ * Cụm Định hướng nghề nghiệp: tên/mô tả 6 nhóm RIASEC và ngành gợi ý do trường tự khai báo. Cổng chức năng `career` và quyền nghenghiep-*
+ * theo từng route (routes/web.php): xem = nghenghiep-view/nghenghiep-update, ghi = nghenghiep-update. Không có dữ liệu mẫu.
  */
-class KhaoSatNgheNghiepController extends Controller
+class NgheNghiepCatalogController extends Controller
 {
     public function __construct(private CareerService $career) {}
 
@@ -26,7 +26,7 @@ class KhaoSatNgheNghiepController extends Controller
     {
         $editing = $request->filled('sua') ? CareerMajor::query()->find((int) $request->query('sua')) : null;
 
-        return view('cmsbackend::screens.pages.khao-sat.career', [
+        return view('cmsbackend::screens.pages.khao-sat.catalog', [
             'groups' => $this->career->groups(),
             'majors' => $this->career->majors(),
             'editing' => $editing,
@@ -48,7 +48,7 @@ class KhaoSatNgheNghiepController extends Controller
         }
         Toastr::success(__('career.admin.groups_saved'), __('admin.survey.ok'));
 
-        return redirect()->route('cms.khao-sat.career');
+        return redirect()->route('cms.nghe-nghiep.catalog');
     }
 
     public function storeMajor(Request $request): RedirectResponse
@@ -66,7 +66,7 @@ class KhaoSatNgheNghiepController extends Controller
         $this->career->deleteMajor($major);
         Toastr::success(__('career.admin.major_deleted'), __('admin.survey.ok'));
 
-        return redirect()->route('cms.khao-sat.career');
+        return redirect()->route('cms.nghe-nghiep.catalog');
     }
 
     private function persistMajor(Request $request, ?CareerMajor $major): RedirectResponse
@@ -92,6 +92,6 @@ class KhaoSatNgheNghiepController extends Controller
         }
         Toastr::success(__('career.admin.major_saved'), __('admin.survey.ok'));
 
-        return redirect()->route('cms.khao-sat.career');
+        return redirect()->route('cms.nghe-nghiep.catalog');
     }
 }

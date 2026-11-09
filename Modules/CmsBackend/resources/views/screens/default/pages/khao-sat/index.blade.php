@@ -1,6 +1,6 @@
 @extends('cmsbackend::screens.components.shared.layouts.layoutMaster')
-@section('title', __('admin.survey.title'))
-@section('cms-list-title', __('admin.survey.title'))
+@section('title', \Modules\CmsBackend\Support\SurveyCluster::title())
+@section('cms-list-title', \Modules\CmsBackend\Support\SurveyCluster::title())
 @section('cms-list-note', __('admin.survey.list_note'))
 @php
     $permMap = \Modules\CmsBackend\Support\SurveyPermissions::map(auth()->user());
@@ -13,11 +13,11 @@
     $canResponses = $can('khaosat-response-view') || $can('khaosat-view');
     $canExport = $can('khaosat-export');
     $canStats = $can('khaosat-statistics-view');
-    $route = fn (string $name, mixed $params = []) => \Modules\CmsBackend\Support\ModuleUrl::route($name, $params);
+    $route = fn (string $name, mixed $params = []) => \Modules\CmsBackend\Support\ModuleUrl::route(\Modules\CmsBackend\Support\SurveyCluster::name($name), $params);
 @endphp
 @section('cms-list-create')
 <div class="cms-page-actions">
-@if ($canView)<a class="btn btn-outline-secondary" href="{{ $route('cms.khao-sat.career') }}"><i class="ri-compass-3-line" aria-hidden="true"></i>{{ __('career.admin.menu_link') }}</a>@endif
+@if ($canView && \Modules\CmsBackend\Support\SurveyCluster::isCareer())<a class="btn btn-outline-secondary" href="{{ $route('cms.khao-sat.catalog') }}"><i class="ri-compass-3-line" aria-hidden="true"></i>{{ __('career.admin.menu_link') }}</a>@endif
 @if ($canCreate)<a class="btn btn-primary" href="{{ $route('cms.khao-sat.create') }}"><i class="ri-add-line" aria-hidden="true"></i>{{ __('admin.survey.create') }}</a>@endif
 </div>
 @endsection
@@ -108,7 +108,7 @@
                                 @if ($canExport)
                                     <a class="btn btn-sm btn-outline-success" href="{{ $route('cms.khao-sat.export', $survey->ks_id) }}?type=summary">{{ __('admin.survey_report.export_summary') }}</a>
                                 @endif
-                                @if ($canStats && \Illuminate\Support\Facades\Route::has('cms.khao-sat.statistics'))
+                                @if ($canStats && \Illuminate\Support\Facades\Route::has(\Modules\CmsBackend\Support\SurveyCluster::name('cms.khao-sat.statistics')))
                                     <a class="btn btn-sm btn-outline-info" href="{{ $route('cms.khao-sat.statistics', $survey->ks_id) }}" title="{{ __('admin.survey.statistics') }}"><i class="ri-bar-chart-line" aria-hidden="true"></i><span class="visually-hidden">{{ __('admin.survey.statistics') }}</span></a>
                                 @endif
                                 @if ($canCreate)

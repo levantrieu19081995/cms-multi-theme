@@ -19,7 +19,7 @@ use Modules\CmsBackend\Http\Controllers\DoiTacController;
 use Modules\CmsBackend\Http\Controllers\GuongTieuBieuController;
 use Modules\CmsBackend\Http\Controllers\HoiDapAdminController;
 use Modules\CmsBackend\Http\Controllers\KhaoSatController;
-use Modules\CmsBackend\Http\Controllers\KhaoSatNgheNghiepController;
+use Modules\CmsBackend\Http\Controllers\NgheNghiepCatalogController;
 use Modules\CmsBackend\Http\Controllers\KhaoSatPhanHoiController;
 use Modules\CmsBackend\Http\Controllers\KhaoSatThongKeController;
 use Modules\CmsBackend\Http\Controllers\LienHeAdminController;
@@ -86,43 +86,55 @@ Route::group([], function () {
         // "dashboard." / "dashboard.cdn." parts so controllers, views, breadcrumbs and permissions are untouched.
         // The overview itself (/cms, cms.dashboard) and the home-page settings (/cms/setting/trang-chu) are defined once, in
         // the CmsFrontend module.
-        // Khảo sát dùng chung (/cms/khao-sat). Cổng chức năng: cms.feature:survey (404 khi chức năng đang tắt trong Feature Registry).
-        // Quyền theo từng hành động; POST thay cho PUT/DELETE vì máy chủ production từ chối method-override.
-        Route::prefix('khao-sat')->middleware('cms.feature:survey')->group(function () {
+        // Hai cụm chức năng dùng chung bộ máy khảo sát, đăng ký từ MỘT khai báo (Support/SurveyCluster):
+        //  - Khảo sát (/cms/khao-sat)                            : cms.feature:survey, quyền khaosat-*,   tên route cms.khao-sat.*
+        //  - Định hướng nghề nghiệp (/cms/dinh-huong-nghe-nghiep): cms.feature:career, quyền nghenghiep-*, tên route cms.nghe-nghiep.*
+        // Cổng chức năng trả 404 khi chức năng đang tắt trong Feature Registry; survey.cluster chuyển một bản ghi sang đúng cụm của nó
+        // (khảo sát loại career chỉ thuộc cụm nghề nghiệp). Quyền theo từng hành động; POST thay cho PUT/DELETE vì máy chủ production
+        // từ chối method-override.
+        $surveyCluster = function (string $cluster) {
+            $career = $cluster === 'career';
+            $prefix = $career ? 'NGHENGHIEP' : 'KHAOSAT';
+            $n = $career ? 'nghe-nghiep' : 'khao-sat';
             $p = \Modules\CmsBackend\Enums\PermissionsEnum::class;
-            $can = fn (string ...$cases) => 'cms.check.permission:'.implode(',', array_map(fn (string $c) => constant($p.'::'.$c)->label(), $cases));
+            $can = fn (string ...$cases) => 'cms.check.permission:'.implode(',', array_map(fn (string $c) => constant($p.'::'.$prefix.'_'.$c)->label(), $cases));
             $survey = KhaoSatController::class;
 
-            // Danh sách là điểm vào chung: mọi quyền khảo sát đều cần chọn được khảo sát; hành động trong danh sách vẫn theo từng quyền.
-            Route::get('/', [$survey, 'index'])->middleware($can('KHAOSAT_VIEW', 'KHAOSAT_CREATE', 'KHAOSAT_UPDATE', 'KHAOSAT_PUBLISH', 'KHAOSAT_DELETE', 'KHAOSAT_RESPONSE_VIEW', 'KHAOSAT_RESPONSE_DELETE', 'KHAOSAT_STATISTICS_VIEW', 'KHAOSAT_EXPORT'))->name('khao-sat');
-            Route::get('tao-moi', [$survey, 'create'])->middleware($can('KHAOSAT_CREATE'))->name('khao-sat.create');
-            Route::post('/', [$survey, 'store'])->middleware($can('KHAOSAT_CREATE'))->name('khao-sat.store');
-            Route::get('{survey}/chinh-sua', [$survey, 'edit'])->whereNumber('survey')->middleware($can('KHAOSAT_VIEW', 'KHAOSAT_UPDATE'))->name('khao-sat.edit');
-            Route::post('{survey}/cap-nhat', [$survey, 'update'])->whereNumber('survey')->middleware($can('KHAOSAT_UPDATE'))->name('khao-sat.update');
-            Route::post('{survey}/cau-hoi', [$survey, 'saveStructure'])->whereNumber('survey')->middleware($can('KHAOSAT_UPDATE'))->name('khao-sat.structure');
-            Route::post('{survey}/trang-thai', [$survey, 'changeStatus'])->whereNumber('survey')->middleware($can('KHAOSAT_PUBLISH'))->name('khao-sat.status');
-            Route::post('{survey}/nhan-ban', [$survey, 'duplicate'])->whereNumber('survey')->middleware($can('KHAOSAT_CREATE'))->name('khao-sat.duplicate');
-            Route::get('{survey}/xem-truoc', [$survey, 'preview'])->whereNumber('survey')->middleware($can('KHAOSAT_VIEW', 'KHAOSAT_UPDATE'))->name('khao-sat.preview');
-            Route::post('{survey}/xoa', [$survey, 'destroy'])->whereNumber('survey')->middleware($can('KHAOSAT_DELETE'))->name('khao-sat.destroy');
-            Route::post('{survey}/khoi-phuc', [$survey, 'restore'])->whereNumber('survey')->withTrashed()->middleware($can('KHAOSAT_DELETE'))->name('khao-sat.restore');
+            Route::prefix($career ? 'dinh-huong-nghe-nghiep' : 'khao-sat')->middleware([$career ? 'cms.feature:career' : 'cms.feature:survey', 'survey.cluster'])->group(function () use ($can, $survey, $n, $career) {
+                // Danh sách là điểm vào chung: mọi quyền của cụm đều cần chọn được khảo sát; hành động trong danh sách vẫn theo từng quyền.
+                Route::get('/', [$survey, 'index'])->middleware($can('VIEW', 'CREATE', 'UPDATE', 'PUBLISH', 'DELETE', 'RESPONSE_VIEW', 'RESPONSE_DELETE', 'STATISTICS_VIEW', 'EXPORT'))->name($n);
+                Route::get('tao-moi', [$survey, 'create'])->middleware($can('CREATE'))->name($n.'.create');
+                Route::post('/', [$survey, 'store'])->middleware($can('CREATE'))->name($n.'.store');
+                Route::get('{survey}/chinh-sua', [$survey, 'edit'])->whereNumber('survey')->middleware($can('VIEW', 'UPDATE'))->name($n.'.edit');
+                Route::post('{survey}/cap-nhat', [$survey, 'update'])->whereNumber('survey')->middleware($can('UPDATE'))->name($n.'.update');
+                Route::post('{survey}/cau-hoi', [$survey, 'saveStructure'])->whereNumber('survey')->middleware($can('UPDATE'))->name($n.'.structure');
+                Route::post('{survey}/trang-thai', [$survey, 'changeStatus'])->whereNumber('survey')->middleware($can('PUBLISH'))->name($n.'.status');
+                Route::post('{survey}/nhan-ban', [$survey, 'duplicate'])->whereNumber('survey')->middleware($can('CREATE'))->name($n.'.duplicate');
+                Route::get('{survey}/xem-truoc', [$survey, 'preview'])->whereNumber('survey')->middleware($can('VIEW', 'UPDATE'))->name($n.'.preview');
+                Route::post('{survey}/xoa', [$survey, 'destroy'])->whereNumber('survey')->middleware($can('DELETE'))->name($n.'.destroy');
+                Route::post('{survey}/khoi-phuc', [$survey, 'restore'])->whereNumber('survey')->withTrashed()->middleware($can('DELETE'))->name($n.'.restore');
 
-            // Định hướng nghề nghiệp (RIASEC): nhóm hiển thị + ngành gợi ý do trường khai báo. Quyền xem = xem/sửa khảo sát, ghi = sửa khảo sát.
-            $career = KhaoSatNgheNghiepController::class;
-            $careerFeature = 'cms.feature:career';
-            Route::get('nghe-nghiep', [$career, 'index'])->middleware([$careerFeature, $can('KHAOSAT_VIEW', 'KHAOSAT_UPDATE')])->name('khao-sat.career');
-            Route::post('nghe-nghiep/nhom', [$career, 'saveGroups'])->middleware([$careerFeature, $can('KHAOSAT_UPDATE')])->name('khao-sat.career.groups');
-            Route::post('nghe-nghiep/nganh', [$career, 'storeMajor'])->middleware([$careerFeature, $can('KHAOSAT_UPDATE')])->name('khao-sat.career.major.store');
-            Route::post('nghe-nghiep/nganh/{major}', [$career, 'updateMajor'])->whereNumber('major')->middleware([$careerFeature, $can('KHAOSAT_UPDATE')])->name('khao-sat.career.major.update');
-            Route::post('nghe-nghiep/nganh/{major}/xoa', [$career, 'destroyMajor'])->whereNumber('major')->middleware([$careerFeature, $can('KHAOSAT_UPDATE')])->name('khao-sat.career.major.destroy');
+                // Phản hồi, thống kê, xuất. Quyền xem của khảo sát (`*-view`) vẫn xem được danh sách/chi tiết phản hồi (tương thích).
+                $responses = KhaoSatPhanHoiController::class;
+                Route::get('{survey}/phan-hoi', [$responses, 'index'])->whereNumber('survey')->middleware($can('RESPONSE_VIEW', 'VIEW'))->name($n.'.responses');
+                Route::get('luot/{participation}', [$responses, 'show'])->whereNumber('participation')->middleware($can('RESPONSE_VIEW', 'VIEW'))->name($n.'.show');
+                Route::post('luot/{participation}/xoa', [$responses, 'destroy'])->whereNumber('participation')->middleware($can('RESPONSE_DELETE'))->name($n.'.responses.destroy');
+                Route::get('{survey}/xuat', [$responses, 'export'])->whereNumber('survey')->middleware($can('EXPORT'))->name($n.'.export');
+                Route::get('{survey}/thong-ke', [KhaoSatThongKeController::class, 'index'])->whereNumber('survey')->middleware($can('STATISTICS_VIEW'))->name($n.'.statistics');
 
-            // Phản hồi, thống kê, xuất (Phase 5). `khaosat-view` cũ vẫn xem được danh sách/chi tiết phản hồi (tương thích).
-            $responses = KhaoSatPhanHoiController::class;
-            Route::get('{survey}/phan-hoi', [$responses, 'index'])->whereNumber('survey')->middleware($can('KHAOSAT_RESPONSE_VIEW', 'KHAOSAT_VIEW'))->name('khao-sat.responses');
-            Route::get('luot/{participation}', [$responses, 'show'])->whereNumber('participation')->middleware($can('KHAOSAT_RESPONSE_VIEW', 'KHAOSAT_VIEW'))->name('khao-sat.show');
-            Route::post('luot/{participation}/xoa', [$responses, 'destroy'])->whereNumber('participation')->middleware($can('KHAOSAT_RESPONSE_DELETE'))->name('khao-sat.responses.destroy');
-            Route::get('{survey}/xuat', [$responses, 'export'])->whereNumber('survey')->middleware($can('KHAOSAT_EXPORT'))->name('khao-sat.export');
-            Route::get('{survey}/thong-ke', [KhaoSatThongKeController::class, 'index'])->whereNumber('survey')->middleware($can('KHAOSAT_STATISTICS_VIEW'))->name('khao-sat.statistics');
-        });
+                if ($career) {
+                    // Chỉ cụm nghề nghiệp: tên/mô tả 6 nhóm RIASEC và ngành gợi ý do trường tự khai báo. Xem = xem/sửa, ghi = sửa.
+                    $catalog = NgheNghiepCatalogController::class;
+                    Route::get('nhom-nganh', [$catalog, 'index'])->middleware($can('VIEW', 'UPDATE'))->name($n.'.catalog');
+                    Route::post('nhom-nganh/nhom', [$catalog, 'saveGroups'])->middleware($can('UPDATE'))->name($n.'.catalog.groups');
+                    Route::post('nhom-nganh/nganh', [$catalog, 'storeMajor'])->middleware($can('UPDATE'))->name($n.'.catalog.major.store');
+                    Route::post('nhom-nganh/nganh/{major}', [$catalog, 'updateMajor'])->whereNumber('major')->middleware($can('UPDATE'))->name($n.'.catalog.major.update');
+                    Route::post('nhom-nganh/nganh/{major}/xoa', [$catalog, 'destroyMajor'])->whereNumber('major')->middleware($can('UPDATE'))->name($n.'.catalog.major.destroy');
+                }
+            });
+        };
+        $surveyCluster('survey');
+        $surveyCluster('career');
 
         Route::name('dashboard.')->group(function () {
             Route::get('con-so-noi-bat', [FeaturedStatisticController::class, 'index'])->name('con-so-noi-bat.index');

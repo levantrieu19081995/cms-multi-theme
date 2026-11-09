@@ -88,18 +88,21 @@ Route::group([], function () use ($localizedRoutes) {
     Route::get('/doi-tac/{slug}', [DoiTacController::class, 'showFront'])->name('doi-tac.show');
     Route::get('/guong-tieu-bieu/chi-tiet/{id}', [GuongTieuBieuController::class, 'showById'])->name('guong-tieu-bieu.detail-by-id');
 
-    // Khảo sát công khai (/khao-sat/{mã}). Chỉ khả dụng khi chức năng Khảo sát đang bật trong Feature Registry (cms.feature:survey).
-    // POST bắt đầu/gửi bị giới hạn tốc độ (throttle:survey-write, định nghĩa ở RouteServiceProvider) và có CSRF của nhóm web.
-    Route::prefix('khao-sat')->middleware('cms.feature:survey')->name('frontend.khaosat.')->group(function () {
-        $survey = KhaoSatPublicController::class;
-        // Danh sách phải khai báo TRƯỚC /{slug}.
-        Route::get('/', [$survey, 'index'])->middleware('throttle:survey-read')->name('index');
-        Route::get('{slug}', [$survey, 'show'])->middleware('throttle:survey-read')->name('show');
-        Route::post('{slug}/bat-dau', [$survey, 'start'])->middleware('throttle:survey-write')->name('start');
-        Route::get('{slug}/lam-bai', [$survey, 'form'])->middleware('throttle:survey-read')->name('form');
-        Route::post('{slug}/gui', [$survey, 'submit'])->middleware('throttle:survey-write')->name('submit');
-        Route::get('{slug}/cam-on', [$survey, 'thanks'])->middleware('throttle:survey-read')->name('thanks');
-    });
+    // Khảo sát công khai (/khao-sat/{mã}) và Định hướng nghề nghiệp công khai (/dinh-huong-nghe-nghiep/{mã}): CÙNG controller và view
+    // (Support/SurveyCluster chọn tên route/chữ theo cụm). Mỗi cụm bật/tắt bằng chức năng riêng trong Feature Registry
+    // (cms.feature:survey / cms.feature:career). POST bắt đầu/gửi bị giới hạn tốc độ (throttle:survey-write, RouteServiceProvider) và có CSRF.
+    foreach (['khao-sat' => ['survey', 'frontend.khaosat.'], 'dinh-huong-nghe-nghiep' => ['career', 'frontend.nghenghiep.']] as $path => [$feature, $prefix]) {
+        Route::prefix($path)->middleware('cms.feature:'.$feature)->name($prefix)->group(function () {
+            $survey = KhaoSatPublicController::class;
+            // Danh sách phải khai báo TRƯỚC /{slug}.
+            Route::get('/', [$survey, 'index'])->middleware('throttle:survey-read')->name('index');
+            Route::get('{slug}', [$survey, 'show'])->middleware('throttle:survey-read')->name('show');
+            Route::post('{slug}/bat-dau', [$survey, 'start'])->middleware('throttle:survey-write')->name('start');
+            Route::get('{slug}/lam-bai', [$survey, 'form'])->middleware('throttle:survey-read')->name('form');
+            Route::post('{slug}/gui', [$survey, 'submit'])->middleware('throttle:survey-write')->name('submit');
+            Route::get('{slug}/cam-on', [$survey, 'thanks'])->middleware('throttle:survey-read')->name('thanks');
+        });
+    }
 
     // Other languages: {route_prefix}/{locale}/...  (the prefix comes from CMS_ROUTE_PREFIX, never written here)
     // Đăng ký theo danh sách cấu hình; chức năng "multilingual" tắt thì cms.feature trả 404 cho các route này.

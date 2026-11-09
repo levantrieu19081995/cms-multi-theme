@@ -12,6 +12,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Modules\CmsBackend\Services\CareerService;
 use Modules\CmsBackend\Services\SurveyReportService;
 use Modules\CmsBackend\Services\SurveyService;
+use Modules\CmsBackend\Support\SurveyCluster;
 use Modules\CmsFrontend\Models\KhaoSat;
 use Modules\CmsFrontend\Models\KhaoSatUser;
 
@@ -49,7 +50,7 @@ class KhaoSatPhanHoiController extends Controller
         $this->reports->deleteParticipation($participation);
         Toastr::success(__('admin.survey_report.deleted'), __('admin.survey.ok'));
 
-        return redirect()->route('cms.khao-sat.responses', $surveyId);
+        return redirect()->route(SurveyCluster::name('cms.khao-sat.responses'), $surveyId);
     }
 
     /** Xuất Excel theo đúng bộ lọc đang áp dụng. Chi tiết mặc định không gồm thông tin liên hệ. */

@@ -31,7 +31,8 @@ return [
     'default_only_routes' => [
         'cms.frontend.vanban.',
         'cms.frontend.hoidap.',
-        'cms.frontend.khaosat.',   // Khảo sát (gồm Định hướng nghề nghiệp): câu hỏi/ngành do quản trị nhập, chưa có bảng bản dịch
+        'cms.frontend.khaosat.',     // Khảo sát: câu hỏi do quản trị nhập, chưa có bảng bản dịch
+        'cms.frontend.nghenghiep.',  // Định hướng nghề nghiệp: câu hỏi/ngành do quản trị nhập, chưa có bảng bản dịch
         'cms.frontend.dichvu.',
         'cms.doi-tac.',
         'cms.guong-tieu-bieu.',
