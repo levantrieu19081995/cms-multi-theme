@@ -37,6 +37,10 @@ final class CareerOrientationTest extends TestCase
         DB::beginTransaction();
         $this->surveys = app(SurveyService::class);
         $this->career = app(CareerService::class);
+        // Trạng thái bật/tắt chức năng trên database dev do Developer đặt (có thể đang tắt): test tự bật trong transaction và hoàn lại khi kết thúc.
+        $registry = app(\Modules\CmsBackend\Features\FeatureRegistry::class);
+        $registry->setEnabled('career', true, null);
+        $registry->setEnabled('survey', true, null);
         $this->public = app(SurveyPublicService::class);
     }
 
@@ -70,6 +74,8 @@ final class CareerOrientationTest extends TestCase
         while (DB::connection()->transactionLevel() > 0) {
             DB::rollBack();
         }
+        // Cache trạng thái chức năng được dựng trong transaction: bỏ đi để không để lại giá trị của test cho request thật.
+        app(\Modules\CmsBackend\Features\FeatureRegistry::class)->forgetStates();
         parent::tearDown();
     }
 
