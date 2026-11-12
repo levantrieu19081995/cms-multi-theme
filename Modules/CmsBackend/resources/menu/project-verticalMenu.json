@@ -289,17 +289,11 @@
       "submenu": [
         {
           "slug": "cms.dashboard.truyen-thong.index",
-          "name": "Tổng quan",
+          "name": "Tổng quan - thống kê",
           "i18n": "admin.menu.truyen_thong_tong_quan",
           "url": "/cms/truyen-thong",
-          "roler": ["social-manager", "social-publication-view"]
-        },
-        {
-          "slug": "cms.dashboard.truyen-thong.create",
-          "name": "Tạo bài đăng",
-          "i18n": "admin.menu.truyen_thong_tao_bai_dang",
-          "url": "/cms/truyen-thong/tao-bai-dang",
-          "roler": ["social-manager", "social-publication-create"]
+          "roler": ["social-manager", "social-publication-view",
+            "social-statistics-view"]
         },
         {
           "slug": "cms.dashboard.truyen-thong.publications.index",
@@ -307,13 +301,6 @@
           "i18n": "admin.menu.truyen_thong_bai_da_dang",
           "url": "/cms/truyen-thong/bai-da-dang",
           "roler": ["social-manager", "social-publication-view"]
-        },
-        {
-          "slug": "cms.dashboard.truyen-thong.statistics",
-          "name": "Thống kê tương tác",
-          "i18n": "admin.menu.truyen_thong_thong_ke",
-          "url": "/cms/truyen-thong/thong-ke",
-          "roler": ["social-manager", "social-statistics-view"]
         },
         {
           "slug": "cms.dashboard.truyen-thong.accounts",

@@ -9,15 +9,17 @@ use Modules\CmsBackend\Models\Social\SocialAccount;
 use Modules\CmsBackend\Models\Social\SocialPublicationChannel;
 use Modules\CmsBackend\Services\Social\SocialChannelAdapter;
 use Modules\CmsBackend\Services\Social\SocialException;
+use Modules\CmsBackend\Services\Social\SocialMedia;
 use Modules\CmsBackend\Services\Social\SocialOperationResult;
 
 /**
- * Facebook Page adapter. Phase 2A implements validateConnection() only. publish, remove, syncStatus and syncMetrics answer
- * "not implemented" without calling Facebook: nothing can be posted or deleted yet.
+ * Facebook Page adapter: connection check (validateConnection), link posts on the Page feed (publish), deletion (remove), and
+ * read-back of a post (syncStatus) and of its reactions, comments and shares (syncMetrics). Every call goes through
+ * FacebookGraphClient with the Page access token; nothing here puts a token in a result or a message.
  */
 final class FacebookChannelAdapter implements SocialChannelAdapter
 {
-    public function __construct(private FacebookGraphClient $graph, private FacebookSettings $settings) {}
+    public function __construct(private FacebookGraphClient $graph, private FacebookSettings $settings, private FacebookImageFetcher $images) {}
 
     public function channel(): SocialChannel
     {
@@ -102,28 +104,156 @@ final class FacebookChannelAdapter implements SocialChannelAdapter
         return ['page' => $page, 'expires_at' => $expires > 0 ? $expires : null, 'scopes' => $scopes];
     }
 
+    /**
+     * Post the snapshot of the publication on the Page. With an https picture it is one photo post: the picture shown in full and,
+     * as its caption, the title, the excerpt (the message) and the public address of the article, one per paragraph. Without a
+     * picture it is a link post (title and excerpt as text; Facebook builds the preview card from the link).
+     * Success: remoteId = Facebook post id.
+     */
     public function publish(SocialPublicationChannel $delivery, SocialAccount $account): SocialOperationResult
     {
-        return $this->notImplemented();
+        $publication = $delivery->publication;
+        $token = $this->pageToken($account);
+        if ($publication === null || $token === null) {
+            return SocialOperationResult::failed('no_token', __('admin.social.fb_api_no_token'));
+        }
+
+        $title = trim((string) $publication->title);
+        $message = trim((string) $publication->message);
+        // Title, then the excerpt; only one of them when the other is empty or the same.
+        $text = $title === '' || $title === $message ? ($message !== '' ? $message : $title) : ($message === '' ? $title : $title."\n\n".$message);
+        // Empty for a publication written directly in the CMS (no article): the post then carries no address.
+        $link = trim((string) $publication->public_url);
+        $caption = $link === '' ? $text : $text."\n\n".$link;
+        $pageId = (string) $account->external_account_id;
+
+        $items = $publication->mediaItems();
+        $videos = SocialMedia::urls($items, SocialMedia::VIDEO);
+        // Facebook is never asked to fetch a file: the CMS downloads it, so only https addresses of public hosts can be used.
+        $images = array_values(array_filter(SocialMedia::urls($items, SocialMedia::IMAGE), fn (string $url) => str_starts_with($url, 'https://')));
+        $hosts = [(string) parse_url($link, PHP_URL_HOST), (string) parse_url((string) config('app.url'), PHP_URL_HOST)];
+
+        try {
+            if ($videos !== []) {
+                $postId = $this->publishVideo($pageId, $token, $caption, $videos[0], $hosts);
+                $url = 'https://www.facebook.com/'.rawurlencode($pageId).'/videos/'.rawurlencode($postId);
+            } elseif (count($images) >= 2) {
+                $postId = $this->publishPhotos($pageId, $token, $caption, $images, $hosts);
+                $url = 'https://www.facebook.com/'.rawurlencode($postId);
+            } elseif (count($images) === 1) {
+                // One picture shown in full, the text and the address as its caption.
+                $file = $this->images->fetch($images[0], ...$hosts);
+                $postId = $this->graph->publishPhotoPost($pageId, $token, $caption, $file['bytes'], $file['filename']);
+                $url = 'https://www.facebook.com/'.rawurlencode($postId);
+            } else {
+                $postId = $this->graph->publishLinkPost($pageId, $token, $text, $link);
+                $url = 'https://www.facebook.com/'.rawurlencode($postId);
+            }
+        } catch (FacebookApiException $e) {
+            return SocialOperationResult::failed($e->kind, $e->userMessage());
+        }
+
+        return SocialOperationResult::ok($postId, $url);
     }
 
+    /**
+     * Several pictures in one post: every picture is downloaded first (so a bad address fails before anything is sent), uploaded
+     * unpublished, then attached to one feed post.
+     *
+     * @param  list<string>  $images
+     * @param  string[]  $hosts
+     */
+    private function publishPhotos(string $pageId, string $token, string $caption, array $images, array $hosts): string
+    {
+        $files = array_map(fn (string $url) => $this->images->fetch($url, ...$hosts), $images);
+        $ids = array_map(fn (array $file) => $this->graph->uploadUnpublishedPhoto($pageId, $token, $file['bytes'], $file['filename']), $files);
+
+        return $this->graph->publishFeedWithPhotos($pageId, $token, $caption, $ids);
+    }
+
+    /** @param string[] $hosts */
+    private function publishVideo(string $pageId, string $token, string $caption, string $url, array $hosts): string
+    {
+        $file = $this->images->fetchVideo($url, ...$hosts);
+        $stream = fopen($file['path'], 'rb');
+        try {
+            if ($stream === false) {
+                throw new FacebookApiException(FacebookApiException::VIDEO);
+            }
+
+            return $this->graph->publishVideo($pageId, $token, $caption, $stream, $file['filename']);
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            @unlink($file['path']);
+        }
+    }
+
+    /**
+     * Delete the post from the Page. Meta lets only some developers do this through the API, so a refusal is reported with its
+     * own message and the delivery stays published: the post is then removed on Facebook by hand.
+     */
     public function remove(SocialPublicationChannel $delivery, SocialAccount $account): SocialOperationResult
     {
-        return $this->notImplemented();
+        $token = $this->pageToken($account);
+        if ($token === null || blank($delivery->remote_post_id)) {
+            return SocialOperationResult::failed('no_token', __('admin.social.fb_api_no_token'));
+        }
+
+        try {
+            $deleted = $this->graph->deletePost((string) $delivery->remote_post_id, $token);
+        } catch (FacebookApiException $e) {
+            return SocialOperationResult::failed($e->kind, $e->kind === FacebookApiException::PERMISSION ? __('admin.social.fb_remove_not_allowed') : $e->userMessage());
+        }
+
+        return $deleted
+            ? SocialOperationResult::ok((string) $delivery->remote_post_id)
+            : SocialOperationResult::failed(FacebookApiException::API, __('admin.social.fb_api_api'));
     }
 
+    /** Does the post still exist on Facebook? Success data: permalink_url, created_time. */
     public function syncStatus(SocialPublicationChannel $delivery, SocialAccount $account): SocialOperationResult
     {
-        return $this->notImplemented();
+        $token = $this->pageToken($account);
+        if ($token === null || blank($delivery->remote_post_id)) {
+            return SocialOperationResult::failed('no_token', __('admin.social.fb_api_no_token'));
+        }
+
+        try {
+            $post = $this->graph->post((string) $delivery->remote_post_id, $token);
+        } catch (FacebookApiException $e) {
+            // Meta answers "invalid parameter" for a post that was deleted or cannot be read: say so instead of a bare API error.
+            $missing = $e->kind === FacebookApiException::API && $e->metaCode === 100;
+
+            return SocialOperationResult::failed($missing ? 'remote_missing' : $e->kind, $missing ? __('admin.social.fb_post_missing') : $e->userMessage());
+        }
+
+        return SocialOperationResult::ok($post['id'], $post['permalink_url'], ['created_time' => $post['created_time']]);
     }
 
+    /** Success data: reactions, comments, shares (integers). Reach is not available: Meta removed it from Page Insights. */
     public function syncMetrics(SocialPublicationChannel $delivery, SocialAccount $account): SocialOperationResult
     {
-        return $this->notImplemented();
+        $token = $this->pageToken($account);
+        if ($token === null || blank($delivery->remote_post_id)) {
+            return SocialOperationResult::failed('no_token', __('admin.social.fb_api_no_token'));
+        }
+
+        try {
+            $metrics = $this->graph->postMetrics((string) $delivery->remote_post_id, $token);
+        } catch (FacebookApiException $e) {
+            return SocialOperationResult::failed($e->kind, $e->userMessage());
+        }
+
+        return SocialOperationResult::ok((string) $delivery->remote_post_id, null, $metrics);
     }
 
-    private function notImplemented(): SocialOperationResult
+    /** The Page access token of the account, or null when it holds none. */
+    private function pageToken(SocialAccount $account): ?string
     {
-        return SocialOperationResult::failed('not_implemented', __('admin.social.error_not_implemented'));
+        $token = ((array) $account->credentials)['page_access_token'] ?? null;
+
+        return is_string($token) && $token !== '' && filled($account->external_account_id) ? $token : null;
     }
 }

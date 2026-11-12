@@ -2,7 +2,7 @@
 
 use Diglactic\Breadcrumbs\Breadcrumbs;
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
-use Illuminate\Support\Str;
+use Modules\CmsBackend\Support\ModuleUrl;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,14 +14,14 @@ use Illuminate\Support\Str;
 /**
  * Breadcrumbs cho bảng: {tableName}
  */
-Breadcrumbs::for("cms.roles.index", function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('cms.roles.index', function (BreadcrumbTrail $trail) {
     $trail->parent('cms.trang-chu');
-    $trail->push(__('admin.menu.vai_tro'), \Modules\CmsBackend\Support\ModuleUrl::route("cms.roles.index"));
+    $trail->push(__('admin.menu.vai_tro'), ModuleUrl::route('cms.roles.index'));
 });
 
-Breadcrumbs::for("cms.roles.create", function (BreadcrumbTrail $trail) {
-    $trail->parent("cms.roles.index");
-    $trail->push(__('admin.breadcrumb.them_moi_vai_tro'), \Modules\CmsBackend\Support\ModuleUrl::route("cms.roles.create"));
+Breadcrumbs::for('cms.roles.create', function (BreadcrumbTrail $trail) {
+    $trail->parent('cms.roles.index');
+    $trail->push(__('admin.breadcrumb.them_moi_vai_tro'), ModuleUrl::route('cms.roles.create'));
 });
 
 /**
@@ -31,8 +31,7 @@ Breadcrumbs::for("cms.roles.create", function (BreadcrumbTrail $trail) {
  * $trail->push("Cập nhật banner", \Modules\CmsBackend\Support\ModuleUrl::route('cms.cdn.banner.edit', $data));
  *});
  */
-
-Breadcrumbs::for("cms.roles.edit", function (BreadcrumbTrail $trail, $post) {
-    $trail->parent("cms.roles.index");
+Breadcrumbs::for('cms.roles.edit', function (BreadcrumbTrail $trail, $post) {
+    $trail->parent('cms.roles.index');
     $trail->push(__('admin.breadcrumb.cap_nhat_vai_tro'));
 });

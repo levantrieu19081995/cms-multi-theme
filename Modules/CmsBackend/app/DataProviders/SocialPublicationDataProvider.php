@@ -140,6 +140,22 @@ class SocialPublicationDataProvider
             ->paginate($perPage)->withQueryString();
     }
 
+    /**
+     * Latest publications of the current project that have a delivery to the channel (archived ones are left out).
+     *
+     * @return Collection<int, SocialPublication>
+     */
+    public function recentByChannel(SocialChannel $channel, int $limit = 5): Collection
+    {
+        return $this->publications()
+            ->with('channels')
+            ->where('status', '!=', 'archived')
+            ->whereHas('channels', fn ($channels) => $channels->where('channel', $channel->value))
+            ->latest('id')
+            ->limit(max(1, $limit))
+            ->get();
+    }
+
     // ---------------------------------------------------------------- accounts
 
     private function accounts(): Builder
@@ -184,6 +200,52 @@ class SocialPublicationDataProvider
         }
 
         return $result;
+    }
+
+    private ?bool $mediaColumn = null;
+
+    /** The `media` column exists (its migration was run). Until then a publication keeps only its first picture (`image_url`). */
+    public function hasMediaColumn(): bool
+    {
+        return $this->mediaColumn ??= Schema::hasColumn('social_publications', 'media');
+    }
+
+    private static ?bool $metricsColumn = null;
+
+    /** The `metrics` column exists (the metrics migration was run). Until then figures are simply not stored or shown. */
+    public function hasMetricsColumn(): bool
+    {
+        return self::$metricsColumn ??= Schema::hasColumn('social_publication_channels', 'metrics');
+    }
+
+    /**
+     * Sum of the interaction figures last read from the platform, over the published deliveries of a channel.
+     *
+     * @return array<string, int> metric key => total (empty when nothing was ever synchronized)
+     */
+    public function metricTotals(SocialChannel $channel): array
+    {
+        if (! $this->hasMetricsColumn()) {
+            return [];
+        }
+
+        $totals = [];
+        $rows = DB::table('social_publication_channels as c')
+            ->join('social_publications as p', 'p.id', '=', 'c.social_publication_id')
+            ->where('p.project_key', $this->project())
+            ->where('c.channel', $channel->value)
+            ->where('c.status', 'published')
+            ->whereNotNull('c.metrics')
+            ->pluck('c.metrics');
+        foreach ($rows as $json) {
+            foreach ((array) json_decode((string) $json, true) as $key => $value) {
+                if (is_string($key) && is_numeric($value)) {
+                    $totals[$key] = ($totals[$key] ?? 0) + (int) $value;
+                }
+            }
+        }
+
+        return $totals;
     }
 
     /** @return Collection<int, object{creator: string, total: int}> */

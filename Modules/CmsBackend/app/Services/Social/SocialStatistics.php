@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\CmsBackend\Services\Social;
 
+use Illuminate\Support\Collection;
 use Modules\CmsBackend\DataProviders\SocialPublicationDataProvider;
 use Modules\CmsBackend\Enums\Social\SocialChannel;
 use Modules\CmsBackend\Enums\Social\SocialChannelStatus;
@@ -77,16 +78,54 @@ final class SocialStatistics
     }
 
     /**
-     * Interaction metrics a channel can report. `available` follows the adapter: none exists in Phase 1, so no number is shown.
+     * Everything one platform tab shows: its delivery figures, its interaction metrics and its latest publications.
+     * Read only; the figures are the ones of statistics(), narrowed to the channel.
      *
-     * @return array<int, array{channel: SocialChannel, key: string, available: bool}>
+     * @return array{channel: SocialChannel, total: int, published: int, failed: int, by_status: array<string, int>, metrics: array<int, array{channel: SocialChannel, key: string, available: bool, value: ?int}>, recent: Collection}
+     */
+    public function channelPanel(SocialChannel $channel, int $recentLimit = 5): array
+    {
+        $rows = $this->data->countByChannelAndStatus()[$channel->value] ?? [];
+
+        return [
+            'channel' => $channel,
+            'total' => array_sum($rows),
+            'published' => $rows[SocialChannelStatus::PUBLISHED->value] ?? 0,
+            'failed' => $rows[SocialChannelStatus::FAILED->value] ?? 0,
+            'by_status' => $rows,
+            'metrics' => array_values(array_filter(
+                $this->metricCatalog(),
+                fn (array $metric) => $metric['channel'] === $channel,
+            )),
+            'recent' => $this->data->recentByChannel($channel, $recentLimit),
+        ];
+    }
+
+    /**
+     * Interaction metrics each channel can report. A metric is `available` when the channel has an adapter that reads it; `value` is
+     * then the total last read from the platform (null while nothing was synchronized).
+     *  - Facebook: reactions, comments, shares. Reach is listed but never available: Meta removed the post reach metrics.
+     *  - Zalo OA: views and shares of an article (article/getslice). Zalo documents no likes or comments.
+     *
+     * @return array<int, array{channel: SocialChannel, key: string, available: bool, value: ?int}>
      */
     public function metricCatalog(): array
     {
+        $declared = [
+            SocialChannel::FACEBOOK->value => ['reactions', 'comments', 'shares', 'reach'],
+            SocialChannel::ZALO->value => ['views', 'shares'],
+        ];
+        $neverAvailable = ['reach'];
+
         $metrics = [];
-        foreach (['reactions', 'comments', 'shares', 'reach'] as $key) {
-            // The Facebook adapter exists since Phase 2A but syncMetrics() is not implemented yet: no figure is shown.
-            $metrics[] = ['channel' => SocialChannel::FACEBOOK, 'key' => $key, 'available' => false];
+        foreach ($declared as $channelValue => $keys) {
+            $channel = SocialChannel::from($channelValue);
+            $connectable = $this->registry->has($channel);
+            $totals = $connectable ? $this->data->metricTotals($channel) : [];
+            foreach ($keys as $key) {
+                $available = $connectable && ! in_array($key, $neverAvailable, true);
+                $metrics[] = ['channel' => $channel, 'key' => $key, 'available' => $available, 'value' => $available ? ($totals[$key] ?? null) : null];
+            }
         }
 
         return $metrics;

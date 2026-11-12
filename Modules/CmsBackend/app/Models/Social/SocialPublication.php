@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use LogicException;
 use Modules\CmsBackend\Enums\Social\SocialPublicationStatus;
+use Modules\CmsBackend\Services\Social\SocialMedia;
 
 /**
  * One preparation of a multi-channel publication. title / message / image_url / public_url are a snapshot taken when it was
@@ -21,11 +22,12 @@ class SocialPublication extends Model
     protected $table = 'social_publications';
 
     protected $fillable = [
-        'post_id', 'project_key', 'locale', 'title', 'message', 'image_url', 'public_url', 'status',
+        'post_id', 'project_key', 'locale', 'title', 'message', 'image_url', 'media', 'public_url', 'status',
         'idempotency_key', 'created_by', 'updated_by', 'published_at', 'archived_at',
     ];
 
     protected $casts = [
+        'media' => 'array',
         'status' => SocialPublicationStatus::class,
         'published_at' => 'datetime',
         'archived_at' => 'datetime',
@@ -39,6 +41,22 @@ class SocialPublication extends Model
                 throw new LogicException('A social publication that has left draft cannot be deleted.');
             }
         });
+    }
+
+    /**
+     * Pictures / video in order, as snapshot. A row made before the `media` column existed (or a post-based one that was never
+     * given more than its picture) reads as its image_url alone.
+     *
+     * @return list<array{type: string, url: string}>
+     */
+    public function mediaItems(): array
+    {
+        $stored = $this->getAttribute('media');
+        if (is_array($stored) && $stored !== []) {
+            return SocialMedia::normalize(array_map(fn ($item) => is_array($item) ? ($item['url'] ?? '') : $item, $stored));
+        }
+
+        return SocialMedia::normalize(filled($this->image_url) ? [$this->image_url] : []);
     }
 
     public function channels(): HasMany

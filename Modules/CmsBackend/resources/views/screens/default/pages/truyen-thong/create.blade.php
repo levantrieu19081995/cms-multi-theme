@@ -26,6 +26,14 @@
 
                 <div class="alert alert-info" role="note">{{ __('admin.social.select_post_note') }}</div>
 
+                {{-- Writing a post here instead of choosing one: opens the drawer on the right. --}}
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                    <span class="text-muted">{{ __('admin.social.direct_hint') }}</span>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#social-direct-drawer" aria-controls="social-direct-drawer">
+                        <i class="ri-edit-box-line me-1" aria-hidden="true"></i>{{ __('admin.social.direct_button') }}
+                    </button>
+                </div>
+
                 <form method="get" action="{{ \Modules\CmsBackend\Support\ModuleUrl::route($routeBase.'create') }}" class="row g-3 mb-4">
                     <div class="col-12 col-md-6">
                         <div class="input-group input-group-merge bg-white">
@@ -90,12 +98,113 @@
                 </div>
             </div>
         </div>
+
+        @php
+            $directSelected = (array) old('channels', []);
+            $directOpen = old('direct') === '1';
+        @endphp
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="social-direct-drawer" aria-labelledby="social-direct-title" style="--bs-offcanvas-width: 540px; width: min(540px, 100vw)">
+            <form method="post" action="{{ \Modules\CmsBackend\Support\ModuleUrl::route($routeBase.'store-direct') }}" id="social-direct-form" class="d-flex flex-column h-100" novalidate>
+                @csrf
+                <input type="hidden" name="direct" value="1">
+                <input type="hidden" name="idempotency_key" value="{{ $idempotencyKey }}">
+
+                <div class="offcanvas-header border-bottom">
+                    <h5 class="offcanvas-title" id="social-direct-title">{{ __('admin.social.direct_title') }}</h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="{{ __('admin.social.cancel') }}"></button>
+                </div>
+
+                <div class="offcanvas-body">
+                    @if ($directOpen && $errors->any())
+                        <div class="alert alert-danger" role="alert">
+                            <ul class="mb-0">@foreach ($errors->all() as $message)<li>{{ $message }}</li>@endforeach</ul>
+                        </div>
+                    @endif
+                    <p class="text-muted small">{{ __('admin.social.direct_note') }}</p>
+
+                    <div class="mb-3">
+                        <label for="social-direct-post-title" class="form-label">{{ __('admin.social.field_title') }} <span class="text-danger">*</span></label>
+                        <input type="text" id="social-direct-post-title" name="title" class="form-control" maxlength="255" required value="{{ $directOpen ? old('title') : '' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="social-direct-message" class="form-label">{{ __('admin.social.field_message') }}</label>
+                        <textarea id="social-direct-message" name="message" rows="7" maxlength="2000" class="form-control">{{ $directOpen ? old('message') : '' }}</textarea>
+                        <div class="form-text">{{ __('admin.social.message_plain_text') }} <span id="social-direct-count">0</span>/2000</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="form-label d-block">{{ __('admin.social.field_media') }}</span>
+                        @include('cmsbackend::screens.pages.truyen-thong.partials.media-picker', [
+                            'pickerId' => 'social-direct-media',
+                            'items' => $directOpen ? old('media', []) : [],
+                        ])
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="social-direct-url" class="form-label">{{ __('admin.social.field_url') }}</label>
+                        <input type="text" id="social-direct-url" name="public_url" class="form-control" maxlength="2000" placeholder="https://" value="{{ $directOpen ? old('public_url') : '' }}">
+                        <div class="form-text">{{ __('admin.social.direct_url_note') }}</div>
+                    </div>
+
+                    <fieldset class="mb-2">
+                        <legend class="form-label fs-6">{{ __('admin.social.field_channels') }}</legend>
+                        @foreach (\Modules\CmsBackend\Enums\Social\SocialChannel::cases() as $channel)
+                            @php $connected = $availability[$channel->value] ?? false; @endphp
+                            <div class="form-check d-flex align-items-center gap-2 mb-2">
+                                <input class="form-check-input mt-0" type="checkbox" name="channels[]" id="social-direct-channel-{{ $channel->value }}"
+                                    value="{{ $channel->value }}" @checked($directOpen && in_array($channel->value, $directSelected, true))>
+                                <label class="form-check-label d-flex align-items-center gap-2" for="social-direct-channel-{{ $channel->value }}">
+                                    <i class="{{ $channel->icon() }}" aria-hidden="true"></i>{{ $channel->label() }}
+                                    <span class="badge {{ $connected ? 'bg-label-success' : 'bg-label-warning' }}">{{ $connected ? __('admin.social.account_status_connected') : __('admin.social.not_connected') }}</span>
+                                </label>
+                            </div>
+                        @endforeach
+                        <div class="form-text">{{ __('admin.social.channels_phase1_note') }}</div>
+                    </fieldset>
+                </div>
+
+                <div class="offcanvas-footer border-top p-3 d-flex flex-wrap justify-content-end gap-2">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">{{ __('admin.social.cancel') }}</button>
+                    <button type="submit" name="intent" value="draft" class="btn btn-outline-primary">{{ __('admin.social.save_draft') }}</button>
+                    <button type="submit" name="intent" value="ready" class="btn btn-primary">{{ __('admin.social.save_ready') }}</button>
+                </div>
+            </form>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var form = document.getElementById('social-direct-form'), drawer = document.getElementById('social-direct-drawer');
+                if (!form || !drawer) { return; }
+                // Under <body>, so no ancestor of the page content can clip or re-position the fixed drawer.
+                document.body.appendChild(drawer);
+                var message = document.getElementById('social-direct-message'), counter = document.getElementById('social-direct-count');
+                function count() { counter.textContent = message.value.length; }
+                message.addEventListener('input', count);
+                count();
+
+                // One click, one request: a second submit of the same form is ignored (the server also de-duplicates by key).
+                form.addEventListener('submit', function (event) {
+                    if (form.dataset.submitted === '1') { event.preventDefault(); return; }
+                    form.dataset.submitted = '1';
+                    [].forEach.call(form.querySelectorAll('button[type="submit"]'), function (button) {
+                        button.classList.add('disabled'); button.setAttribute('aria-disabled', 'true');
+                    });
+                });
+
+                // After a refused save the page reloads: open the drawer again with what was typed.
+                @if ($directOpen)
+                    if (window.bootstrap) { window.bootstrap.Offcanvas.getOrCreateInstance(drawer).show(); }
+                @endif
+            });
+        </script>
     @else
         @php
             $selected = (array) old('channels', $publication ? $publication->channels->map(fn ($delivery) => $delivery->channel->value)->all() : []);
             $titleValue = old('title', $snapshot['title']);
             $messageValue = old('message', $snapshot['message']);
-            $imageValue = old('image_url', $snapshot['image_url']);
+            // A publication written directly has no source post: its address is typed (optional) instead of fixed.
+            $isDirect = $publication && $publication->post_id === null;
             $action = $publication
                 ? \Modules\CmsBackend\Support\ModuleUrl::route($routeBase.'publications.update', $publication->id)
                 : \Modules\CmsBackend\Support\ModuleUrl::route($routeBase.'store');
@@ -130,9 +239,11 @@
                             <div class="mb-3">
                                 <label class="form-label">{{ __('admin.social.field_source_post') }}</label>
                                 <div class="form-control-plaintext fw-medium">
-                                    {{ $post?->title ?? __('admin.social.source_post_deleted') }}
+                                    {{ $isDirect ? __('admin.social.source_direct') : ($post?->title ?? __('admin.social.source_post_deleted')) }}
                                 </div>
-                                <div class="form-text">{{ __('admin.social.source_not_modified') }}</div>
+                                @unless ($isDirect)
+                                    <div class="form-text">{{ __('admin.social.source_not_modified') }}</div>
+                                @endunless
                             </div>
 
                             <div class="mb-3">
@@ -168,14 +279,22 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="social-image" class="form-label">{{ __('admin.social.field_image') }}</label>
-                                <input type="text" id="social-image" name="image_url" class="form-control @error('image_url') is-invalid @enderror" maxlength="2000" value="{{ $imageValue }}" placeholder="https://">
-                                <div class="form-text">{{ __('admin.social.image_note') }}</div>
+                                <span class="form-label d-block">{{ __('admin.social.field_media') }}</span>
+                                @include('cmsbackend::screens.pages.truyen-thong.partials.media-picker', [
+                                    'pickerId' => 'social-media',
+                                    'items' => old('media') !== null ? old('media') : ($snapshot['media'] ?? array_filter([$snapshot['image_url'] ?? null])),
+                                ])
+                                @error('media')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                             </div>
 
                             <div class="mb-3">
                                 <label for="social-url" class="form-label">{{ __('admin.social.field_url') }}</label>
-                                <input type="text" id="social-url" class="form-control" value="{{ $snapshot['public_url'] }}" readonly>
+                                @if ($isDirect)
+                                    <input type="text" id="social-url" name="public_url" class="form-control @error('public_url') is-invalid @enderror" maxlength="2000" placeholder="https://" value="{{ old('public_url', $snapshot['public_url']) }}">
+                                    <div class="form-text">{{ __('admin.social.direct_url_note') }}</div>
+                                @else
+                                    <input type="text" id="social-url" class="form-control" value="{{ $snapshot['public_url'] }}" readonly>
+                                @endif
                             </div>
                         </div>
 
@@ -241,7 +360,7 @@
                 var form = document.getElementById('cms-social-form');
                 if (!form) { return; }
                 var title = document.getElementById('social-title'), message = document.getElementById('social-message'),
-                    image = document.getElementById('social-image'), url = document.getElementById('social-url');
+                    url = document.getElementById('social-url');
                 var boxImage = document.getElementById('social-preview-image'), boxHost = document.getElementById('social-preview-host'),
                     boxTitle = document.getElementById('social-preview-title'), boxMessage = document.getElementById('social-preview-message'),
                     boxChannels = document.getElementById('social-preview-channels'), counter = document.getElementById('social-message-count');
@@ -253,8 +372,12 @@
                     try { boxHost.textContent = new URL(url.value).host; } catch (e) { boxHost.textContent = ''; }
 
                     boxImage.textContent = '';
-                    var src = image.value.trim();
-                    if (/^(https?:\/\/|\/(?!\/))/i.test(src)) {
+                    // The preview shows the first picture; a video has no still here, so only its name is shown.
+                    var chosen = [].slice.call(form.querySelectorAll('input[data-media-input]')).map(function (input) { return input.value; });
+                    var src = chosen.length ? chosen[0] : '';
+                    if (/\.(mp4|mpeg|mpg|mov|webm)(\?|#|$)/i.test(src)) {
+                        boxImage.textContent = decodeURIComponent(src.split('?')[0].split('/').pop());
+                    } else if (/^(https?:\/\/|\/(?!\/))/i.test(src)) {
                         var img = document.createElement('img');
                         img.alt = ''; img.src = src; img.style.cssText = 'width:100%;height:100%;object-fit:cover';
                         img.onerror = function () { boxImage.textContent = form.dataset.labelNoImage; };
@@ -271,6 +394,7 @@
 
                 form.addEventListener('input', render);
                 form.addEventListener('change', render);
+                form.addEventListener('social-media-change', render);
                 render();
 
                 // One click, one request: a second submit of the same form is ignored (the server also de-duplicates by key).

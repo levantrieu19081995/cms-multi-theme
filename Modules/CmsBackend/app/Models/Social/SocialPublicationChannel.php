@@ -16,10 +16,11 @@ class SocialPublicationChannel extends Model
 
     protected $fillable = [
         'social_publication_id', 'channel', 'social_account_id', 'status', 'remote_post_id', 'remote_url',
-        'error_code', 'error_message', 'attempts', 'published_at', 'removed_at', 'last_synced_at',
+        'error_code', 'error_message', 'attempts', 'published_at', 'removed_at', 'last_synced_at', 'metrics',
     ];
 
     protected $casts = [
+        'metrics' => 'array',
         'channel' => SocialChannel::class,
         'status' => SocialChannelStatus::class,
         'attempts' => 'integer',

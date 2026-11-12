@@ -35,12 +35,17 @@ Breadcrumbs::for('cms.dashboard.truyen-thong.publications.edit', function (Bread
     $trail->push(__('admin.social.edit_title'));
 });
 
-Breadcrumbs::for('cms.dashboard.truyen-thong.statistics', function (BreadcrumbTrail $trail) {
-    $trail->parent('cms.dashboard.truyen-thong.index');
-    $trail->push(__('admin.social.statistics_title'), ModuleUrl::route('cms.dashboard.truyen-thong.statistics'));
-});
-
 Breadcrumbs::for('cms.dashboard.truyen-thong.accounts', function (BreadcrumbTrail $trail) {
     $trail->parent('cms.dashboard.truyen-thong.index');
     $trail->push(__('admin.social.accounts_title'), ModuleUrl::route('cms.dashboard.truyen-thong.accounts'));
+});
+
+Breadcrumbs::for('cms.dashboard.truyen-thong.guides.index', function (BreadcrumbTrail $trail) {
+    $trail->parent('cms.dashboard.truyen-thong.index');
+    $trail->push(__('admin.social.guides_title'), ModuleUrl::route('cms.dashboard.truyen-thong.guides.index'));
+});
+
+Breadcrumbs::for('cms.dashboard.truyen-thong.guides.show', function (BreadcrumbTrail $trail) {
+    $trail->parent('cms.dashboard.truyen-thong.guides.index');
+    $trail->push(__('admin.social.guide_detail_title'));
 });

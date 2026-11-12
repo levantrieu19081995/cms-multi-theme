@@ -4,27 +4,18 @@ declare(strict_types=1);
 
 namespace Modules\CmsBackend\Http\Controllers;
 
-use Modules\CmsBackend\DataProviders\SocialPublicationDataProvider;
-use Modules\CmsBackend\Enums\PermissionsEnum;
-use Modules\CmsBackend\Services\Social\SocialPublicationService;
-use Modules\CmsBackend\Services\Social\SocialStatistics;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Routing\Controller;
+use Modules\CmsBackend\Support\ModuleUrl;
 
-class SocialStatisticsController extends SocialBaseController
+/**
+ * The statistics now live in the page "Tổng quan - thống kê" (SocialOverviewController). The old address is kept so that a saved link
+ * or a bookmark still works: it goes to that page, which decides what the user may see.
+ */
+class SocialStatisticsController extends Controller
 {
-    public function __construct(
-        SocialPublicationDataProvider $data,
-        private SocialPublicationService $publications,
-        private SocialStatistics $statistics,
-    ) {
-        parent::__construct($data);
-        $this->middleware($this->requires(PermissionsEnum::SOCIAL_STATISTICS_VIEW));
-        $this->ensureInstalled();
-    }
-
-    public function index()
+    public function index(): RedirectResponse
     {
-        return view('cmsbackend::screens.pages.truyen-thong.statistics', [
-            'stats' => $this->statistics->statistics(),
-        ]);
+        return redirect()->to(ModuleUrl::route('cms.dashboard.truyen-thong.index'));
     }
 }

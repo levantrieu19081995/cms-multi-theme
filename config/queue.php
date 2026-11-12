@@ -39,7 +39,9 @@ return [
       'connection' => env('DB_QUEUE_CONNECTION', null),
       'table' => env('DB_QUEUE_TABLE', 'jobs'),
       'queue' => env('DB_QUEUE', 'default'),
-      'retry_after' => env('DB_QUEUE_RETRY_AFTER', 90),
+      // Longer than the slowest job: a social delivery may upload a video (SendSocialDeliveryJob::$timeout = 300 s). A job still
+      // running when retry_after passes would be handed to a second worker, and a post must never be sent twice.
+      'retry_after' => env('DB_QUEUE_RETRY_AFTER', 600),
       'after_commit' => false,
     ],
 

@@ -12,13 +12,17 @@ use Modules\CmsBackend\DataProviders\SocialPublicationDataProvider;
 use Modules\CmsBackend\Enums\PermissionsEnum;
 use Modules\CmsBackend\Enums\Social\SocialChannel;
 use Modules\CmsBackend\Enums\Social\SocialPublicationStatus;
+use Modules\CmsBackend\Http\Requests\SocialDirectPublicationRequest;
 use Modules\CmsBackend\Http\Requests\SocialPublicationRequest;
 use Modules\CmsBackend\Models\Social\SocialPublication;
 use Modules\CmsBackend\Services\Social\SocialException;
 use Modules\CmsBackend\Services\Social\SocialPublicationService;
 use Modules\CmsBackend\Support\ModuleUrl;
 
-/** Create, list, view, edit and archive social publications. Nothing here contacts a social platform (Phase 1). */
+/**
+ * Create, list, view, edit, archive, publish, retry, remove and synchronize social publications. The calls to a platform are made
+ * by SocialPublicationService (publishing in a queued job); this controller only checks the permission and reports the outcome.
+ */
 class SocialPublicationController extends SocialBaseController
 {
     private const ROUTE = 'cms.dashboard.truyen-thong.';
@@ -28,7 +32,11 @@ class SocialPublicationController extends SocialBaseController
         parent::__construct($data);
         $this->middleware($this->requires(PermissionsEnum::SOCIAL_PUBLICATION_VIEW))->only(['index', 'show']);
         $this->middleware($this->requires(PermissionsEnum::SOCIAL_PUBLICATION_CREATE))
-            ->only(['create', 'store', 'edit', 'update', 'archive', 'restore']);
+            ->only(['create', 'store', 'storeDirect', 'edit', 'update', 'archive', 'restore']);
+        $this->middleware($this->requires(PermissionsEnum::SOCIAL_PUBLICATION_PUBLISH))->only(['publish']);
+        $this->middleware($this->requires(PermissionsEnum::SOCIAL_PUBLICATION_RETRY))->only(['retry']);
+        $this->middleware($this->requires(PermissionsEnum::SOCIAL_PUBLICATION_REMOVE))->only(['remove']);
+        $this->middleware($this->requires(PermissionsEnum::SOCIAL_STATISTICS_VIEW))->only(['sync']);
         $this->ensureInstalled();
     }
 
@@ -46,6 +54,9 @@ class SocialPublicationController extends SocialBaseController
                 'categories' => $this->data->categories(),
                 'search' => trim((string) $request->query('search')),
                 'category' => $categoryId,
+                // The drawer "Tạo trực tiếp": a fresh key per page load, so a double submit never creates two publications.
+                'availability' => $this->publications->channelAvailability(),
+                'idempotencyKey' => (string) Str::uuid(),
             ]);
         }
 
@@ -74,6 +85,23 @@ class SocialPublicationController extends SocialBaseController
             $this->flashError($e->getMessage());
 
             return back()->withInput();
+        }
+
+        Toastr::success(__($created ? 'admin.social.saved' : 'admin.social.already_saved'), __('admin.message.thanh_cong'));
+
+        return redirect(ModuleUrl::route(self::ROUTE.'publications.show', $publication->id));
+    }
+
+    /** A publication written directly in the drawer of the create page (no source post). */
+    public function storeDirect(SocialDirectPublicationRequest $request): RedirectResponse
+    {
+        try {
+            [$publication, $created] = $this->publications->createDirect($request->user(), $request->validated());
+        } catch (SocialException $e) {
+            $this->flashError($e->getMessage());
+
+            // The form carries direct=1, so the page reopens the drawer with what was typed.
+            return redirect(ModuleUrl::route(self::ROUTE.'create'))->withInput();
         }
 
         Toastr::success(__($created ? 'admin.social.saved' : 'admin.social.already_saved'), __('admin.message.thanh_cong'));
@@ -124,6 +152,7 @@ class SocialPublicationController extends SocialBaseController
             'snapshot' => [
                 'title' => $publication->title, 'message' => $publication->message,
                 'image_url' => $publication->image_url, 'public_url' => $publication->public_url,
+                'media' => array_map(fn (array $item) => $item['url'], $publication->mediaItems()),
             ],
             'availability' => $this->publications->channelAvailability(),
             'idempotencyKey' => null,
@@ -156,6 +185,50 @@ class SocialPublicationController extends SocialBaseController
     public function restore(Request $request, int $id): RedirectResponse
     {
         return $this->transition($id, fn (SocialPublication $publication) => $this->publications->restore($request->user(), $publication), 'admin.social.restored');
+    }
+
+    public function publish(Request $request, int $id): RedirectResponse
+    {
+        return $this->transition($id, fn (SocialPublication $publication) => $this->publications->publish($request->user(), $publication), 'admin.social.publish_queued');
+    }
+
+    public function retry(Request $request, int $id): RedirectResponse
+    {
+        return $this->transition($id, fn (SocialPublication $publication) => $this->publications->retry($request->user(), $publication), 'admin.social.retry_queued');
+    }
+
+    public function remove(Request $request, int $id): RedirectResponse
+    {
+        return $this->report($id, fn (SocialPublication $publication) => $this->publications->remove($request->user(), $publication), 'removed', 'admin.social.removed_count');
+    }
+
+    public function sync(Request $request, int $id): RedirectResponse
+    {
+        return $this->report($id, fn (SocialPublication $publication) => $this->publications->sync($request->user(), $publication), 'synced', 'admin.social.synced_count');
+    }
+
+    /**
+     * Run an action that answers with a count and a list of per-channel problems: success toast for the count, one error toast
+     * per problem.
+     */
+    private function report(int $id, \Closure $action, string $countKey, string $successKey): RedirectResponse
+    {
+        try {
+            $result = $action($this->findOrFail($id));
+        } catch (SocialException $e) {
+            $this->flashError($e->getMessage());
+
+            return redirect(ModuleUrl::route(self::ROUTE.'publications.show', $id));
+        }
+
+        if ((int) $result[$countKey] > 0) {
+            Toastr::success(__($successKey, ['count' => (int) $result[$countKey]]), __('admin.message.thanh_cong'));
+        }
+        foreach ($result['errors'] as $message) {
+            $this->flashError($message);
+        }
+
+        return redirect(ModuleUrl::route(self::ROUTE.'publications.show', $id));
     }
 
     private function transition(int $id, \Closure $action, string $successKey): RedirectResponse

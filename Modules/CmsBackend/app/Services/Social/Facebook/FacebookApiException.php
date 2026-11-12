@@ -26,6 +26,12 @@ final class FacebookApiException extends RuntimeException
 
     public const API = 'api';
 
+    /** The picture could not be downloaded or is not a usable picture (before anything was sent to Meta). */
+    public const IMAGE = 'image';
+
+    /** The video could not be downloaded, is too large or is not a usable video (before anything was sent to Meta). */
+    public const VIDEO = 'video';
+
     public function __construct(public readonly string $kind, public readonly ?int $metaCode = null, public readonly ?int $metaSubcode = null)
     {
         parent::__construct('Facebook API error ('.$kind.')');
@@ -34,6 +40,11 @@ final class FacebookApiException extends RuntimeException
     /** Text for the administrator. Never contains a token, a secret or Meta's raw message. */
     public function userMessage(): string
     {
+        // An error number this code does not map is still shown (numbers are safe), so it can be looked up.
+        if ($this->kind === self::API && $this->metaCode !== null) {
+            return __('admin.social.fb_api_api_code', ['code' => $this->metaCode.($this->metaSubcode !== null ? '/'.$this->metaSubcode : '')]);
+        }
+
         return __('admin.social.fb_api_'.$this->kind);
     }
 

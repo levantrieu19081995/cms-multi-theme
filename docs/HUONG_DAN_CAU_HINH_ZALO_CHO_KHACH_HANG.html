@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hướng dẫn cấu hình Zalo OA cho khách hàng</title>
+  <style>
+    :root{--blue:#0b57d0;--ink:#1f2937;--muted:#64748b;--line:#d9e1f2;--soft:#f5f9ff;--green:#e8f5e9;--gold:#fff5d6}
+    *{box-sizing:border-box} body{margin:0;background:#f3f6fb;color:var(--ink);font:15px/1.65 Arial,Helvetica,sans-serif}
+    .page{max-width:1060px;margin:28px auto;padding:0 20px 50px}.hero{background:white;border-radius:18px;padding:42px 44px 30px;box-shadow:0 8px 24px #17355d12}
+    h1{margin:0 0 10px;font-size:34px;line-height:1.2;color:#111827}.subtitle{margin:0;color:var(--blue);font-size:17px}
+    h2{margin:38px 0 12px;color:#111827;font-size:24px;border-bottom:2px solid var(--line);padding-bottom:7px}
+    h3{margin:22px 0 5px;color:var(--blue);font-size:18px}.lead{font-size:17px}.note{background:var(--gold);border-left:4px solid #e0a600;padding:12px 16px;border-radius:6px;margin:16px 0}
+    .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:30px 0}.flow .step{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:16px 10px;text-align:center}.flow .step:nth-child(even){background:var(--green)}
+    .num{display:block;color:var(--blue);font-size:25px;font-weight:700}.step b{display:block}.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin:14px 0}
+    ol,ul{padding-left:25px} li{margin:5px 0} a{color:var(--blue);word-break:break-word}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    table{width:100%;border-collapse:collapse;background:#fff;margin:12px 0 20px}th,td{border:1px solid var(--line);padding:11px 12px;text-align:left;vertical-align:top}th{background:var(--blue);color:white}tr:nth-child(even) td{background:var(--soft)}
+    .check td:last-child{text-align:center;width:90px;font-size:20px}.footer{text-align:center;color:var(--muted);font-size:13px;margin-top:30px}
+    @media(max-width:700px){.page{margin:0 auto;padding:0 12px 28px}.hero{padding:28px 20px}.flow,.grid{grid-template-columns:1fr}.flow{gap:8px}h1{font-size:28px}h2{font-size:21px}table{font-size:14px;display:block;overflow-x:auto;white-space:normal}}
+  </style>
+</head>
+<body>
+<main class="page">
+  <header class="hero">
+    <h1>Hướng dẫn cấu hình Zalo OA cho khách hàng</h1>
+    <p class="subtitle">Tài liệu dành cho người tạo tài khoản và cấu hình kết nối CMS</p>
+    <div class="flow" aria-label="Quy trình 5 bước">
+      <div class="step"><span class="num">1</span><b>Tạo OA</b></div>
+      <div class="step"><span class="num">2</span><b>Chọn gói<br>Tăng trưởng</b></div>
+      <div class="step"><span class="num">3</span><b>Tạo App</b></div>
+      <div class="step"><span class="num">4</span><b>Xác minh<br>domain</b></div>
+      <div class="step"><span class="num">5</span><b>Cấp quyền<br>kết nối</b></div>
+    </div>
+    <p class="lead">Tài liệu này không yêu cầu người cấu hình biết lập trình hoặc gọi API. Chỉ cần thực hiện đúng các bước trên Zalo và cung cấp đúng thông tin cho đội triển khai CMS.</p>
+  </header>
+
+  <section>
+    <h2>1. Ai thực hiện và cần chuẩn bị gì</h2>
+    <table>
+      <thead><tr><th>Người thực hiện</th><th>Nhiệm vụ</th></tr></thead>
+      <tbody>
+        <tr><td>Khách hàng / chủ OA</td><td>Tạo OA, hoàn thiện thông tin doanh nghiệp, chọn gói Tăng trưởng và cấp quyền cho ứng dụng.</td></tr>
+        <tr><td>Đơn vị triển khai CMS</td><td>Cấu hình Zalo App, xác minh domain, nhập thông tin vào server và kiểm tra kết nối.</td></tr>
+        <tr><td>Người quản trị website</td><td>Cung cấp quyền cập nhật domain hoặc phối hợp đặt file/thẻ xác minh trên website.</td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li>Tài khoản Zalo của người đại diện hoặc quản trị.</li>
+      <li>Tên doanh nghiệp, logo, ảnh bìa, mô tả, ngành nghề và thông tin liên hệ.</li>
+      <li>Quyền quản trị domain website.</li>
+      <li>Website đã chạy HTTPS, ví dụ <code>https://tenmiencuakhachhang.vn</code>.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>2. Tạo Zalo Official Account</h2>
+    <ol>
+      <li>Truy cập <a href="https://oa.zalo.me" target="_blank" rel="noopener">oa.zalo.me</a> hoặc <a href="https://oa.zaloapp.com" target="_blank" rel="noopener">oa.zaloapp.com</a>.</li>
+      <li>Đăng nhập bằng tài khoản Zalo của người đại diện hoặc quản trị.</li>
+      <li>Chọn <b>Tạo Official Account mới</b>.</li>
+      <li>Chọn loại phù hợp với doanh nghiệp, nhập tên OA, ngành nghề, mô tả, ảnh đại diện và ảnh bìa.</li>
+      <li>Điền địa chỉ, số điện thoại, website và thông tin doanh nghiệp.</li>
+      <li>Vào <b>Danh sách OA của tôi</b> và ghi lại OA ID.</li>
+    </ol>
+    <div class="note"><b>Lưu ý:</b> OA ID là mã của kênh Zalo. OA ID khác với App ID của ứng dụng.</div>
+  </section>
+
+  <section>
+    <h2>3. Chọn gói Tăng trưởng</h2>
+    <p>Để triển khai đăng bài và sử dụng các quyền mở rộng, khách hàng nên chọn gói <b>Tăng trưởng</b> theo bảng giá hiện hành của Zalo.</p>
+    <ol>
+      <li>Trong OA Manager, chọn OA cần cấu hình.</li>
+      <li>Mở mục <b>Gói dịch vụ</b> hoặc <b>Bảng giá</b>.</li>
+      <li>Chọn gói <b>Tăng trưởng</b>, đọc quyền lợi và hạn mức.</li>
+      <li>Thực hiện thanh toán theo hướng dẫn của Zalo.</li>
+      <li>Kiểm tra OA đã hiển thị đúng gói sau khi thanh toán.</li>
+    </ol>
+    <div class="note"><b>Khuyến nghị:</b> Nếu chỉ thử kết nối lấy thông tin OA thì có thể chưa cần nâng gói. Nếu cần đăng bài từ CMS, nên hoàn thiện gói và quyền trước khi nghiệm thu.</div>
+  </section>
+
+  <section>
+    <h2>4. Tạo ứng dụng trên Zalo Developers</h2>
+    <ol>
+      <li>Truy cập <a href="https://developers.zalo.me" target="_blank" rel="noopener">developers.zalo.me</a>.</li>
+      <li>Chọn <b>Quản lý ứng dụng → Tạo ứng dụng mới</b>.</li>
+      <li>Đặt tên dễ nhận biết, ví dụ <b>TênKháchHàng CMS</b>.</li>
+      <li>Nhập tên hiển thị, số điện thoại liên hệ và tải icon ứng dụng.</li>
+      <li>Mở <b>Thông tin ứng dụng</b> và sao chép <b>ID ứng dụng</b>.</li>
+    </ol>
+    <table>
+      <thead><tr><th>Thông tin</th><th>Dùng để làm gì</th><th>Ai được giữ</th></tr></thead>
+      <tbody>
+        <tr><td><b>App ID</b></td><td>Nhận diện ứng dụng.</td><td>Khách hàng và đội triển khai.</td></tr>
+        <tr><td><b>Secret Key</b></td><td>Khóa bí mật của ứng dụng.</td><td>Chỉ người phụ trách triển khai.</td></tr>
+        <tr><td><b>OA ID</b></td><td>Nhận diện OA sẽ cấp quyền.</td><td>Khách hàng và đội triển khai.</td></tr>
+      </tbody>
+    </table>
+    <div class="note"><b>Bảo mật:</b> Không gửi Secret Key trong nhóm chat đông người, ảnh chụp màn hình hoặc tài liệu công khai.</div>
+  </section>
+
+  <section>
+    <h2>5. Lấy Secret Key</h2>
+    <ol>
+      <li>Trong Zalo Developers, mở đúng ứng dụng vừa tạo.</li>
+      <li>Vào <b>Cài đặt</b> hoặc <b>Thông tin ứng dụng</b>.</li>
+      <li>Tìm mục <b>Secret Key / Khóa bí mật</b>.</li>
+      <li>Bấm sao chép và gửi qua kênh bảo mật cho người triển khai.</li>
+    </ol>
+    <div class="note"><b>Nếu bị lộ khóa:</b> Báo ngay cho người triển khai để đổi hoặc thu hồi khóa theo khả năng mà giao diện Zalo cung cấp.</div>
+  </section>
+
+  <section>
+    <h2>6. Đăng ký và xác minh domain website</h2>
+    <p>Domain phải là domain thật của khách hàng, có HTTPS và truy cập được từ Internet.</p>
+    <ol>
+      <li>Trong Zalo Developers, chọn ứng dụng → <b>Xác thực domain</b>.</li>
+      <li>Nhập tên miền không có <code>http://</code> hoặc <code>https://</code>.</li>
+      <li>Chọn DNS TXT, file HTML hoặc thẻ meta.</li>
+      <li>Gửi token/file Zalo cấp cho người quản trị website.</li>
+      <li>Sau khi cập nhật website, quay lại bấm <b>Xác thực</b>.</li>
+      <li>Không xóa thẻ meta, file HTML hoặc bản ghi DNS sau khi xác minh thành công.</li>
+    </ol>
+    <table>
+      <thead><tr><th>Cách xác minh</th><th>Ai thực hiện</th><th>Khi nên dùng</th></tr></thead>
+      <tbody>
+        <tr><td>DNS TXT</td><td>Người quản lý DNS/domain</td><td>Khi có quyền quản trị DNS.</td></tr>
+        <tr><td>File HTML</td><td>Người quản trị server/website</td><td>Khi có quyền tải file vào thư mục public.</td></tr>
+        <tr><td>Thẻ meta</td><td>Người quản trị website</td><td>Khi có thể sửa trang chủ.</td></tr>
+      </tbody>
+    </table>
+    <div class="note"><b>Lưu ý:</b> Token xác minh là riêng cho từng App và domain. Không dùng token của khách hàng khác.</div>
+  </section>
+
+  <section>
+    <h2>7. Khai báo callback cho đội triển khai</h2>
+    <p>Người cấu hình không cần hiểu kỹ thuật. Chỉ cần gửi cho đội triển khai:</p>
+    <ul>
+      <li>Tên domain website.</li>
+      <li>OA ID.</li>
+      <li>App ID.</li>
+      <li>Secret Key qua kênh bảo mật.</li>
+    </ul>
+    <p>Đội triển khai sẽ gửi lại địa chỉ callback. Khách hàng nhập đúng địa chỉ đó vào phần <b>Official Account API</b> của ứng dụng rồi bấm <b>Lưu</b>.</p>
+    <div class="note"><b>Không tự sửa callback:</b> Nếu đổi domain hoặc đường dẫn callback, cần báo đội triển khai cập nhật đồng thời trên Zalo và CMS.</div>
+  </section>
+
+  <section>
+    <h2>8. Cấp quyền cho ứng dụng kết nối OA</h2>
+    <ol>
+      <li>Đăng nhập OA Manager bằng tài khoản có quyền quản trị OA.</li>
+      <li>Mở CMS và chọn chức năng <b>Kết nối Zalo OA</b>.</li>
+      <li>Kiểm tra đúng tên ứng dụng và đúng tên OA.</li>
+      <li>Chọn quyền quản lý thông tin OA và quyền quản lý bài viết nếu cần đăng bài.</li>
+      <li>Tích đồng ý điều khoản rồi bấm <b>Cấp quyền</b>.</li>
+      <li>Chờ CMS chuyển về và hiển thị <b>Đã kết nối</b>.</li>
+    </ol>
+    <div class="note"><b>Nếu gặp giới hạn app:</b> Vào OA Manager → Quản lý tài khoản → Quản lý liên kết, thu hồi các ứng dụng cũ không còn dùng. Chỉ thu hồi ứng dụng, không chọn <b>Thôi làm Admin</b>.</div>
+  </section>
+
+  <section>
+    <h2>9. Kiểm tra sau khi cấu hình</h2>
+    <table class="check">
+      <thead><tr><th>Nội dung cần kiểm tra</th><th>Đạt</th></tr></thead>
+      <tbody>
+        <tr><td>OA đúng tên, logo và thông tin doanh nghiệp.</td><td>☐</td></tr>
+        <tr><td>Đã chọn gói Tăng trưởng nếu cần đăng bài.</td><td>☐</td></tr>
+        <tr><td>Đã tạo Zalo App.</td><td>☐</td></tr>
+        <tr><td>Đã ghi lại App ID và OA ID.</td><td>☐</td></tr>
+        <tr><td>Đã lấy Secret Key và bàn giao bảo mật.</td><td>☐</td></tr>
+        <tr><td>Domain đã xác minh.</td><td>☐</td></tr>
+        <tr><td>Đã khai báo callback do đội triển khai cung cấp.</td><td>☐</td></tr>
+        <tr><td>Đã cấp quyền cho ứng dụng.</td><td>☐</td></tr>
+        <tr><td>CMS hiển thị Đã kết nối.</td><td>☐</td></tr>
+        <tr><td>Đã thử một bài đăng và kiểm tra kết quả.</td><td>☐</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>10. Khi đổi website hoặc người quản trị</h2>
+    <ul>
+      <li><b>Đổi domain:</b> Xác minh domain mới, cập nhật callback mới và báo đội triển khai.</li>
+      <li><b>Đổi người quản trị:</b> Bàn giao quyền OA Manager và quyền Zalo Developers cho người mới.</li>
+      <li><b>Đổi App:</b> Tạo App mới, lấy App ID/Secret Key mới, xác minh domain nếu được yêu cầu và cấp quyền OA lại.</li>
+      <li><b>Không xóa App cũ ngay:</b> Chỉ xóa sau khi đã chuyển kết nối và kiểm tra thành công.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Địa chỉ cần dùng</h2>
+    <div class="grid">
+      <div class="card"><b>Official Account</b><br><a href="https://oa.zalo.me" target="_blank" rel="noopener">oa.zalo.me</a></div>
+      <div class="card"><b>Zalo Developers</b><br><a href="https://developers.zalo.me" target="_blank" rel="noopener">developers.zalo.me</a></div>
+      <div class="card"><b>Xác minh domain</b><br><a href="https://docs.zaloplatforms.com/docs/OA/phu-luc/huong-dan-xac-thuc-domain" target="_blank" rel="noopener">Tài liệu xác minh domain</a></div>
+      <div class="card"><b>Khởi tạo ứng dụng</b><br><a href="https://docs.zaloplatforms.com/docs/OA/bat-dau/khoi-tao-ung-dung" target="_blank" rel="noopener">Tài liệu khởi tạo ứng dụng</a></div>
+    </div>
+  </section>
+
+  <p class="footer">Hướng dẫn cấu hình Zalo OA cho khách hàng · Tài liệu triển khai CMS</p>
+</main>
+</body>
+</html>
+

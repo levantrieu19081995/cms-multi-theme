@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Modules\CmsBackend\Enums\PermissionsEnum;
 use Modules\CmsBackend\Http\Controllers\CDNBannerController;
 use Modules\CmsBackend\Http\Controllers\CDNLinksWebsiteController;
 use Modules\CmsBackend\Http\Controllers\CDNLoaiVanBanController;
@@ -12,23 +13,29 @@ use Modules\CmsBackend\Http\Controllers\CDNPostController;
 use Modules\CmsBackend\Http\Controllers\CDNThuVienHinhAnhController;
 use Modules\CmsBackend\Http\Controllers\CDNTrangController;
 use Modules\CmsBackend\Http\Controllers\CDNVanBanController;
-use Modules\CmsBackend\Http\Controllers\CmsBackendController;
+use Modules\CmsBackend\Http\Controllers\DeveloperAccountsController;
+use Modules\CmsBackend\Http\Controllers\DeveloperSettingsController;
 use Modules\CmsBackend\Http\Controllers\DichVuController;
-use Modules\CmsBackend\Http\Controllers\FeaturedStatisticController;
 use Modules\CmsBackend\Http\Controllers\DoiTacController;
+use Modules\CmsBackend\Http\Controllers\FeaturedStatisticController;
 use Modules\CmsBackend\Http\Controllers\GuongTieuBieuController;
 use Modules\CmsBackend\Http\Controllers\HoiDapAdminController;
+use Modules\CmsBackend\Http\Controllers\HomepageLayoutController;
 use Modules\CmsBackend\Http\Controllers\KhaoSatController;
-use Modules\CmsBackend\Http\Controllers\NgheNghiepCatalogController;
 use Modules\CmsBackend\Http\Controllers\KhaoSatPhanHoiController;
 use Modules\CmsBackend\Http\Controllers\KhaoSatThongKeController;
 use Modules\CmsBackend\Http\Controllers\LienHeAdminController;
+use Modules\CmsBackend\Http\Controllers\NgheNghiepCatalogController;
+use Modules\CmsBackend\Http\Controllers\ScreenThemeController;
 use Modules\CmsBackend\Http\Controllers\SocialAccountController;
 use Modules\CmsBackend\Http\Controllers\SocialFacebookController;
+use Modules\CmsBackend\Http\Controllers\SocialGuideController;
 use Modules\CmsBackend\Http\Controllers\SocialOverviewController;
 use Modules\CmsBackend\Http\Controllers\SocialPublicationController;
 use Modules\CmsBackend\Http\Controllers\SocialStatisticsController;
+use Modules\CmsBackend\Http\Controllers\SocialZaloController;
 use Modules\CmsBackend\Http\Controllers\SuKienController;
+use Modules\CmsBackend\Services\Social\SocialGuides;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,7 +50,7 @@ use Modules\CmsBackend\Http\Controllers\SuKienController;
 
 Route::middleware(['cms.developer.enabled'])->prefix('developer-settings')->group(function () {
     // Hidden developer area (5 clicks on a logo, or the address). Independent of the CMS sign-in: 404 without DEVELOPER_ACCESS_TOKEN_HASH, then only the Developer password + session flag.
-    $dev = \Modules\CmsBackend\Http\Controllers\DeveloperSettingsController::class;
+    $dev = DeveloperSettingsController::class;
     Route::get('unlock', [$dev, 'unlockForm'])->name('dashboard.developer-settings.unlock');
     Route::post('unlock', [$dev, 'unlock'])->middleware('throttle:developer-unlock')->name('dashboard.developer-settings.unlock.store');
     Route::middleware('cms.developer')->group(function () use ($dev) {
@@ -54,7 +61,7 @@ Route::middleware(['cms.developer.enabled'])->prefix('developer-settings')->grou
         Route::post('theme', [$dev, 'saveTheme'])->middleware('throttle:10,1')->name('dashboard.developer-settings.theme.save');
         Route::post('features/{feature}', [$dev, 'saveFeature'])->where('feature', '[a-z0-9-]+')->middleware('throttle:10,1')->name('dashboard.developer-settings.features.save');
         // Tab "Tài khoản": đổi mật khẩu, khóa/mở, gán vai trò, cấu hình quyền của vai trò (chỉ phiên Developer).
-        $accounts = \Modules\CmsBackend\Http\Controllers\DeveloperAccountsController::class;
+        $accounts = DeveloperAccountsController::class;
         Route::prefix('accounts')->middleware('throttle:20,1')->group(function () use ($accounts) {
             Route::post('password', [$accounts, 'password'])->name('dashboard.developer-settings.accounts.password');
             Route::post('status', [$accounts, 'status'])->name('dashboard.developer-settings.accounts.status');
@@ -63,7 +70,7 @@ Route::middleware(['cms.developer.enabled'])->prefix('developer-settings')->grou
             Route::post('role-permissions', [$accounts, 'rolePermissions'])->name('dashboard.developer-settings.accounts.role-permissions');
         });
         // Homepage Layout Manager (tab "Bố cục trang chủ"): chỉ phiên Developer; preview là snapshot phía server, không đổi bố cục Live.
-        $layout = \Modules\CmsBackend\Http\Controllers\HomepageLayoutController::class;
+        $layout = HomepageLayoutController::class;
         Route::prefix('homepage-layout')->where(['theme' => '[a-z][a-z0-9-]*', 'token' => '[A-Za-z0-9]{40}'])->group(function () use ($layout) {
             Route::get('preview/{token}', [$layout, 'review'])->name('dashboard.developer-settings.homepage.review');
             Route::get('preview/{token}/frame', [$layout, 'frame'])->name('dashboard.developer-settings.homepage.frame');
@@ -80,7 +87,7 @@ Route::group([], function () {
     // Cài đặt thông tin trang chủ
 
     Route::middleware('cms.auth')->group(function () {
-        Route::post('settings/themes', [\Modules\CmsBackend\Http\Controllers\ScreenThemeController::class, 'update'])->name('setting.themes.update');
+        Route::post('settings/themes', [ScreenThemeController::class, 'update'])->name('setting.themes.update');
 
         // URLs are /cms/<function> (no "dashboard", no technical "cdn" level); the route names keep their old
         // "dashboard." / "dashboard.cdn." parts so controllers, views, breadcrumbs and permissions are untouched.
@@ -96,7 +103,7 @@ Route::group([], function () {
             $career = $cluster === 'career';
             $prefix = $career ? 'NGHENGHIEP' : 'KHAOSAT';
             $n = $career ? 'nghe-nghiep' : 'khao-sat';
-            $p = \Modules\CmsBackend\Enums\PermissionsEnum::class;
+            $p = PermissionsEnum::class;
             $can = fn (string ...$cases) => 'cms.check.permission:'.implode(',', array_map(fn (string $c) => constant($p.'::'.$prefix.'_'.$c)->label(), $cases));
             $survey = KhaoSatController::class;
 
@@ -145,8 +152,8 @@ Route::group([], function () {
             // Cổng chức năng cms.feature:contact; quyền ở từng route (đã tính quyền cha lienhe-manager). POST vì production từ chối method-override.
             Route::prefix('lien-he')->middleware('cms.feature:contact')->name('lien-he.')->group(function () {
                 $lienHe = LienHeAdminController::class;
-                $view = 'cms.check.permission:'.\Modules\CmsBackend\Enums\PermissionsEnum::LIENHE_VIEW->label();
-                $delete = 'cms.check.permission:'.\Modules\CmsBackend\Enums\PermissionsEnum::LIENHE_DELETE->label();
+                $view = 'cms.check.permission:'.PermissionsEnum::LIENHE_VIEW->label();
+                $delete = 'cms.check.permission:'.PermissionsEnum::LIENHE_DELETE->label();
                 Route::get('/', [$lienHe, 'index'])->middleware($view)->name('index');
                 Route::get('{id}', [$lienHe, 'show'])->whereNumber('id')->middleware($view)->name('show');
                 Route::post('{id}/xoa', [$lienHe, 'destroy'])->whereNumber('id')->middleware($delete)->name('destroy');
@@ -164,6 +171,7 @@ Route::group([], function () {
                 Route::get('/', [SocialOverviewController::class, 'index'])->name('index');
                 Route::get('tao-bai-dang', [SocialPublicationController::class, 'create'])->name('create');
                 Route::post('tao-bai-dang', [SocialPublicationController::class, 'store'])->name('store');
+                Route::post('tao-bai-dang/truc-tiep', [SocialPublicationController::class, 'storeDirect'])->name('store-direct');
                 Route::get('bai-da-dang', [SocialPublicationController::class, 'index'])->name('publications.index');
                 Route::get('bai-da-dang/{id}', [SocialPublicationController::class, 'show'])->whereNumber('id')->name('publications.show');
                 Route::get('bai-da-dang/{id}/chinh-sua', [SocialPublicationController::class, 'edit'])->whereNumber('id')->name('publications.edit');
@@ -171,8 +179,18 @@ Route::group([], function () {
                 Route::post('bai-da-dang/{id}', [SocialPublicationController::class, 'update'])->whereNumber('id')->name('publications.update');
                 Route::post('bai-da-dang/{id}/luu-tru', [SocialPublicationController::class, 'archive'])->whereNumber('id')->name('publications.archive');
                 Route::post('bai-da-dang/{id}/khoi-phuc', [SocialPublicationController::class, 'restore'])->whereNumber('id')->name('publications.restore');
+                // Send / send again / take down / read back. POST with CSRF; throttled because each one calls a social platform.
+                Route::post('bai-da-dang/{id}/dang', [SocialPublicationController::class, 'publish'])->whereNumber('id')->middleware('throttle:10,1')->name('publications.publish');
+                Route::post('bai-da-dang/{id}/dang-lai', [SocialPublicationController::class, 'retry'])->whereNumber('id')->middleware('throttle:10,1')->name('publications.retry');
+                Route::post('bai-da-dang/{id}/go-bai', [SocialPublicationController::class, 'remove'])->whereNumber('id')->middleware('throttle:10,1')->name('publications.remove');
+                Route::post('bai-da-dang/{id}/dong-bo', [SocialPublicationController::class, 'sync'])->whereNumber('id')->middleware('throttle:20,1')->name('publications.sync');
                 Route::get('thong-ke', [SocialStatisticsController::class, 'index'])->name('statistics');
                 Route::get('tai-khoan', [SocialAccountController::class, 'index'])->name('accounts');
+
+                // Hướng dẫn: the .html files of Modules/CmsBackend/resources/guides/{chung|<project>}, each shown as it is. {scope} = chung | du-an (the current project).
+                Route::get('huong-dan', [SocialGuideController::class, 'index'])->name('guides.index');
+                Route::get('huong-dan/{scope}/{file}', [SocialGuideController::class, 'show'])->where(['scope' => SocialGuides::SCOPE_PATTERN, 'file' => SocialGuides::NAME_PATTERN])->name('guides.show');
+                Route::get('huong-dan/{scope}/{file}/noi-dung', [SocialGuideController::class, 'raw'])->where(['scope' => SocialGuides::SCOPE_PATTERN, 'file' => SocialGuides::NAME_PATTERN])->name('guides.raw');
 
                 // Kết nối Facebook Page (Phase 2A). Callback URL to register at Meta: .../cms/truyen-thong/tai-khoan/facebook/callback
                 Route::prefix('tai-khoan/facebook')->name('facebook.')->group(function () {
@@ -182,6 +200,14 @@ Route::group([], function () {
                     Route::post('confirm-page', [SocialFacebookController::class, 'confirmPage'])->middleware('throttle:10,1')->name('confirm-page');
                     Route::post('check', [SocialFacebookController::class, 'check'])->middleware('throttle:10,1')->name('check');
                     Route::post('disconnect', [SocialFacebookController::class, 'disconnect'])->name('disconnect');
+                });
+
+                // Kết nối Zalo OA. Callback URL to register in the Zalo app: .../cms/truyen-thong/tai-khoan/zalo/callback
+                Route::prefix('tai-khoan/zalo')->name('zalo.')->group(function () {
+                    Route::get('connect', [SocialZaloController::class, 'connect'])->middleware('throttle:10,1')->name('connect');
+                    Route::get('callback', [SocialZaloController::class, 'callback'])->middleware('throttle:10,1')->name('callback');
+                    Route::post('check', [SocialZaloController::class, 'check'])->middleware('throttle:10,1')->name('check');
+                    Route::post('disconnect', [SocialZaloController::class, 'disconnect'])->name('disconnect');
                 });
             });
 

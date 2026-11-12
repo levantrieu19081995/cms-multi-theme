@@ -43,6 +43,9 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1" />
 
+    <meta property="zalo-platform-site-verification"
+        content="UCw-4VpbAmetb9yDjuHCEJQb-2VQsYrvCp0" />
+
     <title>{{ $cmsMetaTitle }} |
         {{ __('frontend.brand.name') }}
     </title>

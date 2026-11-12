@@ -4,7 +4,17 @@
 
 @section('content')
     {{ Breadcrumbs::render('cms.dashboard.truyen-thong.publications.index') }}
-    @include('cmsbackend::screens.pages.truyen-thong.partials.project-badge')
+    @include('cmsbackend::screens.pages.truyen-thong.partials.project-badge', ['hideGuideLink' => true])
+
+    <style>
+        /* The two filter selects sit in a .form-floating wrapper (the shared list layout script needs it), but they must look
+           like the search box beside them: white, outlined, same height, text vertically centred (no floating label). */
+        #social-filter-status, #social-filter-channel {
+            height: 40px; min-height: 40px; padding: .4rem 2.25rem .4rem .875rem;
+            background-color: #fff; border: 1px solid #d4e0f3; border-radius: .5rem; box-shadow: none; color: #183864;
+        }
+        #social-filter-status:focus, #social-filter-channel:focus { border-color: #0879ff; box-shadow: 0 0 0 2px #0879ff26; }
+    </style>
 
     <div class="card">
         <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2 bg-primary text-white">
@@ -14,30 +24,30 @@
             @endif
         </div>
         <div class="card-body mt-4">
-            <form method="get" class="row g-3 mb-4">
-                <div class="col-12 col-md-5">
+            <form method="get" class="mb-4">
+                <div class="d-flex flex-wrap align-items-end gap-3">
                     <div class="input-group input-group-merge bg-white">
                         <span class="input-group-text"><i class="ri-search-line" aria-hidden="true"></i></span>
                         <input type="search" name="search" class="form-control" value="{{ $filters['search'] }}" placeholder="{{ __('admin.social.search_publication') }}" aria-label="{{ __('admin.social.search_publication') }}">
                     </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <select name="status" class="form-select" aria-label="{{ __('admin.social.col_status') }}">
-                        <option value="">{{ __('admin.social.all_statuses') }}</option>
-                        @foreach (\Modules\CmsBackend\Enums\Social\SocialPublicationStatus::cases() as $status)
-                            <option value="{{ $status->value }}" @selected($filters['status'] === $status->value)>{{ $status->label() }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-6 col-md-2">
-                    <select name="channel" class="form-select" aria-label="{{ __('admin.social.col_channels') }}">
-                        <option value="">{{ __('admin.social.all_channels') }}</option>
-                        @foreach (\Modules\CmsBackend\Enums\Social\SocialChannel::cases() as $channel)
-                            <option value="{{ $channel->value }}" @selected($filters['channel'] === $channel->value)>{{ $channel->label() }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-12 col-md-2 d-grid">
+                    <div class="form-floating">
+                        <select id="social-filter-status" name="status" class="form-select">
+                            <option value="">{{ __('admin.social.all_statuses') }}</option>
+                            @foreach (\Modules\CmsBackend\Enums\Social\SocialPublicationStatus::cases() as $status)
+                                <option value="{{ $status->value }}" @selected($filters['status'] === $status->value)>{{ $status->label() }}</option>
+                            @endforeach
+                        </select>
+                        <label for="social-filter-status">{{ __('admin.social.col_status') }}</label>
+                    </div>
+                    <div class="form-floating">
+                        <select id="social-filter-channel" name="channel" class="form-select">
+                            <option value="">{{ __('admin.social.all_channels') }}</option>
+                            @foreach (\Modules\CmsBackend\Enums\Social\SocialChannel::cases() as $channel)
+                                <option value="{{ $channel->value }}" @selected($filters['channel'] === $channel->value)>{{ $channel->label() }}</option>
+                            @endforeach
+                        </select>
+                        <label for="social-filter-channel">{{ __('admin.social.col_channels') }}</label>
+                    </div>
                     <button type="submit" class="btn btn-outline-secondary bg-white"><i class="ri-filter-3-line me-1" aria-hidden="true"></i>{{ __('admin.ui.search') }}</button>
                 </div>
             </form>

@@ -4,22 +4,28 @@ declare(strict_types=1);
 
 namespace Modules\CmsBackend\Services\Social;
 
+use App\Models\Post;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Services\LocaleManager;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\CmsBackend\DataProviders\SocialPublicationDataProvider;
 use Modules\CmsBackend\Enums\PermissionsEnum;
 use Modules\CmsBackend\Enums\Social\SocialChannel;
 use Modules\CmsBackend\Enums\Social\SocialChannelStatus;
 use Modules\CmsBackend\Enums\Social\SocialPublicationStatus;
+use Modules\CmsBackend\Jobs\SendSocialDeliveryJob;
+use Modules\CmsBackend\Models\Social\SocialAccount;
 use Modules\CmsBackend\Models\Social\SocialPublication;
+use Modules\CmsBackend\Models\Social\SocialPublicationChannel;
 use Modules\CmsBackend\Support\ProjectContext;
 
 /**
- * Business rules of the multi-channel publication. Phase 1 prepares publications (draft / ready) and never contacts a
- * social platform: there is no adapter, so publish() always answers "channel not connected".
+ * Business rules of the multi-channel publication: prepare (draft / ready), publish, retry, remove and read back from the
+ * platforms. A platform is only contacted through the SocialChannelAdapter of its channel; sending is done by
+ * SendSocialDeliveryJob, one job per channel, so one failing platform never blocks another.
  */
 final class SocialPublicationService
 {
@@ -55,7 +61,7 @@ final class SocialPublicationService
     /**
      * Data of the create form: the post, the languages it can be shared in, and the snapshot of the chosen language.
      *
-     * @return array{post: \App\Models\Post, locale: string, locales: string[], snapshot: array<string, mixed>}
+     * @return array{post: Post, locale: string, locales: string[], snapshot: array<string, mixed>}
      *
      * @throws SocialException
      */
@@ -108,19 +114,51 @@ final class SocialPublicationService
 
         $snapshot = $this->snapshots->build($post, (string) $input['locale']);
         $content = $this->content($input, $snapshot);
+
+        return $this->persist($user, $key, $post->id, (string) $input['locale'], $content, $snapshot['public_url'], $input);
+    }
+
+    /**
+     * Create a publication written directly in the CMS (no source post): the text, the image and, optionally, the address the post
+     * points to are typed by the administrator, in the default language. Same rules, statuses and idempotency as createFromPost.
+     *
+     * @param  array{title?: ?string, message?: ?string, image_url?: ?string, public_url?: ?string, channels?: array, intent?: string, idempotency_key?: ?string}  $input
+     * @return array{0: SocialPublication, 1: bool} the publication and whether this call created it
+     */
+    public function createDirect(User $user, array $input): array
+    {
+        $this->authorize($user, PermissionsEnum::SOCIAL_PUBLICATION_CREATE);
+
+        $key = $this->cleanKey($input['idempotency_key'] ?? null);
+        if ($key !== null && ($existing = $this->data->findByIdempotencyKey($key)) !== null) {
+            return [$this->sameOwner($existing, $user), false];
+        }
+
+        $content = $this->content($input, ['title' => '', 'message' => '', 'image_url' => null]);
+
+        return $this->persist($user, $key, null, app(LocaleManager::class)->default(), $content, $this->publicUrl($input['public_url'] ?? null), $input);
+    }
+
+    /**
+     * The one write path of a new publication: content, chosen channels and first status in one transaction. A repeated submit
+     * (same idempotency key) returns the first publication.
+     *
+     * @param  array{title: string, message: string, image_url: ?string}  $content
+     * @return array{0: SocialPublication, 1: bool}
+     */
+    private function persist(User $user, ?string $key, ?int $postId, string $locale, array $content, string $publicUrl, array $input): array
+    {
         $channels = $this->channels($input['channels'] ?? []);
+        $this->assertMediaFits($content, $channels);
         $status = $this->targetStatus($input['intent'] ?? 'draft', $content, $channels);
 
         try {
-            $publication = DB::transaction(function () use ($user, $post, $input, $snapshot, $content, $channels, $status, $key) {
-                $publication = SocialPublication::create([
-                    'post_id' => $post->id,
+            $publication = DB::transaction(function () use ($user, $postId, $locale, $publicUrl, $content, $channels, $status, $key) {
+                $publication = SocialPublication::create($this->contentColumns($content) + [
+                    'post_id' => $postId,
                     'project_key' => $this->projectKey(),
-                    'locale' => (string) $input['locale'],
-                    'title' => $content['title'],
-                    'message' => $content['message'],
-                    'image_url' => $content['image_url'],
-                    'public_url' => $snapshot['public_url'],
+                    'locale' => $locale,
+                    'public_url' => $publicUrl,
                     'status' => $status->value,
                     'idempotency_key' => $key,
                     'created_by' => $user->id,
@@ -146,6 +184,14 @@ final class SocialPublicationService
         return [$publication, true];
     }
 
+    /** Address typed for a direct publication: empty (none), or an absolute http(s) address; the column is not nullable. */
+    private function publicUrl(mixed $value): string
+    {
+        $url = trim((string) $value);
+
+        return preg_match('~^https?://[^\s]+$~i', $url) === 1 ? $url : '';
+    }
+
     /**
      * Edit a publication that has not been sent. The snapshot of the post (language, address, source post) is fixed;
      * the administrator edits the share text, image and channels.
@@ -163,11 +209,19 @@ final class SocialPublicationService
                 throw SocialException::notEditable();
             }
 
-            $content = $this->content($input, ['title' => $locked->title, 'message' => $locked->message, 'image_url' => $locked->image_url]);
+            $content = $this->content($input, [
+                'title' => $locked->title, 'message' => $locked->message, 'image_url' => $locked->image_url,
+                'media' => array_map(fn (array $item) => $item['url'], $locked->mediaItems()),
+            ]);
             $channels = $this->channels($input['channels'] ?? []);
+            $this->assertMediaFits($content, $channels);
             $status = $this->targetStatus($input['intent'] ?? 'draft', $content, $channels);
 
-            $locked->update($content + ['status' => $status->value, 'updated_by' => $user->id]);
+            // The address is fixed for a publication made from a post; one written directly may change it.
+            $address = $locked->post_id === null && array_key_exists('public_url', $input)
+                ? ['public_url' => $this->publicUrl($input['public_url'])] : [];
+
+            $locked->update($this->contentColumns($content) + $address + ['status' => $status->value, 'updated_by' => $user->id]);
             $this->syncChannels($locked, $channels);
             $this->refreshStatus($locked);
 
@@ -222,8 +276,9 @@ final class SocialPublicationService
     }
 
     /**
-     * Sending is not available before Phase 2. Every check runs first, so a channel without an adapter or a connected
-     * account is refused with a business error and nothing is changed or sent.
+     * Queue every channel of a ready publication for sending. Every check runs first, so a channel without an adapter or a
+     * connected account refuses the whole publication with a business error and nothing is queued. The sending itself is
+     * done by SendSocialDeliveryJob (see deliver()).
      *
      * @throws SocialException
      */
@@ -253,8 +308,306 @@ final class SocialPublicationService
             $this->assertProject($account->project_key);
         }
 
-        // Posting is not built yet (an adapter exists since Phase 2A, but only to verify the connection): never a silent success.
-        throw new SocialException(__('admin.social.error_not_implemented'), 'not_implemented');
+        $ids = $this->queueDeliveries($publication, [SocialChannelStatus::DRAFT, SocialChannelStatus::UNAVAILABLE], $user);
+        $this->log('update', $publication, $user, __('admin.social.log_published'));
+        $this->dispatchDeliveries($ids);
+    }
+
+    /**
+     * Send the deliveries that failed once more. Only a person asks for this: nothing is retried automatically, because a
+     * failed call may still have created the post on the platform.
+     *
+     * @throws SocialException
+     */
+    public function retry(User $user, SocialPublication $publication): void
+    {
+        $this->authorize($user, PermissionsEnum::SOCIAL_PUBLICATION_RETRY);
+        $this->assertProject($publication->project_key);
+
+        $publication->loadMissing('channels');
+        foreach ($publication->channels->where('status', SocialChannelStatus::FAILED) as $delivery) {
+            if (! $this->registry->has($delivery->channel) || $this->data->connectedAccount($delivery->channel) === null) {
+                throw SocialException::channelNotConnected();
+            }
+        }
+
+        $ids = $this->queueDeliveries($publication, [SocialChannelStatus::FAILED], $user, 'error_nothing_to_retry');
+        $this->log('update', $publication, $user, __('admin.social.log_retried'));
+        $this->dispatchDeliveries($ids);
+    }
+
+    /**
+     * Take the published deliveries down from their platforms. A platform that refuses leaves its delivery published; the
+     * reason is returned so the administrator can remove the post there by hand.
+     *
+     * @return array{removed: int, errors: string[]}
+     *
+     * @throws SocialException
+     */
+    public function remove(User $user, SocialPublication $publication): array
+    {
+        $this->authorize($user, PermissionsEnum::SOCIAL_PUBLICATION_REMOVE);
+        $this->assertProject($publication->project_key);
+
+        $removed = 0;
+        $errors = [];
+        foreach ($publication->channels()->with('account')->where('status', SocialChannelStatus::PUBLISHED->value)->get() as $delivery) {
+            $adapter = $this->registry->find($delivery->channel);
+            if ($adapter === null || $delivery->account === null || ! $this->accountUsable($delivery->account, $publication)) {
+                $errors[] = $delivery->channel->label().': '.__('admin.social.error_channel_not_connected');
+
+                continue;
+            }
+            $result = $this->callAdapter(fn () => $adapter->remove($delivery, $delivery->account));
+            if ($result->success) {
+                $delivery->update(['status' => SocialChannelStatus::REMOVED->value, 'removed_at' => now(), 'error_code' => null, 'error_message' => null]);
+                $removed++;
+            } else {
+                $errors[] = $delivery->channel->label().': '.$result->message;
+            }
+        }
+        if ($removed === 0 && $errors === []) {
+            throw new SocialException(__('admin.social.error_nothing_to_remove'), 'nothing_to_remove');
+        }
+
+        $this->refreshStatus($publication);
+        $this->log('update', $publication, $user, __('admin.social.log_removed'));
+
+        return ['removed' => $removed, 'errors' => $errors];
+    }
+
+    /**
+     * Read back from the platforms whether each published post still exists and how many reactions, comments and shares it has.
+     *
+     * @return array{synced: int, errors: string[]}
+     *
+     * @throws SocialException
+     */
+    public function sync(User $user, SocialPublication $publication): array
+    {
+        $this->authorize($user, PermissionsEnum::SOCIAL_STATISTICS_VIEW);
+        $this->assertProject($publication->project_key);
+
+        $synced = 0;
+        $errors = [];
+        $canStore = $this->data->hasMetricsColumn();
+        $resolved = false;
+        // Published posts, and posts the platform was still processing last time (their final id is read here).
+        $deliveries = $publication->channels()->with('account')
+            ->whereIn('status', [SocialChannelStatus::PUBLISHED->value, SocialChannelStatus::PROCESSING->value])
+            ->whereNotNull('remote_post_id')->get();
+        foreach ($deliveries as $delivery) {
+            $adapter = $this->registry->find($delivery->channel);
+            if ($adapter === null || $delivery->account === null || ! $this->accountUsable($delivery->account, $publication)) {
+                $errors[] = $delivery->channel->label().': '.__('admin.social.error_channel_not_connected');
+
+                continue;
+            }
+
+            $status = $this->callAdapter(fn () => $adapter->syncStatus($delivery, $delivery->account));
+            if ($status->pending) {
+                // Still being processed by the platform: nothing to decide yet, ask again later.
+                $delivery->update(['remote_post_id' => $status->remoteId ?? $delivery->remote_post_id, 'error_message' => $status->message, 'last_synced_at' => now()]);
+                $errors[] = $delivery->channel->label().': '.$status->message;
+
+                continue;
+            }
+            if (! $status->success) {
+                // The delivery keeps its status; the reason is shown next to it. Nothing is guessed about a post we cannot read.
+                $delivery->update(['error_code' => $status->errorCode, 'error_message' => $status->message, 'last_synced_at' => now()]);
+                $errors[] = $delivery->channel->label().': '.$status->message;
+
+                continue;
+            }
+
+            $attributes = ['last_synced_at' => now()];
+            if ($delivery->status === SocialChannelStatus::PROCESSING) {
+                // The platform finished: the post now has its final id and counts as published.
+                $attributes += [
+                    'status' => SocialChannelStatus::PUBLISHED->value,
+                    'remote_post_id' => $status->remoteId ?? $delivery->remote_post_id,
+                    'published_at' => now(),
+                    'error_code' => null,
+                    'error_message' => null,
+                ];
+                $delivery->fill($attributes)->save();
+                $attributes = [];
+                $resolved = true;
+            } elseif ($delivery->error_code === 'remote_missing') {
+                $attributes += ['error_code' => null, 'error_message' => null];
+            }
+            if ($status->remoteUrl !== null) {
+                $attributes['remote_url'] = $status->remoteUrl;
+            }
+            $metrics = $this->callAdapter(fn () => $adapter->syncMetrics($delivery, $delivery->account));
+            if ($metrics->success && $metrics->remoteUrl !== null) {
+                // Some platforms (Zalo) give the public address of the post only with its figures.
+                $attributes['remote_url'] = $metrics->remoteUrl;
+            }
+            if ($metrics->success && $canStore && $metrics->data !== []) {
+                $attributes['metrics'] = array_map('intval', $metrics->data);
+            } elseif (! $metrics->success) {
+                $errors[] = $delivery->channel->label().': '.$metrics->message;
+            }
+            if ($attributes !== []) {
+                $delivery->update($attributes);
+            }
+            $synced++;
+        }
+        if ($synced === 0 && $errors === []) {
+            throw new SocialException(__('admin.social.error_nothing_to_sync'), 'nothing_to_sync');
+        }
+
+        if ($resolved) {
+            $publication = $this->refreshStatus($publication);
+            if ($publication->published_at === null && $publication->status === SocialPublicationStatus::PUBLISHED) {
+                $publication->update(['published_at' => now()]);
+            }
+        }
+        $this->log('update', $publication, $user, __('admin.social.log_synced'));
+
+        return ['synced' => $synced, 'errors' => $errors];
+    }
+
+    /**
+     * Send one queued delivery. Called by SendSocialDeliveryJob. The row is claimed first (queued -> processing) inside a lock, so
+     * two workers can never send the same delivery; the platform call is made outside the transaction.
+     */
+    public function deliver(int $deliveryId): void
+    {
+        $delivery = DB::transaction(function () use ($deliveryId) {
+            $row = SocialPublicationChannel::query()->lockForUpdate()->find($deliveryId);
+            if ($row === null || $row->status !== SocialChannelStatus::QUEUED) {
+                return null;
+            }
+            $row->update(['status' => SocialChannelStatus::PROCESSING->value, 'attempts' => $row->attempts + 1]);
+
+            return $row;
+        });
+        if ($delivery === null) {
+            return;
+        }
+
+        $delivery->load(['publication', 'account']);
+        $publication = $delivery->publication;
+        $account = $delivery->account;
+        $this->refreshStatus($publication);
+
+        $adapter = $this->registry->find($delivery->channel);
+        $result = ($adapter === null || $account === null || ! $this->accountUsable($account, $publication))
+            ? SocialOperationResult::failed('channel_not_connected', __('admin.social.error_channel_not_connected'))
+            : $this->callAdapter(fn () => $adapter->publish($delivery, $account));
+
+        if ($result->success) {
+            $delivery->update([
+                'status' => SocialChannelStatus::PUBLISHED->value,
+                'remote_post_id' => $result->remoteId,
+                'remote_url' => $result->remoteUrl,
+                'published_at' => now(),
+                'error_code' => null,
+                'error_message' => null,
+            ]);
+        } elseif ($result->pending) {
+            // Accepted by the platform but not finished (a Zalo article is built asynchronously). Never a failure: the post may
+            // already exist, so it stays "processing" and the next synchronization resolves it.
+            $delivery->update(['remote_post_id' => $result->remoteId, 'error_code' => null, 'error_message' => $result->message]);
+        } else {
+            $delivery->update([
+                'status' => SocialChannelStatus::FAILED->value,
+                'error_code' => $result->errorCode,
+                'error_message' => $result->message,
+            ]);
+        }
+
+        $publication = $this->refreshStatus($publication);
+        if ($result->success && $publication->published_at === null) {
+            $publication->update(['published_at' => now()]);
+        }
+    }
+
+    /** Last resort of the job: a delivery stuck in "queued" or "processing" becomes failed, so a person can retry it. */
+    public function markDeliveryFailed(int $deliveryId): void
+    {
+        $delivery = SocialPublicationChannel::query()->find($deliveryId);
+        if ($delivery === null || ! in_array($delivery->status, [SocialChannelStatus::QUEUED, SocialChannelStatus::PROCESSING], true)) {
+            return;
+        }
+        $delivery->update([
+            'status' => SocialChannelStatus::FAILED->value,
+            'error_code' => 'unexpected',
+            'error_message' => __('admin.social.error_delivery_unexpected'),
+        ]);
+        if ($delivery->publication !== null) {
+            $this->refreshStatus($delivery->publication);
+        }
+    }
+
+    /**
+     * Mark the eligible deliveries of the publication as queued, in one transaction, and return their ids.
+     *
+     * @param  SocialChannelStatus[]  $from
+     * @return int[]
+     *
+     * @throws SocialException when no delivery is eligible
+     */
+    private function queueDeliveries(SocialPublication $publication, array $from, User $user, string $emptyKey = 'error_not_ready'): array
+    {
+        $ids = DB::transaction(function () use ($publication, $from, $user) {
+            $ids = [];
+            $fromValues = array_map(fn (SocialChannelStatus $status) => $status->value, $from);
+            foreach ($publication->channels()->lockForUpdate()->get() as $delivery) {
+                if (! in_array($delivery->status->value, $fromValues, true)) {
+                    continue;
+                }
+                $account = $this->data->connectedAccount($delivery->channel);
+                if ($account === null) {
+                    throw SocialException::channelNotConnected();
+                }
+                $delivery->update([
+                    'social_account_id' => $account->id,
+                    'status' => SocialChannelStatus::QUEUED->value,
+                    'error_code' => null,
+                    'error_message' => null,
+                ]);
+                $ids[] = $delivery->id;
+            }
+            if ($ids !== []) {
+                $publication->update(['status' => SocialPublicationStatus::QUEUED->value, 'updated_by' => $user->id]);
+            }
+
+            return $ids;
+        });
+        if ($ids === []) {
+            throw new SocialException(__('admin.social.'.$emptyKey), $emptyKey);
+        }
+
+        return $ids;
+    }
+
+    /** @param int[] $ids */
+    private function dispatchDeliveries(array $ids): void
+    {
+        foreach ($ids as $id) {
+            SendSocialDeliveryJob::dispatch($id);
+        }
+    }
+
+    /** The account must be connected, of the same platform and of the project of the publication. */
+    private function accountUsable(SocialAccount $account, SocialPublication $publication): bool
+    {
+        return $account->isConnected() && $account->project_key === $publication->project_key;
+    }
+
+    /** An adapter must never throw; if one does, the cause is logged by class only and the caller gets a safe message. */
+    private function callAdapter(\Closure $call): SocialOperationResult
+    {
+        try {
+            return $call();
+        } catch (\Throwable $e) {
+            Log::error('Social adapter call failed', ['exception' => $e::class]);
+
+            return SocialOperationResult::failed('unexpected', __('admin.social.error_delivery_unexpected'));
+        }
     }
 
     /** Overall status derived from the status of its channels. A draft / ready publication stays as the user set it. */
@@ -327,17 +680,44 @@ final class SocialPublicationService
      */
     private function content(array $input, array $fallback): array
     {
-        $image = $fallback['image_url'];
-        if (array_key_exists('image_url', $input)) {
-            $image = trim((string) $input['image_url']);
-            $image = $image === '' ? null : (str_starts_with($image, '/') ? url($image) : $image);
+        // Pictures / video: the list picked in the library; an older form sends a single image_url instead; neither = unchanged.
+        if (array_key_exists('media', $input)) {
+            $media = SocialMedia::normalize($input['media']);
+        } elseif (array_key_exists('image_url', $input)) {
+            $media = SocialMedia::normalize([$input['image_url']]);
+        } else {
+            $media = SocialMedia::normalize($fallback['media'] ?? (filled($fallback['image_url'] ?? null) ? [$fallback['image_url']] : []));
+        }
+        if (($problem = SocialMedia::violation($media)) !== null) {
+            throw new SocialException(__('admin.social.'.$problem, ['max' => SocialMedia::MAX_IMAGES]), $problem);
         }
 
         return [
             'title' => array_key_exists('title', $input) ? $this->snapshots->plainText($input['title']) : (string) $fallback['title'],
             'message' => array_key_exists('message', $input) ? $this->snapshots->plainText($input['message']) : (string) $fallback['message'],
-            'image_url' => $image,
+            // image_url stays the first picture: lists, overview and older rows read it.
+            'image_url' => SocialMedia::urls($media, SocialMedia::IMAGE)[0] ?? null,
+            'media' => $media,
         ];
+    }
+
+    /** What is written in the columns: the media list only once its column exists (before the migration only image_url is kept). */
+    private function contentColumns(array $content): array
+    {
+        if (! $this->data->hasMediaColumn()) {
+            unset($content['media']);
+        }
+
+        return $content;
+    }
+
+    /** Zalo articles are made here with pictures only: a video cannot go to it. */
+    private function assertMediaFits(array $content, array $channels): void
+    {
+        $hasVideo = SocialMedia::urls($content['media'] ?? [], SocialMedia::VIDEO) !== [];
+        if ($hasVideo && in_array(SocialChannel::ZALO, $channels, true)) {
+            throw new SocialException(__('admin.social.error_media_zalo_video'), 'media_zalo_video');
+        }
     }
 
     /** @return SocialChannel[] */

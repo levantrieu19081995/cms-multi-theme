@@ -2,7 +2,7 @@
 
 use Diglactic\Breadcrumbs\Breadcrumbs;
 use Diglactic\Breadcrumbs\Generator as BreadcrumbTrail;
-use Illuminate\Support\Str;
+use Modules\CmsBackend\Support\ModuleUrl;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 /**
  * Breadcrumbs cho bảng: {tableName}
  */
-Breadcrumbs::for("cms.file.index", function (BreadcrumbTrail $trail) {
+Breadcrumbs::for('cms.file.index', function (BreadcrumbTrail $trail) {
     $trail->parent('cms.trang-chu');
-    $trail->push(__('admin.menu.quan_ly_tap_tin'), \Modules\CmsBackend\Support\ModuleUrl::route("cms.file.index"));
+    $trail->push(__('admin.menu.quan_ly_tap_tin'), ModuleUrl::route('cms.file.index'));
 });

@@ -143,10 +143,14 @@ class CmsBackendServiceProvider extends ServiceProvider
         $this->app->singleton(\Modules\CmsBackend\Services\Developer\DeveloperAccess::class);
         // Multi-channel publishing: adapters (Facebook, Zalo) are registered here by Phase 2; Phase 1 has none.
         $this->app->singleton(\Modules\CmsBackend\Services\Social\SocialChannelRegistry::class);
-        // The Facebook adapter is registered only when the Meta App settings are complete (config/social.php).
+        // Adapters are registered only when the settings of their platform are complete (config/social.php).
         $this->app->resolving(\Modules\CmsBackend\Services\Social\SocialChannelRegistry::class, function ($registry, $app) {
             if ($app->make(\Modules\CmsBackend\Services\Social\Facebook\FacebookSettings::class)->configured()) {
                 $registry->register(\Modules\CmsBackend\Enums\Social\SocialChannel::FACEBOOK, \Modules\CmsBackend\Services\Social\Facebook\FacebookChannelAdapter::class);
+            }
+            // The Zalo adapter likewise only when the Zalo App settings (ZALO_*) are complete.
+            if ($app->make(\Modules\CmsBackend\Services\Social\Zalo\ZaloSettings::class)->configured()) {
+                $registry->register(\Modules\CmsBackend\Enums\Social\SocialChannel::ZALO, \Modules\CmsBackend\Services\Social\Zalo\ZaloChannelAdapter::class);
             }
         });
         $this->app->extend('view.finder', function ($finder, $app) {
