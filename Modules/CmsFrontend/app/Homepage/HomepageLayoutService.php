@@ -41,8 +41,6 @@ final class HomepageLayoutService
 
     /**
      * Chuẩn hóa lựa chọn hiệu ứng: rỗng/`default` -> null (hiệu ứng mặc định của theme). Giá trị ngoài allow-list: null, hoặc `false` khi `$strict`.
-     *
-     * @return string|false|null
      */
     private function choice(mixed $value, bool $strict = false): string|false|null
     {
@@ -96,14 +94,62 @@ final class HomepageLayoutService
             return [];
         }
 
-        return HomepageThemeBlock::query()->with('instance:id,instance_key')->where('theme_key', $theme)
+        return $this->withSplitBlocks($theme, HomepageThemeBlock::query()->with('instance:id,instance_key')->where('theme_key', $theme)
             ->orderBy('sort_order')->orderBy('id')->get()
             ->filter(fn ($row) => $row->instance !== null)
             ->map(fn ($row) => [
                 'instance' => $row->instance->instance_key, 'zone' => $row->zone_key, 'variant' => (string) $row->variant_key,
                 'effect' => $row->effect_key !== null && $row->effect_key !== '' ? (string) $row->effect_key : null,
                 'enabled' => (bool) $row->enabled, 'sort' => (int) $row->sort_order,
-            ])->values()->all();
+            ])->values()->all());
+    }
+
+    /**
+     * Cụm tách từ một cụm cũ (`split_from`) mà bố cục đã cài chưa có dòng: thêm dòng ngay sau dòng của cụm cũ (cùng zone, bật/tắt và hiệu ứng),
+     * để trang chủ đang chạy không đổi sau khi deploy. Dòng của cụm cũ mà theme không còn khai báo thì được thay bằng các cụm tách từ nó.
+     * Chỉ đọc; lần lưu bố cục tiếp theo ghi các dòng này vào database.
+     *
+     * @param  list<array<string, mixed>>  $rows  các dòng Live theo thứ tự sort
+     * @return list<array<string, mixed>>
+     */
+    private function withSplitBlocks(string $theme, array $rows): array
+    {
+        $blocks = $this->registry->layout($theme)?->blocks() ?? [];
+        $present = array_flip(array_column($rows, 'instance'));
+        $children = [];
+        $replaced = [];
+        foreach ($blocks as $instance => $declaration) {
+            $parent = $declaration['split_from'] ?? null;
+            if (! is_string($parent) || ! isset($present[$parent])) {
+                continue;
+            }
+            if (! isset($blocks[$parent])) {
+                $replaced[$parent] = true;
+            }
+            if (! isset($present[$instance])) {
+                $children[$parent][] = $instance;
+            }
+        }
+        if ($children === [] && $replaced === []) {
+            return $rows;
+        }
+        $result = [];
+        foreach ($rows as $row) {
+            $declared = isset($blocks[$row['instance']]);
+            if (! isset($replaced[$row['instance']])) {
+                $result[] = $row;
+            }
+            foreach ($children[$row['instance']] ?? [] as $offset => $child) {
+                $declaration = $blocks[$child];
+                $result[] = [
+                    'instance' => $child, 'zone' => in_array($row['zone'], $declaration['zones'], true) ? $row['zone'] : $declaration['zones'][0],
+                    'variant' => $declaration['default_variant'], 'effect' => $row['effect'], 'enabled' => $row['enabled'],
+                    'sort' => $row['sort'] + $offset + ($declared ? 1 : 0),
+                ];
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -178,7 +224,19 @@ final class HomepageLayoutService
             return null;
         }
 
-        return Cache::rememberForever(self::CACHE_KEY.$theme, fn (): array => $this->plan($theme, $this->rows($theme) ?: $this->defaultRows($theme)));
+        return Cache::rememberForever($this->cacheKey($theme), fn (): array => $this->plan($theme, $this->rows($theme) ?: $this->defaultRows($theme)));
+    }
+
+    /**
+     * Khóa cache kế hoạch của theme, gắn với khai báo bố cục trong code (cụm, renderer, bố cục mặc định): deploy đổi Theme Layout thì kế hoạch
+     * cũ (có thể trỏ tới renderer đã xóa) không còn được đọc, không cần xóa cache bằng tay.
+     */
+    private function cacheKey(string $theme): string
+    {
+        $layout = $this->registry->layout($theme);
+        $declaration = $layout === null ? '' : json_encode([$layout->blocks(), $layout->defaultLayout()]);
+
+        return self::CACHE_KEY.$theme.'.'.substr(hash('sha256', (string) $declaration), 0, 12);
     }
 
     /**
@@ -382,7 +440,7 @@ final class HomepageLayoutService
     public function flush(?string $theme = null): void
     {
         foreach ($theme === null ? array_keys($this->registry->layouts()) : [$theme] as $key) {
-            Cache::forget(self::CACHE_KEY.$key);
+            Cache::forget($this->cacheKey($key));
         }
     }
 

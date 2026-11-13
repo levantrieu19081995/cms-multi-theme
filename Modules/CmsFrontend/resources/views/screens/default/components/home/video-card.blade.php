@@ -10,7 +10,7 @@
 <article class="cms-video-card {{ $leadVideo ? 'cms-video-card--lead' : '' }}">
     @if (!$leadVideo && $videoDetail)
         <a class="cms-video-thumb {{ $videoPoster === '' ? 'cms-image-empty' : '' }}" href="{{ $videoDetail }}" tabindex="-1" aria-hidden="true">
-            @if ($videoPoster !== '')<img src="{{ $videoPoster }}" alt="" loading="lazy" width="240" height="160">@endif
+            @if ($videoPoster !== '')@include('cmsfrontend::screens.components.home.frame-image', ['src' => $videoPoster, 'width' => 240, 'height' => 160])@endif
             <span class="cms-video-play"><i class="ri-play-fill" aria-hidden="true"></i></span>
         </a>
     @elseif (($homeVideo['type'] ?? '') === 'file' && $isSafeVideoUrl)

@@ -8,7 +8,7 @@
 <article class="cms-story cms-story--{{ $variant }}">
     <a class="cms-story-image {{ $storyImage === '' ? 'cms-image-empty' : '' }}" href="{{ $storyUrl }}" tabindex="-1" aria-hidden="true">
         @if ($storyImage !== '')
-            <img src="{{ $storyImage }}" alt="" {{ $variant === 'lead' ? 'fetchpriority=high' : 'loading=lazy' }} decoding="async" width="640" height="360">
+            @include('cmsfrontend::screens.components.home.frame-image', ['src' => $storyImage, 'width' => 640, 'height' => 360, 'priority' => $variant === 'lead'])
         @else
             <span class="cms-image-placeholder"><i class="ri-image-line" aria-hidden="true"></i></span>
         @endif

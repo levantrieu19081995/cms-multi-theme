@@ -1,10 +1,7 @@
-{{-- PLHĐ blocks: work schedules (Department leaders, Board of Directors) + traceability portals. --}}
-@php
-    $schedules = collect($homeSchedules ?? []);
-    $traceLinks = collect($homeTraceLinks ?? []);
-@endphp
-@if ($schedules->isNotEmpty() || $traceLinks->isNotEmpty())
-    <div class="cms-plan-grid cms-home-section cms-home-section--cream @if($traceLinks->isEmpty()) cms-plan-grid--no-trace @endif">
+{{-- Lịch làm việc (lãnh đạo Sở, Ban giám đốc). Truy xuất nguồn gốc là cụm riêng (blocks.trace). --}}
+@php($schedules = collect($homeSchedules ?? []))
+@if ($schedules->isNotEmpty())
+    <div class="cms-plan-grid cms-plan-grid--no-trace cms-home-section cms-home-section--cream">
         @foreach ($schedules as $schedule)
             <section class="cms-section cms-schedule" aria-labelledby="cms-schedule-{{ $schedule['key'] }}">
                 <div class="cms-section-heading">
@@ -28,26 +25,5 @@
                 </ol>
             </section>
         @endforeach
-        @if ($traceLinks->isNotEmpty())
-            <section class="cms-section cms-trace" aria-labelledby="cms-trace-title">
-                <div class="cms-section-heading"><h2 id="cms-trace-title">{{ __('frontend.ui.truy_xuat_nguon_goc') }}</h2></div>
-                <div class="cms-trace-list">
-                    @foreach ($traceLinks as $link)
-                        @php($tag = $link['url'] ? 'a' : 'div')
-                        <{{ $tag }} class="cms-trace-card @unless($link['url']) cms-trace-card--pending @endunless"
-                            @if($link['url']) href="{{ $link['url'] }}" target="_blank" rel="noopener noreferrer" @endif>
-                            <span class="cms-trace-media" aria-hidden="true">
-                                @if ($link['image'])<img src="{{ $link['image'] }}" alt="" loading="lazy">@else<i class="{{ $link['icon'] }}"></i>@endif
-                            </span>
-                            <span class="cms-trace-text">
-                                <span class="cms-trace-title">{{ $link['title'] }}</span>
-                                <span class="cms-trace-caption">{{ $link['url'] ? $link['caption'] : __('pages.chua_cau_hinh_lien_ket') }}</span>
-                            </span>
-                            @if ($link['url'])<span class="cms-trace-out" aria-hidden="true"><i class="ri-external-link-line"></i></span><span class="cms-sr-only">{{ __('frontend.ui.mo_tab_moi') }}</span>@endif
-                        </{{ $tag }}>
-                    @endforeach
-                </div>
-            </section>
-        @endif
     </div>
 @endif

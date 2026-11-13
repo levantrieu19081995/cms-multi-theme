@@ -1,11 +1,11 @@
 {{-- Homepage hero carousel; slides come from the Banner admin screen (HomeBlocks::banners). Hidden when none. --}}
 @if (!empty($homeBanners))
-    {{-- Frame ratio follows the first banner image; other slides fill it (object-fit: cover). --}}
+    {{-- Khung theo tỉ lệ ảnh banner đầu tiên; ảnh khác tỉ lệ vẫn hiện nguyên (không cắt), phần dư lấp bằng chính ảnh làm mờ. --}}
     <section class="cms-hero" aria-roledescription="carousel" aria-label="{{ __('frontend.ui.banner_trang_chu') }}" data-cms-hero style="--cms-hero-ratio: {{ (int) $homeBanners[0]['width'] }} / {{ (int) $homeBanners[0]['height'] }}">
         <div class="cms-hero-track">
             @foreach ($homeBanners as $banner)
                 <article class="cms-hero-slide {{ $loop->first ? 'is-active' : '' }}" aria-roledescription="slide" aria-label="{{ $loop->iteration }} / {{ $loop->count }}" @unless($loop->first) aria-hidden="true" @endunless>
-                    <img src="{{ $banner['image'] }}" alt="" @if($loop->first) fetchpriority="high" @else loading="lazy" @endif decoding="async" width="{{ (int) $banner['width'] }}" height="{{ (int) $banner['height'] }}">
+                    @include('cmsfrontend::screens.components.home.frame-image', ['src' => $banner['image'], 'width' => (int) $banner['width'], 'height' => (int) $banner['height'], 'priority' => $loop->first])
                     @if ($banner['show_text'] ?? true)
                         <div class="cms-hero-copy">
                             <h2>{{ $banner['title'] }}</h2>

@@ -1,17 +1,4 @@
-<section class="cms-section cms-partners cms-home-section cms-home-section--white" aria-label="{{ __('frontend.ui.don_vi_phoi_hop') }}">
-    @include('cmsfrontend::screens.components.home.section-heading', ['heading' => __('pages.don_vi_phoi_hop'), 'moreUrl' => null])
-    <div class="cms-partners-grid">
-        @forelse (collect($links ?? [])->take(6) as $partner)
-            @php $partnerImage = trim((string) $partner->getFirstMediaUrl('avatars')); @endphp
-            <a class="cms-partner" href="{{ $partner->url ?? \Modules\CmsBackend\Support\ModuleUrl::route('cms.doi-tac.show', ['slug' => $partner->slug]) }}">
-                @if ($partnerImage !== '')<img src="{{ $partnerImage }}" alt="" loading="lazy" width="160" height="72">@else<i class="ri-{{ $partner->icon ?: 'community-line' }}" aria-hidden="true"></i>@endif
-                <span>{{ $partner->title }}</span>
-            </a>
-        @empty
-            <p class="cms-empty">{{ __('frontend.ui.chua_co_don_vi_phoi_hop_duoc_dang') }}</p>
-        @endforelse
-    </div>
-</section>
+{{-- Hỗ trợ và tư vấn: Gửi câu hỏi (Hỏi đáp) và Liên hệ tư vấn khi chức năng Liên hệ bật (tách từ cụm Đối tác và hỗ trợ). --}}
 <section class="cms-support-grid cms-home-section cms-home-section--white" aria-label="{{ __('frontend.ui.ho_tro_va_tu_van') }}">
     <a class="cms-support" href="{{ \Modules\CmsBackend\Support\ModuleUrl::route('cms.frontend.hoidap.gui') }}">
         <span class="cms-support-icon"><i class="ri-chat-3-line" aria-hidden="true"></i></span>

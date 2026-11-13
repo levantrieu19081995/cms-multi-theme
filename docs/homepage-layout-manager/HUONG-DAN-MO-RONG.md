@@ -18,6 +18,9 @@ Khai báo thêm instance trong `blocks()` của Theme Layout (`Themes/*HomepageL
 5. Nếu partial của cụm đọc dữ liệu nền của trang chủ (bài mới, sự kiện, văn bản, đối tác, video...), khai báo loại cụm trong `HomepageDataNeeds::BY_DEFINITION` để trang chủ chỉ truy vấn nhóm đó khi cụm đang bật. Chưa khai báo thì trang chủ nạp đủ mọi nhóm (đúng nhưng chậm hơn).
 6. Build và deploy một lần. Sau đó bật/tắt, sắp xếp, đổi variant trong Developer Settings.
 
+## Tách một cụm ghép thành nhiều cụm
+Khai báo cụm mới với `splitFrom: '<instance cũ>'` trong `blocks()` (ví dụ theme `default`: `documents` tách từ `information`, `events`/`examples`/`services` tách từ `activities`, `gallery`/`videos` từ `media`, `partners`/`support` từ `partners-support`, `trace` từ `schedules-trace`). Trên bản đã cài bố cục: cụm mới chưa có dòng thì tự đứng ngay sau dòng của cụm cũ (cùng zone, bật/tắt, hiệu ứng); cụm cũ mà theme không còn khai báo thì được thay bằng các cụm tách; cấu hình nội dung chưa lưu riêng thì đọc từ bản lưu của cụm cũ (field trùng tên). Không cần migration hay cài lại bố cục; lần lưu bố cục kế tiếp ghi các dòng mới vào database. Kế hoạch bố cục cache theo theme VÀ khai báo trong code, nên deploy đổi Theme Layout không còn lỗi `Screen not found` do cache cũ.
+
 ## Variant, hiệu ứng
 - Variant mới: thêm khóa vào `variants` của cụm kèm `renderer` (partial riêng).
 - Hiệu ứng thuộc khung dùng chung (mọi theme dùng được, mọi build đều đóng gói): Theme Layout chỉ khai báo KEY preset trong `EffectCatalog` (không lưu JS/CSS/selector trong database). Trang chủ chỉ nạp entry của preset mà cụm đang bật khai báo.

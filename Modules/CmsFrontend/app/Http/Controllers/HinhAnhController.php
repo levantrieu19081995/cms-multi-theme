@@ -53,7 +53,8 @@ class HinhAnhController extends Controller
             return [
                 'url' => $media->getUrl(),
                 'description' => $media->getCustomProperty('description') ?? '',
-                'index' => $media->getCustomProperty('index') ?? 0
+                'index' => $media->getCustomProperty('index') ?? 0,
+                'ratio' => \Modules\CmsFrontend\Support\MediaSize::ratio($media),
             ];
         })->sortBy('index')->values();
 

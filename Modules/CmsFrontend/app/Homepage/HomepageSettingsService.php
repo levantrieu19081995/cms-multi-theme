@@ -7,7 +7,10 @@ namespace Modules\CmsFrontend\Homepage;
 use App\Models\Option;
 use App\Models\Taxonomy;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use InvalidArgumentException;
+use Modules\CmsBackend\Models\LoaiVanBan;
+use Modules\CmsBackend\Models\NhomVanBan;
 use Modules\CmsBackend\Support\HomeSettings;
 use Modules\CmsFrontend\Homepage\Contracts\HomepageBlockDefinition;
 use Modules\CmsFrontend\Homepage\Models\HomepageBlockInstance;
@@ -47,7 +50,7 @@ final class HomepageSettingsService
             return [];
         }
         $values = $definition->defaults();
-        $stored = $this->stored($theme, $instance);
+        $stored = $this->stored($theme, $instance) ?? $this->storedOfSplitParent($theme, $instance);
         if ($stored === null) {
             return $this->legacyValues($definition, $theme, $values);
         }
@@ -78,7 +81,8 @@ final class HomepageSettingsService
             if ($row->exists) {
                 continue;
             }
-            $row->settings = $this->legacyValues($definition, $theme, $definition->defaults());
+            // Cụm tách từ cụm cũ: giữ cấu hình đã lưu của cụm cũ thay vì option cũ (read() làm đúng thứ tự đó).
+            $row->settings = $this->read($theme, $instance);
             $row->save();
             $created++;
         }
@@ -204,7 +208,7 @@ final class HomepageSettingsService
         if ($instanceId === null) {
             throw new InvalidArgumentException('not_installed');
         }
-        DB::transaction(function () use ($theme, $instanceId, $definition, $result): void {
+        DB::transaction(function () use ($theme, $instanceId, $result): void {
             HomepageBlockSetting::query()->updateOrCreate(['theme_key' => $theme, 'block_instance_id' => $instanceId], ['settings' => $result['values']]);
         });
         request()->attributes->remove('_homepage_settings_'.$theme);
@@ -260,7 +264,7 @@ final class HomepageSettingsService
                 $forms[] = [
                     'instance' => $block['instance'], 'definition' => $definition, 'fields' => $fields, 'values' => $values,
                     'missing' => $this->missingReferences($definition, $values),
-                    'management_url' => $definition->managementRoute() !== null && \Illuminate\Support\Facades\Route::has($definition->managementRoute())
+                    'management_url' => $definition->managementRoute() !== null && Route::has($definition->managementRoute())
                         ? route($definition->managementRoute()) : null,
                 ];
             }
@@ -282,10 +286,10 @@ final class HomepageSettingsService
                 return $memo; // several blocks (information, documents) share one list per request
             }
             $options = ['' => (string) __('homepage.settings.document_latest')];
-            foreach (\Modules\CmsBackend\Models\LoaiVanBan::orderBy('lvb_ten')->get(['lvb_id', 'lvb_ten']) as $type) {
+            foreach (LoaiVanBan::orderBy('lvb_ten')->get(['lvb_id', 'lvb_ten']) as $type) {
                 $options['lvb:'.$type->lvb_id] = __('homepage.settings.document_type').': '.$type->lvb_ten;
             }
-            foreach (\Modules\CmsBackend\Models\NhomVanBan::orderBy('nvb_name')->get(['nvb_id', 'nvb_name']) as $group) {
+            foreach (NhomVanBan::orderBy('nvb_name')->get(['nvb_id', 'nvb_name']) as $group) {
                 $options['nvb:'.$group->nvb_id] = __('homepage.settings.document_group').': '.$group->nvb_name;
             }
 
@@ -317,6 +321,18 @@ final class HomepageSettingsService
         }
 
         return $cache[$instance] ?? null;
+    }
+
+    /**
+     * Cấu hình đã lưu của cụm cũ mà instance được tách ra (`split_from`), khi instance chưa có bản lưu riêng: các field trùng tên giữ nguyên giá trị.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function storedOfSplitParent(string $theme, string $instance): ?array
+    {
+        $parent = $this->registry->layout($theme)?->blocks()[$instance]['split_from'] ?? null;
+
+        return is_string($parent) ? $this->stored($theme, $parent) : null;
     }
 
     /**

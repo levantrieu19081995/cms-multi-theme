@@ -7,14 +7,18 @@ namespace Tests\Unit\Homepage;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use Modules\CmsBackend\Support\HomeSettings;
+use Modules\CmsFrontend\Homepage\BlockEffectApplier;
 use Modules\CmsFrontend\Homepage\Definitions\AbstractBlockDefinition;
-use Modules\CmsFrontend\Homepage\Definitions\SchedulesTraceBlock;
+use Modules\CmsFrontend\Homepage\Definitions\TraceBlock;
 use Modules\CmsFrontend\Homepage\EffectCatalog;
 use Modules\CmsFrontend\Homepage\HomepageBlockRegistry;
 use Modules\CmsFrontend\Homepage\HomepageDataResolver;
 use Modules\CmsFrontend\Homepage\HomepageLayoutService;
+use Modules\CmsFrontend\Homepage\HomepageRenderer;
 use Modules\CmsFrontend\Homepage\HomepageSettingsService;
 use Modules\CmsFrontend\Homepage\Themes\AbstractThemeLayout;
+use Modules\CmsFrontend\Services\HomeBlocks;
 use ReflectionProperty;
 use Tests\TestCase;
 
@@ -101,7 +105,7 @@ final class HomepageCoreTest extends TestCase
     {
         $registry = $this->registry();
         $this->assertSame([], $registry->selfCheck());
-        $this->assertCount(16, $registry->definitions());
+        $this->assertCount(24, $registry->definitions());
         $this->assertSame(['default', 'nam-binh-duong', 'ban-de-an'], array_keys($registry->layouts()));
     }
 
@@ -231,7 +235,10 @@ final class HomepageCoreTest extends TestCase
 
         $this->assertNotNull($plan);
         $this->assertSame(['notice-ticker'], array_column($plan['zones']['before-main'], 'instance'));
-        $this->assertSame(['news', 'information', 'schedules-trace', 'activities', 'media', 'partners-support'], array_column($plan['zones']['main'], 'instance'));
+        $this->assertSame([
+            'news', 'information', 'documents', 'schedules-trace', 'trace', 'activities', 'events', 'examples', 'services',
+            'gallery', 'videos', 'partners', 'support',
+        ], array_column($plan['zones']['main'], 'instance'));
         $this->assertNull($service->live('not-a-theme'));
     }
 
@@ -290,7 +297,7 @@ final class HomepageCoreTest extends TestCase
     public function test_settings_validation_enforces_schema(): void
     {
         $settings = new HomepageSettingsService($this->registry());
-        $definition = new SchedulesTraceBlock;
+        $definition = new TraceBlock;
 
         $bad = $settings->validate($definition, ['trace_market_url' => 'javascript:alert(1)', 'trace_portal_image' => 'ftp://x']);
         $this->assertSame(['trace_market_url' => 'url_invalid', 'trace_portal_image' => 'url_invalid'], $bad['errors']);
@@ -338,24 +345,24 @@ final class HomepageCoreTest extends TestCase
 
     public function test_trace_tile_texts_are_configurable_and_fall_back_to_the_original_text(): void
     {
-        $blocks = app(\Modules\CmsFrontend\Services\HomeBlocks::class);
+        $blocks = app(HomeBlocks::class);
         $settings = [
-            \Modules\CmsBackend\Support\HomeSettings::TRACE_MARKET_URL => 'https://example.com/m', \Modules\CmsBackend\Support\HomeSettings::TRACE_MARKET_IMAGE => '',
-            \Modules\CmsBackend\Support\HomeSettings::TRACE_PORTAL_URL => 'https://example.com/p', \Modules\CmsBackend\Support\HomeSettings::TRACE_PORTAL_IMAGE => '',
+            HomeSettings::TRACE_MARKET_URL => 'https://example.com/m', HomeSettings::TRACE_MARKET_IMAGE => '',
+            HomeSettings::TRACE_PORTAL_URL => 'https://example.com/p', HomeSettings::TRACE_PORTAL_IMAGE => '',
         ];
 
         $default = $blocks->traceLinks($settings);
-        $this->assertSame(\Modules\CmsFrontend\Services\HomeBlocks::TRACE_TEXTS['market']['title'], $default[0]['title'], 'không cấu hình thì giữ chữ cũ');
+        $this->assertSame(HomeBlocks::TRACE_TEXTS['market']['title'], $default[0]['title'], 'không cấu hình thì giữ chữ cũ');
 
         $custom = $blocks->traceLinks($settings, ['market' => ['title' => 'Tiêu đề mới', 'caption' => ''], 'portal' => ['title' => null, 'caption' => 'Mô tả mới']]);
         $this->assertSame('Tiêu đề mới', $custom[0]['title']);
-        $this->assertSame(\Modules\CmsFrontend\Services\HomeBlocks::TRACE_TEXTS['market']['caption'], $custom[0]['caption'], 'rỗng thì dùng chữ mặc định');
+        $this->assertSame(HomeBlocks::TRACE_TEXTS['market']['caption'], $custom[0]['caption'], 'rỗng thì dùng chữ mặc định');
         $this->assertSame('Mô tả mới', $custom[1]['caption']);
     }
 
     public function test_preview_shows_a_notice_for_blocks_missing_a_required_source_but_not_for_complete_ones(): void
     {
-        $renderer = app(\Modules\CmsFrontend\Homepage\HomepageRenderer::class);
+        $renderer = app(HomepageRenderer::class);
         $notice = new \ReflectionMethod($renderer, 'missingSettingsNotice');
         $block = fn (string $definition, array $settings) => ['instance' => $definition, 'definition' => $definition, 'settings' => $settings];
 
@@ -367,7 +374,7 @@ final class HomepageCoreTest extends TestCase
     public function test_effect_choice_edits_only_the_effect_attributes_of_the_block_html(): void
     {
         $html = '<section class="news" data-sbut-group="news"><div class="wrap" data-stagger-group=":scope > .s" data-stagger-offset="2"><h2 class="t" data-reveal-lines>Tin</h2><p>x</p></div></section>';
-        $apply = fn (?string $choice) => \Modules\CmsFrontend\Homepage\BlockEffectApplier::apply($html, $choice);
+        $apply = fn (?string $choice) => BlockEffectApplier::apply($html, $choice);
 
         $this->assertSame($html, $apply(null), 'chưa chọn: giữ nguyên HTML hiện tại của theme');
         $this->assertSame($html, $apply(''));
@@ -389,8 +396,8 @@ final class HomepageCoreTest extends TestCase
         $this->assertStringNotContainsString('data-reveal-lines', $stagger);
 
         $plain = '<div class="cms-ticker"><a>x</a></div>';
-        $this->assertSame($plain, \Modules\CmsFrontend\Homepage\BlockEffectApplier::apply($plain, 'reveal'), 'không có tiêu đề thì không thêm gì');
-        $this->assertSame('', \Modules\CmsFrontend\Homepage\BlockEffectApplier::apply('', 'stagger'));
+        $this->assertSame($plain, BlockEffectApplier::apply($plain, 'reveal'), 'không có tiêu đề thì không thêm gì');
+        $this->assertSame('', BlockEffectApplier::apply('', 'stagger'));
     }
 
     public function test_layout_validation_accepts_only_allow_listed_effect_choices_and_keeps_the_stored_one(): void

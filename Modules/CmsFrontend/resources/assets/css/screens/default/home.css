@@ -154,6 +154,24 @@
 .cms-public .cms-home .cms-empty--news { margin-top: 12px; padding: 38px 24px; }
 .cms-public .cms-home .cms-empty--news h2 { margin-bottom: 10px; font-size: 28px; }
 .cms-public .cms-home .cms-image-empty { background: #eef4ec; }
+
+/* Ảnh không bị cắt: ảnh hiện nguyên trong khung (contain), phần dư của khung được lấp bằng chính ảnh đó làm mờ (.cms-frame-bg).
+   Markup do components/home/frame-image.blade.php; khung giữ nguyên tỉ lệ theo thiết kế. */
+.cms-public .cms-home :is(.cms-story-image, .cms-exemplar-portrait, .cms-exemplar-small-image, .cms-gallery-item, .cms-video-thumb) { position: relative; overflow: hidden; }
+.cms-public .cms-home .cms-frame-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(14px) saturate(1.1); transform: scale(1.15); pointer-events: none; user-select: none; }
+.cms-public .cms-home .cms-frame-img {
+  /* Khung ôm sát ảnh thật (không phủ kín khung), nằm giữa; viền ảnh mờ dần vào nền mờ phía sau. */
+  --cms-feather: min(24px, 6%);
+  position: absolute; inset: 0; margin: auto; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; object-position: center;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--cms-feather), #000 calc(100% - var(--cms-feather)), transparent), linear-gradient(to bottom, transparent, #000 var(--cms-feather), #000 calc(100% - var(--cms-feather)), transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 var(--cms-feather), #000 calc(100% - var(--cms-feather)), transparent), linear-gradient(to bottom, transparent, #000 var(--cms-feather), #000 calc(100% - var(--cms-feather)), transparent);
+  mask-composite: intersect;
+}
+.cms-public .cms-home .cms-exemplar-portrait .cms-frame-img { object-position: center; }
+.cms-public .cms-home .cms-hero-slide { isolation: isolate; }
+.cms-public .cms-home .cms-hero-slide > .cms-frame-bg { z-index: -1; height: 100%; aspect-ratio: auto; transform: scale(1.15); }
+.cms-public .cms-home .cms-hero-slide > .cms-frame-img { position: static; margin: 0; width: 100%; max-width: none; max-height: none; height: auto; aspect-ratio: var(--cms-hero-ratio, 3 / 1); object-fit: contain; -webkit-mask-image: none; mask-image: none; }
 .cms-public .cms-home .cms-image-placeholder { display: grid; place-items: center; height: 100%; width: 100%; min-height: inherit; color: #9cae9f; font-size: 34px; }
 @media (max-width: 1100px) {
   .cms-public .cms-home .cms-news-top { gap: 18px; }
@@ -269,7 +287,7 @@
   .cms-public .cms-home .cms-production-group .cms-story-image { height: clamp(180px, 21svh, 360px); aspect-ratio: auto; }
   .cms-public .cms-home .cms-production-group .cms-story-title { font-size: 23px; }
   .cms-public .cms-home .cms-production-group .cms-story-excerpt { font-size: 15px; line-height: 1.55; }
-  .cms-public .cms-home .cms-community-group { display: grid; grid-template-rows: 2fr 1fr; gap: 32px; }
+  .cms-public .cms-home .cms-community-group { display: grid; gap: 32px; }
   .cms-public .cms-home .cms-community-group > section { display: flex; flex-direction: column; }
   .cms-public .cms-home .cms-exemplars { padding-bottom: 24px; }
   .cms-public .cms-home .cms-exemplar-grid { flex: 1; align-items: stretch; padding: 16px; }
@@ -334,6 +352,13 @@
 .cms-public .cms-home .cms-trace-title { font-size: 15px; font-weight: 700; line-height: 1.35; }
 .cms-public .cms-home .cms-trace-caption { font-size: 12px; color: var(--cms-muted, #687582); line-height: 1.4; }
 .cms-public .cms-home .cms-trace-out { color: var(--cms-accent, #e81920); font-size: 18px; }
+/* Cụm tách từ cụm ghép cũ: wrapper riêng giữ lề của nội dung bên trong dải màu (không để lề lọt ra thành vạch trắng giữa hai dải cùng màu). */
+.cms-public .cms-home :is(.cms-notices-band,.cms-documents-band,.cms-services-band,.cms-trace-band) { display: flow-root; }
+/* Truy xuất nguồn gốc là cụm riêng (blocks.trace): đứng một mình nên hai cổng nằm ngang, tiêu đề cùng cỡ với lịch làm việc. */
+.cms-public .cms-home .cms-trace-band .cms-section-heading h2 { font-size: 21px; }
+@media (min-width: 768px) {
+  .cms-public .cms-home .cms-trace-band .cms-trace-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 1100px) {
   .cms-public .cms-home .cms-plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px; }
   .cms-public .cms-home .cms-plan-grid > .cms-trace { grid-column: 1 / -1; }
@@ -524,4 +549,11 @@
 .cms-home-scrollbar-top:focus-visible { outline: 2px solid var(--cms-brand, #006b43); outline-offset: 2px; }
 @media (max-width: 767px) {
   .cms-home-scrollbar { display: none; }
+}
+
+/* Gương tiêu biểu trên màn hình rộng: khung ảnh không còn kéo giãn theo chiều cao ô (trước đây ảnh bị cắt cho vừa), giữ tỉ lệ khung như thiết kế
+   và nằm giữa ô để ảnh hiện nguyên không bị lấp bằng quá nhiều nền mờ. */
+@media (min-width: 1024px) {
+  .cms-public .cms-home .cms-exemplar-grid .cms-exemplar-portrait { aspect-ratio: 4 / 5; min-height: 0; align-self: center; }
+  .cms-public .cms-home .cms-exemplar-grid .cms-exemplar-small-image { height: auto; aspect-ratio: 1.7; align-self: center; }
 }

@@ -7,7 +7,7 @@
                 $albumImage = $album->getFirstMediaUrl('avatars') ?: $albumMedia->first()?->getUrl();
             @endphp
             <a class="cms-gallery-item {{ $loop->first ? 'cms-gallery-item--lead' : '' }} {{ empty($albumImage) ? 'cms-image-empty' : '' }}" href="{{ $album->url ?? \Modules\CmsBackend\Support\ModuleUrl::route('cms.hinh-anh.show', ['slug' => $album->slug]) }}">
-                @if (!empty($albumImage))<img src="{{ $albumImage }}" alt="" loading="lazy" width="480" height="360">@else<span class="cms-image-placeholder"><i class="ri-image-line" aria-hidden="true"></i></span>@endif
+                @if (!empty($albumImage))@include('cmsfrontend::screens.components.home.frame-image', ['src' => $albumImage, 'width' => 480, 'height' => 360])@else<span class="cms-image-placeholder"><i class="ri-image-line" aria-hidden="true"></i></span>@endif
                 <div class="cms-gallery-caption"><h3>{{ $album->title }}</h3><span>{{ $albumMedia->count() }} {{ __('frontend.ui.anh') }}</span></div>
             </a>
         @endforeach

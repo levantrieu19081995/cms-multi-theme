@@ -6,13 +6,13 @@
         'Modules/CmsFrontend/resources/assets/sass/app.scss',
     ])
     <style>
-        /* Đảm bảo ảnh hiển thị đồng đều */
-        .album-image {
-            width: 100%;
-            height: 220px;       /* chỉnh lại theo layout mong muốn */
-            object-fit: cover;   /* crop ảnh để vừa khung */
-            border-radius: 6px;
-        }
+        /* Ảnh xếp theo hàng đều chiều cao, mỗi ảnh đúng tỉ lệ gốc (--r = rộng / cao), không cắt. Hàng cuối không bị kéo giãn. */
+        .cms-album-rows { display: flex; flex-wrap: wrap; gap: 8px; }
+        .cms-album-rows::after { content: ''; flex-grow: 1000000; }
+        .cms-album-item { position: relative; display: block; min-width: 0; overflow: hidden; border-radius: 6px; background: #eef4ec; aspect-ratio: var(--r); flex: calc(var(--r) * 100) 1 calc(var(--r) * 200px); }
+        .cms-album-item img { display: block; width: 100%; height: 100%; object-fit: contain; }
+        .cms-album-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 10px 8px; color: #fff; font-size: 13px; line-height: 1.4; text-align: center; background: linear-gradient(transparent, #000b); }
+        @media (max-width: 575px) { .cms-album-item { flex-basis: calc(var(--r) * 120px); } }
     </style>
 @endsection
 
@@ -22,18 +22,14 @@
         <div class="container cms-page-container">
             <h2 class="mb-4  ">{{ $album->title }}</h2>
 
-            <div class="row">
+            <div class="cms-album-rows">
                 @foreach ($album->image as $img)
-                    <div class="col-md-3 col-sm-6 mb-4">
-                        <div class="card h-100">
-                            <img src="{{ $img['url'] }}" class="card-img-top album-image" alt="{{ $album->title }}">
-                            @if ($img['description'])
-                                <div class="card-body">
-                                    <p class="card-text text-center">{{ $img['description'] }}</p>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
+                    <a class="cms-album-item" href="{{ $img['url'] }}" data-lightbox="album" target="_blank" rel="noopener" style="--r: {{ $img['ratio'] }}">
+                        <img src="{{ $img['url'] }}" alt="{{ $img['description'] ?: $album->title }}" loading="lazy" decoding="async">
+                        @if ($img['description'])
+                            <span class="cms-album-cap">{{ $img['description'] }}</span>
+                        @endif
+                    </a>
                 @endforeach
             </div>
         </div>

@@ -34,7 +34,7 @@ return [
         'default' => [
             'label' => 'Mặc định (giao diện hiện tại)',
             'surfaces' => ['public'],
-            'version' => 2, // 2: dải nền theo cụm trên trang chủ (class cms-home-section--*)
+            'version' => 4, // 2: dải nền theo cụm trên trang chủ (class cms-home-section--*); 3: tách cụm ghép (văn bản, truy xuất, sự kiện, gương tiêu biểu, dịch vụ, ảnh/video, đối tác/hỗ trợ); 4: ảnh hiện nguyên trong khung (frame-image), không cắt
             'login' => [
                 'logo' => 'assets/img/khuyen-nong-can-tho/admin/logo1.png',
                 'favicon' => 'assets/img/khuyen-nong-can-tho/admin/logo1.png',

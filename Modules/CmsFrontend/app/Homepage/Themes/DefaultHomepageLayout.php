@@ -6,8 +6,10 @@ namespace Modules\CmsFrontend\Homepage\Themes;
 
 /**
  * Khuyến nông (`default`). Thứ tự mặc định:
- * banner, dải thông báo, Tin tức, Thông tin (Thông báo + Văn bản), Lịch & truy xuất, Hoạt động, Thư viện, Đối tác.
- * Văn bản nằm cạnh Thông báo ngay trong cụm Thông tin của theme này.
+ * banner, dải thông báo, Tin tức, Thông báo, Văn bản, Lịch làm việc, Truy xuất nguồn gốc, Chuyên mục nổi bật, Sự kiện, Gương tiêu biểu,
+ * Dịch vụ, Thư viện ảnh, Video, Đối tác, Hỗ trợ và tư vấn.
+ * Mỗi nội dung là một cụm riêng để bật/tắt trong tab Bố cục trang chủ. Các cụm có `split_from` được tách từ cụm ghép cũ
+ * (information, schedules-trace, activities, media, partners-support): bố cục đã cài trên server giữ nguyên vị trí và trạng thái của chúng.
  */
 final class DefaultHomepageLayout extends AbstractThemeLayout
 {
@@ -30,10 +32,17 @@ final class DefaultHomepageLayout extends AbstractThemeLayout
             'notice-ticker' => self::block('notice-ticker', $body, self::standard('blocks.notice-ticker')),
             'news' => self::block('article-list', $body, self::standard('news')),
             'information' => self::block('information', $body, self::standard('information')),
+            'documents' => self::block('documents', $body, self::standard('blocks.documents'), splitFrom: 'information'),
             'schedules-trace' => self::block('schedules-trace', $body, self::standard('schedules-trace')),
+            'trace' => self::block('trace', $body, self::standard('blocks.trace'), splitFrom: 'schedules-trace'),
             'activities' => self::block('activities', $body, self::standard('activities')),
-            'media' => self::block('media', $body, self::standard('media')),
-            'partners-support' => self::block('partners-support', $body, self::standard('partners-support')),
+            'events' => self::block('events', $body, self::standard('blocks.events'), splitFrom: 'activities'),
+            'examples' => self::block('examples', $body, self::standard('blocks.examples'), splitFrom: 'activities'),
+            'services' => self::block('services', $body, self::standard('blocks.services'), splitFrom: 'activities'),
+            'gallery' => self::block('gallery', $body, self::standard('blocks.gallery'), splitFrom: 'media'),
+            'videos' => self::block('videos', $body, self::standard('blocks.videos'), splitFrom: 'media'),
+            'partners' => self::block('partners', $body, self::standard('blocks.partners'), splitFrom: 'partners-support'),
+            'support' => self::block('support', $body, self::standard('blocks.support'), splitFrom: 'partners-support'),
         ];
     }
 
@@ -42,7 +51,10 @@ final class DefaultHomepageLayout extends AbstractThemeLayout
         return $this->layoutFrom([
             'hero' => ['hero'],
             'before-main' => ['notice-ticker'],
-            'main' => ['news', 'information', 'schedules-trace', 'activities', 'media', 'partners-support'],
+            'main' => [
+                'news', 'information', 'documents', 'schedules-trace', 'trace', 'activities', 'events', 'examples', 'services',
+                'gallery', 'videos', 'partners', 'support',
+            ],
         ]);
     }
 }
