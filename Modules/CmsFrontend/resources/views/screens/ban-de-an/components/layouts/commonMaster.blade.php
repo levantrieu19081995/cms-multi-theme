@@ -25,8 +25,16 @@
     $cmsSeoText = $cmsSeoPost?->translation(app()->getLocale());
     if (filled($cmsSeoText?->seo_title)) { $cmsMetaTitle = trim($cmsSeoText->seo_title); }
     if (filled($cmsSeoText?->seo_description)) { $cmsMetaDescription = trim(strip_tags($cmsSeoText->seo_description)); }
-    $cmsMetaImage = trim($__env->yieldContent('meta-image', asset('assets/img/themes/nam-binh-duong/nbdut-favicon.png')))
-        ?: asset('assets/img/themes/nam-binh-duong/nbdut-favicon.png');
+    // Ảnh xem trước khi gửi link (Zalo/Facebook/Messenger...): mặc định là logo chọn ở "Cài đặt chung" (cùng logo với đầu trang và favicon), chưa chọn thì ảnh của theme.
+    // Gắn ?v=<ngày sửa tệp> để khi đổi logo, ứng dụng nhắn tin thấy địa chỉ ảnh mới thay vì dùng ảnh cũ trong bộ nhớ đệm. Địa chỉ phải tuyệt đối (https://...).
+    $cmsSiteLogoPath = \Modules\CmsBackend\Support\SiteLogo::url();
+    if ($cmsSiteLogoPath !== null) {
+        $cmsSiteLogoFile = public_path(ltrim($cmsSiteLogoPath, '/'));
+        $cmsDefaultMetaImage = asset(ltrim($cmsSiteLogoPath, '/')).(is_file($cmsSiteLogoFile) ? '?v='.filemtime($cmsSiteLogoFile) : '');
+    } else {
+        $cmsDefaultMetaImage = asset('assets/img/themes/nam-binh-duong/nbdut-favicon.png');
+    }
+    $cmsMetaImage = trim($__env->yieldContent('meta-image', $cmsDefaultMetaImage)) ?: $cmsDefaultMetaImage;
     $cmsMetaType = trim($__env->yieldContent('meta-type', 'website')) ?: 'website';
     $cmsMetaUrl = \Modules\CmsBackend\Support\ModuleUrl::url()->current();
 @endphp
