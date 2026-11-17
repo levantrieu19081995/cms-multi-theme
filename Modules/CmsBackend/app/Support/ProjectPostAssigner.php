@@ -26,7 +26,7 @@ final class ProjectPostAssigner
             }
             DB::table('post_projects')->insertOrIgnore([
                 'post_id' => $post->getKey(),
-                'project_key' => ProjectContext::key(),
+                'project_key' => ProjectContext::dataKey(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

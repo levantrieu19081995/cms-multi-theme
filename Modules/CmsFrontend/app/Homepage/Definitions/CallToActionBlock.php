@@ -10,5 +10,4 @@ final class CallToActionBlock extends AbstractBlockDefinition
     protected string $key = 'cta';
 
     protected string $icon = 'ri-megaphone-line';
-
 }

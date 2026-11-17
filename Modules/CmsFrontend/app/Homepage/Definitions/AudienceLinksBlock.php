@@ -10,5 +10,4 @@ final class AudienceLinksBlock extends AbstractBlockDefinition
     protected string $key = 'audience-links';
 
     protected string $icon = 'ri-team-line';
-
 }

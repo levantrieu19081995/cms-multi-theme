@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Survey;
 
+use App\Enums\OptionEnum;
 use Illuminate\Support\Facades\DB;
 use Modules\CmsBackend\Enums\PermissionsEnum as P;
 use Modules\CmsBackend\Enums\SurveyStatus;
@@ -11,8 +12,9 @@ use Modules\CmsBackend\Exceptions\SurveyRuleException;
 use Modules\CmsBackend\Services\SurveyService;
 use Modules\CmsBackend\Support\SurveyPermissions;
 use Modules\CmsFrontend\Models\KhaoSat;
+use Modules\CmsFrontend\Services\SurveyPublicService;
 
-/** Hồi quy vòng 2 cho CODEX-REVIEW.md: KS-001 (dependency), KS-002 (quyền cha), KS-007 (khóa quy tắc thu thập), KS-008 (container sai kiểu). */
+/** Hồi quy vòng 2 cho bản review (file review đã xóa, xem lịch sử git):KS-001 (dependency), KS-002 (quyền cha), KS-007 (khóa quy tắc thu thập), KS-008 (container sai kiểu). */
 final class SurveyReviewRound2Test extends SurveySqliteTestCase
 {
     private function draft(array $info = []): KhaoSat
@@ -46,7 +48,7 @@ final class SurveyReviewRound2Test extends SurveySqliteTestCase
 
     private function addParticipation(KhaoSat $survey): void
     {
-        $public = app(\Modules\CmsFrontend\Services\SurveyPublicService::class);
+        $public = app(SurveyPublicService::class);
         $ctx = ['token' => 'T', 'fingerprint' => hash('sha256', 'T'), 'ip_hash' => 'x', 'user_agent' => null];
         $public->start($survey->fresh(), ['an_danh' => 1], $ctx);
     }
@@ -80,7 +82,7 @@ final class SurveyReviewRound2Test extends SurveySqliteTestCase
 
         $survey = $this->draft();
         app(SurveyService::class)->transition($survey, SurveyStatus::Open, 1);
-        DB::table('options')->insert(['key' => \App\Enums\OptionEnum::WEB_LOGO->value, 'value' => '/logo.png']);
+        DB::table('options')->insert(['key' => OptionEnum::WEB_LOGO->value, 'value' => '/logo.png']);
         $id = $survey->ks_id;
         $this->actingAs($user);
 
@@ -239,7 +241,7 @@ final class SurveyReviewRound2Test extends SurveySqliteTestCase
     {
         $svc = app(SurveyService::class);
         $survey = $svc->transition($this->draft(['ks_so_lan_gui' => 2]), SurveyStatus::Open, 1);
-        DB::table('options')->insert(['key' => \App\Enums\OptionEnum::WEB_LOGO->value, 'value' => '/logo.png']);
+        DB::table('options')->insert(['key' => OptionEnum::WEB_LOGO->value, 'value' => '/logo.png']);
         $this->actingAs($this->user([P::KHAOSAT_UPDATE->label(), P::KHAOSAT_VIEW->label()]));
         $html = $this->get("/cms/khao-sat/{$survey->ks_id}/chinh-sua")->assertOk()->getContent();
         $this->assertStringContainsString(__('admin.survey.notice_collection_locked'), $html);

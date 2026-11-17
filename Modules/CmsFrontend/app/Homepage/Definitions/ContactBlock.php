@@ -10,5 +10,4 @@ final class ContactBlock extends AbstractBlockDefinition
     protected string $key = 'contact';
 
     protected string $icon = 'ri-mail-send-line';
-
 }

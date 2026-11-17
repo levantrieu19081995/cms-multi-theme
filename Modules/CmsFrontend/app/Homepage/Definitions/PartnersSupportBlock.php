@@ -13,7 +13,6 @@ final class PartnersSupportBlock extends AbstractBlockDefinition
 
     protected ?string $route = 'cms.dashboard.doi-tac.index';
 
-
     public function __construct()
     {
         $this->schema = [

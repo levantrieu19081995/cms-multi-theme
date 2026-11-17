@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\CmsFrontend\Homepage\Definitions;
 
+use Modules\CmsFrontend\Services\HomeBlocks;
+
 /** Văn bản, tài liệu như một cụm riêng (cụm lớn). Lọc theo loại/nhóm văn bản; trống = mới nhất. */
 final class DocumentsBlock extends AbstractBlockDefinition
 {
@@ -12,7 +14,6 @@ final class DocumentsBlock extends AbstractBlockDefinition
     protected string $icon = 'ri-file-text-line';
 
     protected ?string $route = 'cms.dashboard.cdn.van-ban.index';
-
 
     protected array $binding = ['document_filter' => 'cms_home_document_filter'];
 
@@ -26,6 +27,6 @@ final class DocumentsBlock extends AbstractBlockDefinition
 
     public function resolve(array $settings, array $data): array
     {
-        return ['homepageDocuments' => self::translatedPage() ? collect() : app(\Modules\CmsFrontend\Services\HomeBlocks::class)->documents(self::documentFilter($settings['document_filter'] ?? ''))];
+        return ['homepageDocuments' => self::translatedPage() ? collect() : app(HomeBlocks::class)->documents(self::documentFilter($settings['document_filter'] ?? ''))];
     }
 }

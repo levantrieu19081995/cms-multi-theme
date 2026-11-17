@@ -4,14 +4,23 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Survey;
 
+use App\Enums\OptionEnum;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
+use Modules\CmsBackend\DataProviders\SurveyResponseDataProvider;
 use Modules\CmsBackend\Enums\PermissionsEnum as P;
 use Modules\CmsBackend\Enums\SurveyStatus;
 use Modules\CmsBackend\Exceptions\SurveyRuleException;
+use Modules\CmsBackend\Services\SurveyFormService;
+use Modules\CmsBackend\Services\SurveyReportService;
 use Modules\CmsBackend\Services\SurveyService;
 use Modules\CmsFrontend\Models\KhaoSat;
+use Modules\CmsFrontend\Models\KhaoSatUser;
+use Modules\CmsFrontend\Services\SurveyPublicService;
+use PHPUnit\Framework\Attributes\DataProvider;
 
-/** Hồi quy cho các lỗi trong CODEX-REVIEW.md (KS-001 … ). */
+/** Hồi quy cho các lỗi của bản review (KS-001 …; file review đã xóa, xem lịch sử git). */
 final class SurveyReviewRegressionTest extends SurveySqliteTestCase
 {
     private function draft(array $structure, array $info = []): KhaoSat
@@ -72,7 +81,7 @@ final class SurveyReviewRegressionTest extends SurveySqliteTestCase
     }
 
     /** @dataProvider xssPayloads */
-    #[\PHPUnit\Framework\Attributes\DataProvider('xssPayloads')]
+    #[DataProvider('xssPayloads')]
     public function test_ks001_payload_is_neutralised_on_save_and_on_public_page(string $payload): void
     {
         $survey = $this->draft(
@@ -90,7 +99,7 @@ final class SurveyReviewRegressionTest extends SurveySqliteTestCase
     }
 
     /** @dataProvider xssPayloads */
-    #[\PHPUnit\Framework\Attributes\DataProvider('xssPayloads')]
+    #[DataProvider('xssPayloads')]
     public function test_ks001_legacy_unsafe_value_already_in_database_is_cleaned_at_render(string $payload): void
     {
         $survey = $this->draft([['name' => 'P', 'questions' => [['type' => 'text', 'text' => 'Q']]]]);
@@ -120,7 +129,7 @@ final class SurveyReviewRegressionTest extends SurveySqliteTestCase
     {
         $survey = $this->draft([['name' => 'P', 'questions' => [['type' => 'text', 'text' => 'Q']]]]);
         app(SurveyService::class)->transition($survey, SurveyStatus::Open, 1);
-        DB::table('options')->insert(['key' => \App\Enums\OptionEnum::WEB_LOGO->value, 'value' => '/logo.png']);
+        DB::table('options')->insert(['key' => OptionEnum::WEB_LOGO->value, 'value' => '/logo.png']);
         $id = $survey->ks_id;
 
         // [quyền, các đoạn PHẢI có, các đoạn KHÔNG ĐƯỢC có]
@@ -163,7 +172,7 @@ final class SurveyReviewRegressionTest extends SurveySqliteTestCase
         $menu = json_decode((string) file_get_contents(base_path('Modules/CmsBackend/resources/menu/project-verticalMenu.json')), true);
         $item = collect($menu['menu'] ?? $menu)->first(fn ($i) => ($i['slug'] ?? null) === 'cms.khao-sat');
         $this->assertNotNull($item);
-        $route = collect(\Illuminate\Support\Facades\Route::getRoutes())->first(fn ($r) => $r->getName() === 'cms.khao-sat');
+        $route = collect(Route::getRoutes())->first(fn ($r) => $r->getName() === 'cms.khao-sat');
         $labels = collect($route->gatherMiddleware())->first(fn ($m) => is_string($m) && str_starts_with($m, 'cms.check.permission:'));
         $allowed = explode(',', substr($labels, strlen('cms.check.permission:')));
         foreach ($item['roler'] as $slug) {
@@ -221,7 +230,7 @@ final class SurveyReviewRegressionTest extends SurveySqliteTestCase
         $survey = $this->draft($this->structureWith([['text' => 'A'], ['text' => 'B'], ['text' => 'C', 'enabled' => false]]));
         $survey = app(SurveyService::class)->transition($survey, SurveyStatus::Open, 1);
         $this->assertSame('open', $survey->ks_status);
-        $this->assertSame(1, app(\Modules\CmsBackend\Services\SurveyFormService::class)->schema($survey)['question_count']);
+        $this->assertSame(1, app(SurveyFormService::class)->schema($survey)['question_count']);
         $this->get('/khao-sat/hoi-quy')->assertOk()->assertSee('1 câu hỏi');
     }
 
@@ -365,7 +374,7 @@ final class SurveyReviewRegressionTest extends SurveySqliteTestCase
         $key = DB::table('ks_cau_hoi')->value('ch_ma');
 
         $log = new \ArrayObject;
-        $this->app->bind(\Modules\CmsBackend\DataProviders\SurveyResponseDataProvider::class, fn () => new class($log) extends \Modules\CmsBackend\DataProviders\SurveyResponseDataProvider
+        $this->app->bind(SurveyResponseDataProvider::class, fn () => new class($log) extends SurveyResponseDataProvider
         {
             public function __construct(private \ArrayObject $log) {}
 
@@ -376,7 +385,7 @@ final class SurveyReviewRegressionTest extends SurveySqliteTestCase
                 return parent::lockSurvey($surveyId);
             }
 
-            public function findParticipationByCode(int $surveyId, string $code, bool $lock = false): ?\Modules\CmsFrontend\Models\KhaoSatUser
+            public function findParticipationByCode(int $surveyId, string $code, bool $lock = false): ?KhaoSatUser
             {
                 $this->log[] = 'find';
 
@@ -390,14 +399,14 @@ final class SurveyReviewRegressionTest extends SurveySqliteTestCase
                 return parent::completedCountByFingerprint($surveyId, $fingerprint);
             }
 
-            public function insertAnswers(\Modules\CmsFrontend\Models\KhaoSatUser $participation, array $rows): void
+            public function insertAnswers(KhaoSatUser $participation, array $rows): void
             {
                 $this->log[] = 'insert';
                 parent::insertAnswers($participation, $rows);
             }
         });
 
-        $public = app(\Modules\CmsFrontend\Services\SurveyPublicService::class);
+        $public = app(SurveyPublicService::class);
         $ctx = ['token' => 'T', 'fingerprint' => hash('sha256', 'T'), 'ip_hash' => 'x', 'user_agent' => null];
         $p = $public->start($survey->fresh(), [], $ctx);
         $this->assertSame(['lock@tx1', 'count'], array_slice($log->getArrayCopy(), 0, 2), 'start: khóa rồi mới đếm, trong transaction');
@@ -416,24 +425,24 @@ final class SurveyReviewRegressionTest extends SurveySqliteTestCase
     public function test_ks009_sensitive_actions_are_audited_without_personal_data(): void
     {
         $records = [];
-        \Illuminate\Support\Facades\Log::shouldReceive('info')->andReturnUsing(function ($message, $context = []) use (&$records) {
+        Log::shouldReceive('info')->andReturnUsing(function ($message, $context = []) use (&$records) {
             if ($message === 'survey.audit') {
                 $records[] = $context;
             }
         });
-        \Illuminate\Support\Facades\Log::shouldReceive('warning', 'error', 'debug', 'notice')->zeroOrMoreTimes();
+        Log::shouldReceive('warning', 'error', 'debug', 'notice')->zeroOrMoreTimes();
 
         $svc = app(SurveyService::class);
         $survey = $this->draft([['name' => 'P', 'questions' => [['type' => 'text', 'text' => 'Q']]]], ['ks_yeu_cau_thong_tin' => true, 'ks_cho_phep_an_danh' => false]);
         $survey = $svc->transition($survey, SurveyStatus::Open, 1);
 
-        $public = app(\Modules\CmsFrontend\Services\SurveyPublicService::class);
+        $public = app(SurveyPublicService::class);
         $ctx = ['token' => 'T', 'fingerprint' => hash('sha256', 'T'), 'ip_hash' => 'x', 'user_agent' => null];
         $p = $public->start($survey->fresh(), ['ho_ten' => 'Nguyễn Bí Mật', 'email' => 'bi.mat@example.com'], $ctx);
         $public->submit($survey->fresh(), $p->ksu_ma, [DB::table('ks_cau_hoi')->value('ch_ma') => 'câu trả lời riêng tư'], $ctx);
 
         $this->actingAs($this->user([]));
-        app(\Modules\CmsBackend\Services\SurveyReportService::class)->deleteParticipation(\Modules\CmsFrontend\Models\KhaoSatUser::query()->firstOrFail());
+        app(SurveyReportService::class)->deleteParticipation(KhaoSatUser::query()->firstOrFail());
         $svc->transition($survey->fresh(), SurveyStatus::Paused, 1);
         $copy = $svc->duplicate($survey->fresh(), 1);
         $svc->delete($survey->fresh());

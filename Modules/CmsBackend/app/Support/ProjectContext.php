@@ -63,6 +63,20 @@ final class ProjectContext
         return ($theme !== null ? self::projectOfTheme($theme) : null) ?? (string) config('cmsbackend.projects.default', 'khuyen-nong');
     }
 
+    /**
+     * Project whose DATA (posts assigned to a project, publication history, social accounts) the current project works on.
+     * Normally the project itself; a project may declare `data_project` to share another project's data (e.g. a redesigned
+     * site of the same unit). Everything stored with a `project_key` must use this, while theme, guides, login design and
+     * the permission manifest keep using key().
+     */
+    public static function dataKey(?string $key = null): string
+    {
+        $key ??= self::key();
+        $data = self::projects()[$key]['data_project'] ?? null;
+
+        return is_string($data) && self::exists($data) ? $data : $key;
+    }
+
     public static function label(?string $key = null): string
     {
         $key ??= self::key();
@@ -78,10 +92,37 @@ final class ProjectContext
         return is_string($theme) ? $theme : null;
     }
 
+    /**
+     * Themes a FIXED project may switch between: the themes of every project that works on the same data as the fixed one
+     * (dataKey), itself included. Ban Đề án therefore chooses between `ban-de-an` and `bandean-v2` (same data), never `default`
+     * or `nam-binh-duong`. Empty when the project is not fixed (then the whole selector is open) or has no theme.
+     *
+     * @return list<string>
+     */
+    public static function fixedThemeChoices(): array
+    {
+        if (! self::fixed()) {
+            return [];
+        }
+        $key = trim((string) config('cmsbackend.projects.key'));
+        if (! self::exists($key)) {
+            return [];
+        }
+        $data = self::dataKey($key);
+        $themes = [];
+        foreach (self::projects() as $projectKey => $project) {
+            if (self::dataKey((string) $projectKey) === $data && is_string($project['theme'] ?? null)) {
+                $themes[] = $project['theme'];
+            }
+        }
+
+        return array_values(array_unique($themes));
+    }
+
     public static function projectOfTheme(string $theme): ?string
     {
         foreach (self::projects() as $key => $project) {
-            if (($project['theme'] ?? null) === $theme) {
+            if (($project['theme'] ?? null) === $theme || in_array($theme, (array) ($project['other_themes'] ?? []), true)) {
                 return (string) $key;
             }
         }

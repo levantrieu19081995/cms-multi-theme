@@ -6,6 +6,7 @@
     <style>
         #dev-pane-permissions,
         #dev-pane-themes,
+        #dev-pane-login,
         #dev-pane-layout {
             padding-bottom: 5rem;
         }
@@ -78,6 +79,11 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="dev-tab-layout" data-bs-toggle="tab" data-bs-target="#dev-pane-layout" type="button" role="tab" aria-controls="dev-pane-layout" aria-selected="false">
                 <i class="ri-layout-masonry-line me-1" aria-hidden="true"></i>{{ __('homepage.ui.tab') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="dev-tab-login" data-bs-toggle="tab" data-bs-target="#dev-pane-login" type="button" role="tab" aria-controls="dev-pane-login" aria-selected="false">
+                <i class="ri-login-box-line me-1" aria-hidden="true"></i>{{ __('admin.developer.tab_login') }}
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -312,6 +318,7 @@
         @include('cmsbackend::screens.pages.developer-settings.partials.features')
         @include('cmsbackend::screens.pages.developer-settings.partials.languages')
         @include('cmsbackend::screens.pages.developer-settings.partials.homepage-layout')
+        @include('cmsbackend::screens.pages.developer-settings.partials.login-designs')
         <div class="tab-pane fade" id="dev-pane-accounts" role="tabpanel" aria-labelledby="dev-tab-accounts" tabindex="0">
             @include('cmsbackend::screens.pages.developer-settings.partials.accounts')
         </div>
@@ -418,7 +425,7 @@
                     if (!chosen || chosen.getAttribute('data-active') === '1' || !window.confirm(confirmTheme.replace(':theme', chosen.value))) { event.preventDefault(); }
                 });
             }
-            var tabByQuery = { permissions: 'dev-tab-permissions', theme: 'dev-tab-themes', features: 'dev-tab-features', languages: 'dev-tab-languages', layout: 'dev-tab-layout', accounts: 'dev-tab-accounts' };
+            var tabByQuery = { permissions: 'dev-tab-permissions', theme: 'dev-tab-themes', features: 'dev-tab-features', languages: 'dev-tab-languages', layout: 'dev-tab-layout', login: 'dev-tab-login', accounts: 'dev-tab-accounts' };
             // ?tab=permissions&feature=career opens the permission list already filtered to the permissions of one feature.
             var featureParam = new URLSearchParams(window.location.search).get('feature');
             if (featureFilter && featureParam) { featureFilter.value = featureParam; }

@@ -13,7 +13,6 @@ final class ShortcutsBlock extends AbstractBlockDefinition
 
     protected ?string $route = 'menus.index';
 
-
     public function __construct()
     {
         $this->schema = ['menu_link' => self::link('menus.index', 'homepage.fields.menu_link')];

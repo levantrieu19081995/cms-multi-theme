@@ -2,7 +2,7 @@
 <div class="alert alert-secondary d-flex flex-wrap align-items-center gap-2 py-2 mb-4" role="status">
     <i class="ri-building-line" aria-hidden="true"></i>
     <span>{{ __('admin.social.current_project') }}:</span>
-    <strong>{{ \Modules\CmsBackend\Support\ProjectContext::label() }}</strong>
+    <strong>{{ \Modules\CmsBackend\Support\ProjectContext::label(\Modules\CmsBackend\Support\ProjectContext::dataKey()) }}</strong>
     <span class="text-muted small">
         {{ \Modules\CmsBackend\Support\ProjectContext::fixed() ? __('admin.social.project_fixed') : __('admin.social.project_follows_theme') }}
     </span>

@@ -13,7 +13,6 @@ final class HeroBlock extends AbstractBlockDefinition
 
     protected ?string $route = 'cms.dashboard.cdn.banner.index';
 
-
     public function __construct()
     {
         $this->schema = ['banner_link' => self::link('cms.dashboard.cdn.banner.index', 'homepage.fields.banner_link')];

@@ -50,15 +50,35 @@ final class ScreenTheme
             return $preview;
         }
         // A fixed project (CMS_PROJECT_KEY) owns its theme: the stored administration choice is neither read nor changed.
-        $projectTheme = ProjectContext::fixedTheme();
-        if ($projectTheme !== null && array_key_exists($projectTheme, $this->choices($surface))) {
-            return $projectTheme;
-        }
         $request = request();
-        if (! $request->attributes->has(self::REQUEST_OPTIONS)) {
-            $request->attributes->set(self::REQUEST_OPTIONS, Option::query()->whereIn('key', array_values(self::OPTIONS))->pluck('value', 'key')->all());
+        $options = function () use ($request): array {
+            if (! $request->attributes->has(self::REQUEST_OPTIONS)) {
+                $request->attributes->set(self::REQUEST_OPTIONS, Option::query()->whereIn('key', array_values(self::OPTIONS))->pluck('value', 'key')->all());
+            }
+
+            return $request->attributes->get(self::REQUEST_OPTIONS);
+        };
+        $projectTheme = ProjectContext::fixedTheme();
+        if ($projectTheme !== null) {
+            // ...except that it may offer more than one theme over the same data (ProjectContext::fixedThemeChoices): then the
+            // stored choice counts when it is one of those themes and is built here.
+            $stored = null;
+            if (count(ProjectContext::fixedThemeChoices()) > 1) {
+                try {
+                    $stored = $options()[self::OPTIONS[$surface]] ?? null;
+                } catch (\Throwable) {
+                    // No database (yet): the project's own theme below.
+                }
+            }
+            if (is_string($stored) && $stored !== $projectTheme
+                && in_array($stored, ProjectContext::fixedThemeChoices(), true) && array_key_exists($stored, $this->choices($surface))) {
+                return $stored;
+            }
+            if (array_key_exists($projectTheme, $this->choices($surface))) {
+                return $projectTheme;
+            }
         }
-        $key = $request->attributes->get(self::REQUEST_OPTIONS)[self::OPTIONS[$surface]] ?? 'default';
+        $key = $options()[self::OPTIONS[$surface]] ?? 'default';
         if (array_key_exists($key, $this->choices($surface))) {
             return $key;
         }
@@ -91,6 +111,25 @@ final class ScreenTheme
         return ($surface === 'admin' ? 'cmsbackend' : 'cmsfrontend').'::screens.'.$screen;
     }
 
+    /**
+     * Folders under screens/ searched for a view of a theme, in order: the theme itself, the shared layer it declares (`extends`, a
+     * folder named _<name> that holds the files its themes have in common), then `default`. A layer is never a theme: it cannot be
+     * chosen, and a theme can only name one that really exists.
+     *
+     * @return list<string>
+     */
+    public function lookup(string $theme): array
+    {
+        $chain = [$theme];
+        $layer = config('cmsbackend.screens.themes.'.$theme.'.extends');
+        if (is_string($layer) && preg_match('/^_[a-z][a-z0-9-]*$/D', $layer) === 1) {
+            $chain[] = $layer;
+        }
+        $chain[] = 'default';
+
+        return array_values(array_unique($chain));
+    }
+
     public function path(string $surface, string $screen, bool $required = true): ?string
     {
         $this->view($surface, $screen);
@@ -102,7 +141,7 @@ final class ScreenTheme
             $relative = str_replace('.', '/', $screen).'.blade.php';
             $base = module_path($module, 'resources/views/screens');
             $found = null;
-            foreach (array_unique([$key, 'default']) as $theme) {
+            foreach ($this->lookup($key) as $theme) {
                 $root = realpath($base.'/'.$theme);
                 $file = realpath($base.'/'.$theme.'/'.$relative);
                 if ($root !== false && $file !== false && is_file($file) && str_starts_with(strtolower(str_replace('\\', '/', $file)), strtolower(str_replace('\\', '/', $root)).'/')) {

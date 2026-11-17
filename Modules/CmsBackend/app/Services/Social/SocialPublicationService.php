@@ -37,10 +37,10 @@ final class SocialPublicationService
         private SocialChannelRegistry $registry,
     ) {}
 
-    /** Current project (ProjectContext). The social module never reads it from a theme or a title. */
+    /** Project whose data is used (ProjectContext::dataKey()). The social module never reads it from a theme or a title. */
     public function projectKey(): string
     {
-        return ProjectContext::key();
+        return ProjectContext::dataKey();
     }
 
     /**

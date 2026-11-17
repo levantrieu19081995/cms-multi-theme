@@ -11,6 +11,7 @@
     "dev:theme": "node scripts/theme-dev.mjs",
     "dev:nbd": "node scripts/theme-dev.mjs nam-binh-duong",
     "dev:bda": "node scripts/theme-dev.mjs ban-de-an",
+    "dev:bdav2": "node scripts/theme-dev.mjs bandean-v2",
     "dev:default": "node scripts/theme-dev.mjs default",
     "start:nbd": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-all.ps1 -Project nam-binh-duong -Mode single -Theme nam-binh-duong",
     "start:bda": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-all.ps1 -Project ban-de-an -Mode single -Theme ban-de-an",
@@ -23,6 +24,7 @@
     "build:theme": "node scripts/theme-build.mjs",
     "build:nbd": "node scripts/theme-build.mjs nam-binh-duong",
     "build:bda": "node scripts/theme-build.mjs ban-de-an",
+    "build:bdav2": "node scripts/theme-build.mjs bandean-v2",
     "build:default": "node scripts/theme-build.mjs default",
     "deploy:ui:kn": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy-ui-228.ps1"
   },

@@ -22,7 +22,7 @@ use Modules\CmsBackend\Support\ProjectContext;
  * Connect, check and disconnect the Zalo Official Account of the current project.
  *
  * Unlike Facebook there is no list to choose from: the person grants access to one OA, Zalo answers with a code and the OA id,
- * and the connection is saved at once. The project is always ProjectContext::key(), never a request value. Tokens come from the
+ * and the connection is saved at once. The project is always ProjectContext::dataKey(), never a request value. Tokens come from the
  * code exchange on the server and are stored in social_accounts.credentials (encrypted cast); activity logs hold ids and statuses only.
  */
 final class ZaloConnectionService
@@ -53,12 +53,12 @@ final class ZaloConnectionService
         $this->authorize($user);
         $this->requireConfigured();
 
-        $current = $this->activeAccounts(ProjectContext::key())->first(fn (SocialAccount $account) => $account->isConnected());
+        $current = $this->activeAccounts(ProjectContext::dataKey())->first(fn (SocialAccount $account) => $account->isConnected());
         if ($current !== null) {
             throw new SocialException(__('admin.social.zalo_error_already_connected', ['name' => $current->name]), 'already_connected');
         }
 
-        $attempt = $this->store->begin($session, $user, ProjectContext::key());
+        $attempt = $this->store->begin($session, $user, ProjectContext::dataKey());
 
         return $this->client->authorizationUrl($attempt['state'], $attempt['challenge']);
     }
@@ -87,7 +87,7 @@ final class ZaloConnectionService
             throw new SocialException(__('admin.social.zalo_error_state_invalid'), 'state_invalid');
         }
 
-        $project = ProjectContext::key();
+        $project = ProjectContext::dataKey();
         $attempt = $this->store->consume($session, $state, $user, $project);
 
         try {
@@ -153,7 +153,7 @@ final class ZaloConnectionService
         $this->authorize($user);
         $this->requireConfigured();
 
-        $account = $this->activeAccounts(ProjectContext::key())->first();
+        $account = $this->activeAccounts(ProjectContext::dataKey())->first();
         if ($account === null) {
             throw new SocialException(__('admin.social.zalo_error_no_account'), 'no_account');
         }
@@ -194,7 +194,7 @@ final class ZaloConnectionService
     {
         $this->authorize($user);
 
-        $accounts = $this->activeAccounts(ProjectContext::key(), true);
+        $accounts = $this->activeAccounts(ProjectContext::dataKey(), true);
         if ($accounts->isEmpty()) {
             throw new SocialException(__('admin.social.zalo_error_no_account'), 'no_account');
         }
@@ -219,7 +219,7 @@ final class ZaloConnectionService
      */
     public function card(): array
     {
-        $account = $this->activeAccounts(ProjectContext::key())->first();
+        $account = $this->activeAccounts(ProjectContext::dataKey())->first();
         $credentials = $account !== null ? (array) $account->credentials : [];
 
         return [

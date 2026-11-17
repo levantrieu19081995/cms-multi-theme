@@ -1,0 +1,199 @@
+/* bandean-v2: màu xanh dương còn sót trong shared/campus-base.css được đổi sang tông xanh lá (cùng độ bão hòa và độ sáng, xoay màu -58 độ).
+   TẠO TỰ ĐỘNG bởi scripts/bandean-v2-derived-css.mjs (chỉ các khai báo có màu xanh dương); campus-base.css giữ nguyên cho các theme khác.
+   Nạp sau theme.css và trước sections.css. Bộ màu gốc: docs/design-standards/BO-MAU-THEME.md. */
+.proposal-public.sbut-public .utility{color:#D4E6DC}
+.proposal-public.sbut-public .utility-divider{background:#3E6750}
+.proposal-public.sbut-public .sample-label{color:#A3C0B0}
+.proposal-public.sbut-public .header{border-bottom:1px solid #E8EEEA}
+.proposal-public.sbut-public .brand>span>span{color:#3F6850;border-left:1px solid #D7E2DB}
+.proposal-public.sbut-public .icon-btn:hover{background:#EEF5F1}
+.proposal-public.sbut-public .eyebrow{color:#5D9B78}
+.proposal-public.sbut-public .hero{background:#143F28}
+.proposal-public.sbut-public .hero:after{background:linear-gradient(90deg,rgba(16,67,43,.93) 0%,rgba(16,67,43,.72) 36%,rgba(16,67,43,.10) 76%),linear-gradient(0deg,rgba(16,67,43,.55),transparent 45%)}
+.proposal-public.sbut-public .hero p{color:#D5E1DA}
+.proposal-public.sbut-public .btn{border:1px solid #D7E4DC}
+.proposal-public.sbut-public .btn:hover{background:#EFF6F2;border-color:#77AE8F}
+.proposal-public.sbut-public .btn.gold{color:#254032}
+.proposal-public.sbut-public .btn.light-outline{border-color:#78AE90}
+.proposal-public.sbut-public .play-circle{border:1px solid #7FB295}
+.proposal-public.sbut-public .slide-index span{color:#91AA9C}
+.proposal-public.sbut-public .slide-arrows button{border:1px solid #71AA8A}
+.proposal-public.sbut-public .hero-caption{color:#D9E5DE}
+.proposal-public.sbut-public .hero-right-note span{color:#BCD0C5}
+.proposal-public.sbut-public .quick-inner svg{color:#5B9976}
+.proposal-public.sbut-public .quick-inner small{color:#74AC8C}
+.proposal-public.sbut-public .quick-inner .arrow{color:#77AD8F}
+.proposal-public.sbut-public .ticker-inner>a{color:#497A5F}
+.proposal-public.sbut-public .section-head p{color:#6CA786}
+.proposal-public.sbut-public .intro-stamp{color:#294536}
+.proposal-public.sbut-public .intro-copy p{color:#69A583}
+.proposal-public.sbut-public .value-row>span{color:#47795D}
+.proposal-public.sbut-public .pill{border:1px solid #D6E6DD;color:#66A380}
+.proposal-public.sbut-public .program-card{border:1px solid #DFEBE4}
+.proposal-public.sbut-public .image-label{color:#436F56}
+.proposal-public.sbut-public .program-body p{color:#70A989}
+.proposal-public.sbut-public .program-card-footer{border-top:1px solid #E6F0EA;color:#66A380}
+.proposal-public.sbut-public .round-arrow{border:1px solid #D1E5DA;color:#427F5C}
+.proposal-public.sbut-public .sample-inline{color:#95AA9E}
+.proposal-public.sbut-public .stats-head>span{color:#9FBAAB}
+.proposal-public.sbut-public .stat{border-left:1px solid #426D54}
+.proposal-public.sbut-public .stat p{color:#D9E7DF}
+.proposal-public.sbut-public .stat small{color:#80B397}
+.proposal-public.sbut-public .research-num{color:#AABFB3}
+.proposal-public.sbut-public .research-item p{color:#74AB8C}
+.proposal-public.sbut-public .news-section{background:#F7FBF9}
+.proposal-public.sbut-public .tag{background:#E6F1EA}
+.proposal-public.sbut-public .date{color:#8EA699}
+.proposal-public.sbut-public .news-feature p{color:#71AA8A}
+.proposal-public.sbut-public .news-side-item .text-button{color:#67A481}
+.proposal-public.sbut-public .event-date{border-right:1px solid #D5E8DE}
+.proposal-public.sbut-public .event-line{color:#8FA699}
+.proposal-public.sbut-public .admissions-copy p{color:#6FA988}
+.proposal-public.sbut-public .notice-item>span{color:#AABFB3}
+.proposal-public.sbut-public .campus-film{background:#123A24}
+.proposal-public.sbut-public .film-copy p{color:#BFD5C9}
+.proposal-public.sbut-public .portal-section{background:#F2F7F4}
+.proposal-public.sbut-public .portal-copy p{color:#70A989}
+.proposal-public.sbut-public .portal-tabs{border-bottom:1px solid #D2E5DB}
+.proposal-public.sbut-public .portal-tabs button{color:#74AB8C}
+.proposal-public.sbut-public .portal-link{border-bottom:1px solid #D7E8DF;color:#427358}
+.proposal-public.sbut-public .portal-link svg{color:#77AE8F}
+.proposal-public.sbut-public .partners-head p{color:#8EA799}
+.proposal-public.sbut-public .partner-logo{color:#72AA8A}
+.proposal-public.sbut-public .partner-logo:hover{background:#F6FAF8;border-color:#9BC3AC}
+.proposal-public.sbut-public .footer{color:#BFD8CA}
+.proposal-public.sbut-public .brand.light>span>span{color:#A9C7B6;border-color:#426E55}
+.proposal-public.sbut-public .footer-brand h3{color:#DCEAE2}
+.proposal-public.sbut-public .footer-brand p{color:#88AE98}
+.proposal-public.sbut-public .footer-col h4{color:#D9E9E0}
+.proposal-public.sbut-public .footer-col>a,.proposal-public.sbut-public .footer-link{color:#96BDA7}
+.proposal-public.sbut-public .footer-contact p{color:#A8CCB7}
+.proposal-public.sbut-public .footer-contact>span{color:#6DA887}
+.proposal-public.sbut-public .footer .video-link{border:1px solid #48785D}
+.proposal-public.sbut-public .footer-bottom{border-top:1px solid #345D47;color:#77AD8F}
+.proposal-public.sbut-public .footer-bottom button{color:#A9C6B6}
+.proposal-public.sbut-public .image-credit{color:#5C9A77}
+.proposal-public.sbut-public .page-banner:after{color:#E2EEE7}
+.proposal-public.sbut-public .breadcrumbs{color:#8EA699}
+.proposal-public.sbut-public .breadcrumbs a{color:#568F6F}
+.proposal-public.sbut-public .page-banner p{color:#6BA685}
+.proposal-public.sbut-public .search-field{border:1px solid #D3E5DB}
+.proposal-public.sbut-public .search-field svg{color:#90AD9D}
+.proposal-public.sbut-public .search-field input{color:#3F7356}
+.proposal-public.sbut-public .result-count{color:#8FAB9B}
+.proposal-public.sbut-public .program-hero p{color:#70A989}
+.proposal-public.sbut-public .program-meta small{color:#90AB9C}
+.proposal-public.sbut-public .program-meta strong{color:#4B7D61}
+.proposal-public.sbut-public .article-content p{color:#61A07C}
+.proposal-public.sbut-public .article-content ul{color:#67A481}
+.proposal-public.sbut-public .article-content .intro-paragraph{color:#417056}
+.proposal-public.sbut-public .detail-sidebar{border:1px solid #D5E7DD;background:#F6FAF8}
+.proposal-public.sbut-public .detail-sidebar p{color:#74AB8C}
+.proposal-public.sbut-public .course-item{background:#F9FCFA;color:#548D6D}
+.proposal-public.sbut-public .course-item span{color:#9FBBAB}
+.proposal-public.sbut-public .article-hero p{color:#6EA887}
+.proposal-public.sbut-public .news-card-body p{color:#76AD8E}
+.proposal-public.sbut-public .news-card-body .text-button{color:#457F5E}
+.proposal-public.sbut-public .pagination button{color:#5F9E7B}
+.proposal-public.sbut-public .empty-state{background:#F3F9F5;color:#8CA898;border:1px dashed #D2E5DB}
+.proposal-public.sbut-public .admission-page-intro p{color:#6FA988}
+.proposal-public.sbut-public .journey-step{border:1px solid #D5E8DE}
+.proposal-public.sbut-public .journey-step p{color:#77AD8F}
+.proposal-public.sbut-public .faq-item summary:after{color:#72AB8B}
+.proposal-public.sbut-public .faq-item p{color:#6AA584}
+.proposal-public.sbut-public .audience-hero p{color:#A9C9B7}
+.proposal-public.sbut-public .service-card>.icon{color:#6CA786}
+.proposal-public.sbut-public .service-card p{color:#7AAF91}
+.proposal-public.sbut-public .service-card:hover{border-color:#82B598;background:#F9FBFA}
+.proposal-public.sbut-public .about-value p{color:#72AA8A}
+.proposal-public.sbut-public .modal p{color:#74AB8C}
+.proposal-public.sbut-public .modal video{background:#0A2416}
+.proposal-public.sbut-public .field label{color:#4F8366}
+.proposal-public.sbut-public .field input,.proposal-public.sbut-public .field select,.proposal-public.sbut-public .field textarea{border:1px solid #D0E5D9;color:#407457}
+.proposal-public.sbut-public .field small{color:#94AFA0}
+.proposal-public.sbut-public .form-submit small{color:#93AC9E}
+.proposal-public.sbut-public .search-result{border:1px solid #D9E9E0}
+.proposal-public.sbut-public .search-result b{color:#3D7154}
+.proposal-public.sbut-public .search-result small{color:#8CAB99}
+.proposal-public.sbut-public .search-result:hover{background:#F2F7F4;border-color:#8DBDA2}
+.proposal-public.sbut-public .toast{color:#F0F7F3}
+.proposal-public.sbut-public .credits-note{color:#96AFA1}
+.proposal-public.sbut-public .event-info{background:#F1F7F3;border:1px solid #D7E9DF}
+.proposal-public.sbut-public .event-info>div{color:#5B9875}
+.proposal-public.sbut-public .success-mark{background:#E9F2ED}
+@media(max-width:760px){.proposal-public.sbut-public .footer-contact{border-top:1px solid #335B45}}
+.proposal-public.sbut-public .schedule-row{color:#74AB8C}
+.proposal-public.sbut-public .schedule-row strong{color:#467F5F}
+.proposal-public.sbut-public .schedule-row b{color:#56906F}
+.proposal-public.sbut-public .resource-row svg{color:#87B098}
+.proposal-public.sbut-public .resource-row b{color:#538A6C}
+.proposal-public.sbut-public .resource-row span{color:#9FBCAC}
+.proposal-public.sbut-public .section-shortcuts{border-bottom:1px solid #E3EDE7;background:#FAFCFB}
+.proposal-public.sbut-public .section-shortcuts .wrap{color:#66A380}
+.proposal-public.sbut-public .section-shortcuts span{color:#94AD9F}
+.proposal-public.sbut-public .section-shortcuts a:after{color:#95B8A4}
+.proposal-public.sbut-public .audience-link-group{border:1px solid #D7E8DF}
+.proposal-public.sbut-public .audience-icon{background:#EAF3EE;color:#498965}
+.proposal-public.sbut-public .group-count{color:#6FA888;background:#ECF5F0}
+.proposal-public.sbut-public .audience-group-description{color:#79AE90}
+.proposal-public.sbut-public .audience-service-link{border-bottom:1px solid #E3EFE8}
+.proposal-public.sbut-public .service-icon{background:#F4F9F6;color:#70A989}
+.proposal-public.sbut-public .audience-service-link strong{color:#3E7556}
+.proposal-public.sbut-public .audience-service-link small{color:#8EAA9A}
+.proposal-public.sbut-public .audience-service-link>svg{color:#82B598}
+.proposal-public.sbut-public .audience-service-link:hover .service-icon{background:#E4F0E9}
+.proposal-public.sbut-public .partners-section{border-top:1px solid #E6F0EA}
+.proposal-public.sbut-public .list-section-intro{color:#70A989}
+.proposal-public.sbut-public .home-list-count{color:#80B397}
+.proposal-public.sbut-public .list-heading-label{color:#5A9574}
+.proposal-public.sbut-public .home-content-list{border-top:1px solid #D2E5DB}
+.proposal-public.sbut-public .home-list-item{border-bottom:1px solid #D9E9E0}
+.proposal-public.sbut-public .home-row-number{color:#A2BAAD}
+.proposal-public.sbut-public .home-list-thumb{background:#DFEDE5}
+.proposal-public.sbut-public .home-row-category>span:not(.list-category-chip){color:#9CB8A8}
+.proposal-public.sbut-public .home-row-category time{color:#94AE9F}
+.proposal-public.sbut-public .home-row-copy h3{color:#284A38}
+.proposal-public.sbut-public .home-row-description{color:#72AA8A}
+.proposal-public.sbut-public .home-row-tags>span{color:#6FA888;background:#EBF3EE;border:1px solid #DAEAE1}
+.proposal-public.sbut-public .row-duration,.proposal-public.sbut-public .row-label{color:#7DB194}
+.proposal-public.sbut-public .list-category-chip{color:#4F8366;background:#E5F0E9}
+.proposal-public.sbut-public .video-player-meta{color:#8CAA99}
+.proposal-public.sbut-public .video-player-meta span+span:before{color:#A8C2B3}
+.proposal-public.sbut-public .home-list-item:last-child{border-bottom-color:#D2E5DB}
+.proposal-public.sbut-public .sbut-reference-slide::before{background:linear-gradient(90deg,rgba(16,67,43,.93),rgba(16,67,43,.72) 36%,rgba(16,67,43,.1) 76%),linear-gradient(0deg,rgba(16,67,43,.55),transparent 45%)}
+.proposal-public.sbut-public .quick-inner i{color:#5B9976}
+.proposal-public.sbut-public .sbut-image-empty{background:#E9F2ED;color:#609F7B}
+.proposal-public.sbut-public .sbut-section-empty{border:1px dashed #D2E3DA;color:#5E9D79;background:#FAFCFB}
+.proposal-public.sbut-public .sbut-audience-arrow{color:#63A17E}
+.proposal-public.sbut-public .sbut-site-search{border:1px solid #D4E7DD}
+.proposal-public.sbut-public .sbut-site-search input{border:1px solid #D4E7DD}
+.proposal-public.sbut-public .sbut-footer-directory{color:#CFDFD6}
+.proposal-public.sbut-public :is(.card,.proposal-public.sbut-public .grid-item,.proposal-public.sbut-public .widget,.proposal-public.sbut-public .cms-news-card,.proposal-public.sbut-public .cms-video-card){border-color:#D5E6DD}
+.proposal-public.sbut-public .card :is(.card-header,.proposal-public.sbut-public .card-footer){background:#EBF3EE;border-color:#D5E6DD}
+.proposal-public.sbut-public .listing-section .grid-item{border:1px solid #D5E6DD}
+.proposal-public.sbut-public .form-control,.proposal-public.sbut-public .form-select{border-color:#CADCD2}
+.proposal-public.sbut-public .table{--bs-table-border-color:#D5E6DD}
+.proposal-public.sbut-public .table th{background:#E1EEE6!important}
+.proposal-public.sbut-public .sbut-contact-form{border:1px solid #D5E6DD}
+.proposal-public.sbut-public .sbut-search-field{border:1px solid #CDE4D7}
+.proposal-public.sbut-public .sbut-search-field:focus-within{border-color:#77AE8F}
+.proposal-public.sbut-public .sbut-search-field i{color:#7EB194}
+.proposal-public.sbut-public #sbut-search-hint{color:#63A27E}
+.proposal-public.sbut-public .sbut-search-results a{border:1px solid #D3E6DC}
+.proposal-public.sbut-public .sbut-search-results a:hover{border-color:#8DB69E}
+.proposal-public.sbut-public .sbut-search-results span{color:#7BB092}
+.proposal-public.sbut-public .sbut-search-results strong{color:#47795D}
+.proposal-public.sbut-public .sbut-search-empty{color:#5D9B78}
+.proposal-public.sbut-public #doi-tac .partner-logo{color:#72AA8A}
+.proposal-public.sbut-public #doi-tac .partner-logo b{color:#72AA8A}
+.proposal-public.sbut-public #doi-tac .partner-logo small{color:#7BB093}
+.proposal-public.sbut-public #doi-tac .partner-logo:hover{border-color:#9BC3AC;background:#F6FAF8}
+.proposal-public.sbut-public .sbut-shortcut-panel{color:#123E26}
+.proposal-public.sbut-public .sbut-shortcut-head{background:#F3F8F5}
+.proposal-public.sbut-public .sbut-shortcut-head .sbut-shortcut-all{color:#185334}
+.proposal-public.sbut-public .sbut-shortcut-list :is(a,.proposal-public.sbut-public summary){color:#123E26}
+.proposal-public.sbut-public .sbut-shortcut-list a:hover{color:#174F31;background:#F1F7F3}
+.proposal-public.sbut-public .sbut-shortcut-list summary:hover{background:#F1F7F3}
+.proposal-public.sbut-public .sbut-shortcut-backdrop{background:rgba(16,67,43,.24)}
+.proposal-public.sbut-public .sbut-section-rail a{color:#47795D}
+.proposal-public.sbut-public .sbut-section-rail a:hover{border-color:#C6DACF}

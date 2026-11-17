@@ -1,0 +1,142 @@
+/* Footer của bandean-v2 (view: components/layouts/sections/footer/footer-front.blade.php).
+   Nền xanh đậm + sóng sáng vẽ bằng SVG/CSS; có ảnh footer-art.* thì phủ lên (class .has-art). Chỉ transform/opacity, không blur trên mảng lớn.
+   Bo góc lồng nhau: bo ngoài = bo trong + padding (--ft-r-in, --ft-pad). Cỡ chữ tối thiểu do typography.css (sinh tự động) lo. */
+.proposal-public.sbut-public .bd2-footer {
+  --ft-gold: #F2D48A;
+  --ft-mint: #8EF0B4;
+  --ft-text: #E6EFE9;
+  --ft-pad: 14px;
+  --ft-r-in: 6px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-top: clamp(48px, 5.5vw, 84px);
+  background:
+    radial-gradient(90% 70% at 18% 100%, rgba(40, 120, 84, .42), transparent 62%),
+    radial-gradient(70% 60% at 100% 0, rgba(30, 100, 70, .3), transparent 60%),
+    linear-gradient(180deg, #102B25 0%, #133229 58%, #0C241F 100%);
+  color: var(--ft-text);
+}
+.bd2-ft-art { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.bd2-ft-wave { position: absolute; top: 0; width: min(62%, 860px); height: 62%; opacity: .85; }
+.bd2-ft-wave--left { left: 0; }
+.bd2-ft-wave--right { right: 0; }
+/* Ảnh campus mờ dần ở góc dưới trái (dự phòng khi chưa có ảnh footer-art.*). */
+.bd2-ft-campus {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: min(48%, 640px);
+  height: 62%;
+  background: var(--bd2-footer-campus) left bottom / cover no-repeat;
+  opacity: .2;
+  -webkit-mask-image: linear-gradient(90deg, #000 30%, transparent 100%), linear-gradient(0deg, #000 40%, transparent 100%);
+  mask-image: linear-gradient(90deg, #000 30%, transparent 100%), linear-gradient(0deg, #000 40%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+.bd2-ft-image { position: absolute; inset: 0; background: var(--bd2-footer-art, none) center bottom / cover no-repeat; }
+.bd2-footer.has-art .bd2-ft-campus { display: none; }
+
+.bd2-ft-wrap { position: relative; }
+.bd2-ft-top {
+  display: grid;
+  grid-template-columns: minmax(270px, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: clamp(28px, 4vw, 64px);
+  padding-bottom: clamp(36px, 4vw, 56px);
+}
+
+/* Cột thương hiệu */
+.bd2-ft-logo {
+  display: inline-block;
+  padding: var(--ft-pad);
+  border-radius: calc(var(--ft-r-in) + var(--ft-pad));
+  background: #fff;
+  line-height: 0;
+  box-shadow: 0 18px 36px -22px rgba(0, 0, 0, .7);
+}
+.bd2-ft-logo img { display: block; width: clamp(120px, 11vw, 150px); height: auto; border-radius: var(--ft-r-in); }
+.bd2-ft-motto { margin: clamp(18px, 2vw, 26px) 0 0; color: var(--ft-gold); font-size: clamp(1.9rem, 2.7vw, 2.7rem); font-weight: 800; line-height: 1.12; letter-spacing: -.01em; white-space: nowrap; }
+.bd2-ft-slogan { margin: 14px 0 0; color: var(--ft-text); font-size: 1rem; line-height: 1.5; }
+
+/* Ba cột liên kết: tiêu đề vàng có biểu tượng + danh sách mũi tên */
+.bd2-ft-col h4 { display: flex; align-items: center; gap: 12px; margin: 6px 0 clamp(18px, 2vw, 26px); color: var(--ft-gold); font-size: clamp(1.1rem, 1.45vw, 1.4rem); font-weight: 800; line-height: 1.2; }
+.bd2-ft-col h4 i { flex: none; font-size: 1.9rem; line-height: 1; }
+.bd2-ft-col ul { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.proposal-public.sbut-public .bd2-ft-col a, .proposal-public.sbut-public .bd2-ft-col summary {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  color: var(--ft-text);
+  font-size: 1rem;
+  line-height: 1.4;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+.bd2-ft-col a:before, .bd2-ft-col summary:before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border: solid currentColor;
+  border-width: 2px 2px 0 0;
+  transform: translateY(-1px) rotate(45deg);
+}
+.proposal-public.sbut-public .bd2-ft-col a:hover, .proposal-public.sbut-public .bd2-ft-col summary:hover { color: var(--ft-gold); }
+.bd2-ft-col a:focus-visible, .bd2-ft-col summary:focus-visible, .bd2-ft-bar a:focus-visible, .bd2-ft-sites a:focus-visible { outline: 2px solid var(--ft-gold); outline-offset: 3px; border-radius: 4px; }
+.bd2-ft-col summary { list-style: none; }
+.bd2-ft-col summary::-webkit-details-marker { display: none; }
+.bd2-ft-dir[open] summary:before { transform: translateY(-3px) rotate(135deg); }
+.bd2-ft-dir ul { margin: 12px 0 0 18px; gap: 10px; }
+
+.bd2-ft-sites { display: flex; flex-wrap: wrap; gap: 8px 24px; padding-bottom: 28px; }
+.proposal-public.sbut-public .bd2-ft-sites a { color: #BFD8CA; font-size: .95rem; text-decoration: none; }
+.proposal-public.sbut-public .bd2-ft-sites a:hover { color: var(--ft-gold); }
+
+/* Thanh liên hệ dưới cùng, ngăn cách bằng đường chân trời sáng */
+.bd2-ft-bar {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px clamp(20px, 3vw, 44px);
+  padding-block: 24px 28px;
+}
+.bd2-ft-bar:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 100vw;
+  height: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent 0, var(--ft-mint) 18%, #D4F380 50%, var(--ft-mint) 82%, transparent 100%);
+  box-shadow: 0 0 22px rgba(142, 240, 180, .55);
+}
+.bd2-ft-bar:after { content: ''; position: absolute; inset: 2px -50vw 0; z-index: -1; background: rgba(6, 26, 21, .55); }
+.bd2-ft-info { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: 0; color: #fff; font-size: 1rem; font-weight: 600; line-height: 1.5; }
+.bd2-ft-info b { font-weight: 800; }
+.bd2-ft-info i { color: var(--ft-gold); font-size: 1.4rem; line-height: 1; }
+.proposal-public.sbut-public .bd2-ft-info a { color: #fff; text-decoration: none; }
+.proposal-public.sbut-public .bd2-ft-info a:hover { color: var(--ft-gold); }
+.bd2-ft-address { flex: 1 1 340px; }
+.bd2-ft-copy { gap: 4px 20px; color: #D5E3DA; font-weight: 500; }
+
+@media (min-width: 1100px) {
+  .bd2-ft-copy { padding-left: clamp(20px, 3vw, 44px); border-left: 1px solid rgba(255, 255, 255, .35); }
+}
+@media (max-width: 1000px) {
+  .bd2-ft-top { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .bd2-ft-brand { grid-column: 1 / -1; display: grid; justify-items: start; }
+}
+@media (max-width: 640px) {
+  .bd2-ft-top { grid-template-columns: 1fr; }
+  .bd2-ft-wave { height: 40%; }
+  .bd2-ft-campus { width: 100%; height: 38%; opacity: .14; }
+  .bd2-ft-address { flex-basis: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .proposal-public.sbut-public .bd2-ft-col a, .proposal-public.sbut-public .bd2-ft-col summary { transition: none; }
+}

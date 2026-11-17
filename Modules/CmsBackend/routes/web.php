@@ -14,6 +14,7 @@ use Modules\CmsBackend\Http\Controllers\CDNThuVienHinhAnhController;
 use Modules\CmsBackend\Http\Controllers\CDNTrangController;
 use Modules\CmsBackend\Http\Controllers\CDNVanBanController;
 use Modules\CmsBackend\Http\Controllers\DeveloperAccountsController;
+use Modules\CmsBackend\Http\Controllers\DeveloperLoginController;
 use Modules\CmsBackend\Http\Controllers\DeveloperSettingsController;
 use Modules\CmsBackend\Http\Controllers\DichVuController;
 use Modules\CmsBackend\Http\Controllers\DoiTacController;
@@ -68,6 +69,12 @@ Route::middleware(['cms.developer.enabled'])->prefix('developer-settings')->grou
             Route::post('roles', [$accounts, 'roles'])->name('dashboard.developer-settings.accounts.roles');
             Route::post('edit-published', [$accounts, 'editPublished'])->name('dashboard.developer-settings.accounts.edit-published');
             Route::post('role-permissions', [$accounts, 'rolePermissions'])->name('dashboard.developer-settings.accounts.role-permissions');
+        });
+        // Tab "Đăng nhập": giao diện đăng nhập của từng dự án (chỉ phiên Developer); xem thử không lưu gì.
+        $loginDesigns = DeveloperLoginController::class;
+        Route::prefix('login-designs')->group(function () use ($loginDesigns) {
+            Route::post('/', [$loginDesigns, 'save'])->middleware('throttle:10,1')->name('dashboard.developer-settings.login.save');
+            Route::get('{design}/preview', [$loginDesigns, 'preview'])->where('design', '[a-z][a-z0-9-]*')->middleware('throttle:30,1')->name('dashboard.developer-settings.login.preview');
         });
         // Homepage Layout Manager (tab "Bố cục trang chủ"): chỉ phiên Developer; preview là snapshot phía server, không đổi bố cục Live.
         $layout = HomepageLayoutController::class;

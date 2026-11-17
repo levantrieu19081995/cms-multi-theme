@@ -84,15 +84,21 @@ function bladeFiles(dir) {
 }
 
 /**
- * Blade files a theme can render: its own views, the default views it does not override (ScreenTheme falls back to
- * `default`) and the frontend views outside screens/. Returns absolute paths.
+ * Blade files a theme can render: its own views, those of the shared layers it extends, the default views it does not override
+ * (ScreenTheme searches theme, layers, then `default`) and the frontend views outside screens/. Returns absolute paths.
  */
 function effectiveViews(theme) {
   const screens = path.join(root, 'Modules/CmsFrontend/resources/views/screens');
   const own = new Set(bladeFiles(path.join(screens, theme)));
   const files = [...own].map(file => path.join(screens, theme, file));
-  for (const file of bladeFiles(path.join(screens, 'default'))) {
-    if (!own.has(file)) files.push(path.join(screens, 'default', file));
+  const seen = new Set(own);
+  for (const folder of [...(themeProfiles[theme]?.layers ?? []), 'default']) {
+    for (const file of bladeFiles(path.join(screens, folder))) {
+      if (!seen.has(file)) {
+        seen.add(file);
+        files.push(path.join(screens, folder, file));
+      }
+    }
   }
   const viewsRoot = path.join(root, 'Modules/CmsFrontend/resources/views');
   for (const file of glob.sync('**/*.blade.php', { cwd: viewsRoot, posix: true, ignore: 'screens/**' })) files.push(path.join(viewsRoot, file));

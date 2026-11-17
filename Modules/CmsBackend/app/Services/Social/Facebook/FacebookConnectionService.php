@@ -22,7 +22,7 @@ use Modules\CmsBackend\Support\ProjectContext;
 /**
  * Connect, check and disconnect the Facebook Page of the current project. Phase 2A: nothing is posted or deleted.
  *
- * The project is always ProjectContext::key(), never a request value. The page access token is never taken from a request:
+ * The project is always ProjectContext::dataKey(), never a request value. The page access token is never taken from a request:
  * it comes from the OAuth selection kept on the server (FacebookOAuthStore) and is stored in social_accounts.credentials
  * (encrypted cast). Activity logs hold ids and statuses only.
  */
@@ -55,7 +55,7 @@ final class FacebookConnectionService
         $this->authorize($user);
         $this->requireConfigured();
 
-        $state = $this->store->begin($session, $user, ProjectContext::key(), self::cleanExpected($input));
+        $state = $this->store->begin($session, $user, ProjectContext::dataKey(), self::cleanExpected($input));
 
         return $this->graph->authorizationUrl($state);
     }
@@ -84,7 +84,7 @@ final class FacebookConnectionService
             throw new SocialException(__('admin.social.fb_error_state_invalid'), 'state_invalid');
         }
 
-        $project = ProjectContext::key();
+        $project = ProjectContext::dataKey();
         $attempt = $this->store->consume($session, $state, $user, $project);
         $expected = (array) ($attempt['expected'] ?? []);
 
@@ -143,12 +143,12 @@ final class FacebookConnectionService
     public function selectionView(Session $session, User $user): array
     {
         $this->authorize($user);
-        $selection = $this->store->selection($session, $user, ProjectContext::key());
+        $selection = $this->store->selection($session, $user, ProjectContext::dataKey());
 
         return [
             'pages' => array_map(fn (array $page) => array_diff_key($page, ['access_token' => true]), $selection['pages']),
             'expected' => (array) $selection['expected'],
-            'current' => $this->activeAccounts(ProjectContext::key())->first(),
+            'current' => $this->activeAccounts(ProjectContext::dataKey())->first(),
         ];
     }
 
@@ -162,7 +162,7 @@ final class FacebookConnectionService
         $this->authorize($user);
         $this->requireConfigured();
 
-        $project = ProjectContext::key();
+        $project = ProjectContext::dataKey();
         $selection = $this->store->selection($session, $user, $project);
 
         $page = null;
@@ -240,7 +240,7 @@ final class FacebookConnectionService
         $this->authorize($user);
         $this->requireConfigured();
 
-        $account = $this->activeAccounts(ProjectContext::key())->first();
+        $account = $this->activeAccounts(ProjectContext::dataKey())->first();
         if ($account === null) {
             throw new SocialException(__('admin.social.fb_error_no_account'), 'no_account');
         }
@@ -287,7 +287,7 @@ final class FacebookConnectionService
     {
         $this->authorize($user);
 
-        $accounts = $this->activeAccounts(ProjectContext::key(), true);
+        $accounts = $this->activeAccounts(ProjectContext::dataKey(), true);
         if ($accounts->isEmpty()) {
             throw new SocialException(__('admin.social.fb_error_no_account'), 'no_account');
         }
@@ -312,7 +312,7 @@ final class FacebookConnectionService
      */
     public function card(): array
     {
-        $account = $this->activeAccounts(ProjectContext::key())->first();
+        $account = $this->activeAccounts(ProjectContext::dataKey())->first();
         $credentials = $account !== null ? (array) $account->credentials : [];
 
         return [

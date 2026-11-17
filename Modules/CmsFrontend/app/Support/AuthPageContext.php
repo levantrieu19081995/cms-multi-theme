@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\CmsFrontend\Support;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ViewErrorBag;
+use Modules\CmsBackend\Services\LoginDesigns;
 use Modules\CmsBackend\Services\ScreenTheme;
 use Modules\CmsBackend\Support\ModuleUrl;
 
 /**
- * Display data shared by every theme's Login page (views/auth/shared/* and screens/<theme>/pages/auth/login.blade.php).
+ * Display data shared by every login design (views/auth/shared/* and views/auth/designs/<key>/login.blade.php).
  * Presentation only: brand text/logo from the active public theme, which pane is shown, the error line. No authentication logic.
  */
 final class AuthPageContext
@@ -23,7 +25,7 @@ final class AuthPageContext
         $brandLogo = data_get($themeConfig, 'login.logo', config('cmsfrontend.brand.banner'));
 
         // Login and register share one page; /register (RegisteredUserController::create) passes $authMode = 'register'.
-        $canRegister = \Illuminate\Support\Facades\Route::has('register');
+        $canRegister = Route::has('register');
         $authMode = ($canRegister && ($requestedMode ?? (request()->routeIs('register') ? 'register' : 'login')) === 'register') ? 'register' : 'login';
 
         return [
@@ -34,7 +36,8 @@ final class AuthPageContext
             'brandLogo' => $brandLogo,
             'brandFavicon' => data_get($themeConfig, 'login.favicon', $brandLogo),
             'homeUrl' => ModuleUrl::route('cms.trang-chu'),
-            'authTransition' => data_get($themeConfig, 'login.transition'),
+            // The page transition belongs to the chosen login design (it falls back to the theme's own setting).
+            'authTransition' => app(LoginDesigns::class)->transition(),
             'canRegister' => $canRegister,
             'authMode' => $authMode,
             'isRegister' => $authMode === 'register',

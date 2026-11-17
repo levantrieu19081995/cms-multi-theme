@@ -1,10 +1,10 @@
 # HOMEPAGE LAYOUT MANAGER — MASTER PLAN
 
-> Trạng thái: tài liệu kiến trúc đã thống nhất, **chưa triển khai code**.
+> Trạng thái: tài liệu kiến trúc; chức năng **đã triển khai** (`Modules/CmsFrontend/app/Homepage/`). Cách thêm khối mới: `HUONG-DAN-MO-RONG.md`.
 >
-> Đây là nguồn định hướng chính thức cho chức năng Quản lý bố cục trang chủ. Khi triển khai không tự ý đổi ranh giới giữa dữ liệu, theme và effect. Nếu có thay đổi quyết định, phải cập nhật file này trước.
+> Đây là nguồn định hướng chính thức cho chức năng Quản lý bố cục trang chủ. Khi sửa không tự ý đổi ranh giới giữa dữ liệu, theme và effect. Nếu có thay đổi quyết định, phải cập nhật file này trước.
 >
-> Phạm vi file bị ảnh hưởng và quy trình backup/hoàn tác bắt buộc được quy định tại `IMPACT-AND-BACKUP.md`.
+> Tài liệu phạm vi ảnh hưởng/backup lúc triển khai và bản review đã xóa (12/11/2026); xem lịch sử git nếu cần.
 
 ## 1. Mục tiêu
 

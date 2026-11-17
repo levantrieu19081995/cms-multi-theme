@@ -30,7 +30,8 @@ final class DeveloperSettings
             return 'single';
         }
         if (ProjectContext::fixed()) {
-            return 'fixed';
+            // A fixed project may still switch between the themes that share its data (ProjectContext::fixedThemeChoices()).
+            return count(array_intersect(ProjectContext::fixedThemeChoices(), AssetProfile::selectable())) < 2 ? 'fixed' : null;
         }
 
         return count(AssetProfile::selectable()) < 2 ? 'one' : null;
@@ -56,9 +57,13 @@ final class DeveloperSettings
                 continue;
             }
             $isSelectable = in_array($key, $selectable, true);
-            $isDependency = ! $isSelectable && in_array($key, $info['dependencies'], true);
+            $inBuild = $isSelectable;
+            if (ProjectContext::fixed() && ! in_array($key, ProjectContext::fixedThemeChoices(), true)) {
+                $isSelectable = false; // fixed project: only the themes over its own data can be chosen
+            }
+            $isDependency = ! $inBuild && in_array($key, $info['dependencies'], true);
             // With nothing known about the build every registered theme is listed; otherwise only what the build contains.
-            if ($known && ! $isSelectable && ! $isDependency) {
+            if ($known && ! $inBuild && ! $isDependency) {
                 continue;
             }
             $project = ProjectContext::projectOfTheme($key);
@@ -74,7 +79,7 @@ final class DeveloperSettings
                 'default' => $key === 'default',
                 'selectable' => $isSelectable,
                 'dependency' => $isDependency,
-                'in_build' => $known ? ($isSelectable || $isDependency) : null,
+                'in_build' => $known ? ($inBuild || $isDependency) : null,
             ];
         }
 
@@ -117,6 +122,9 @@ final class DeveloperSettings
         }
         if (! in_array($theme, AssetProfile::selectable(), true)) {
             throw new InvalidArgumentException('theme_error_not_in_build');
+        }
+        if (ProjectContext::fixed() && ! in_array($theme, ProjectContext::fixedThemeChoices(), true)) {
+            throw new InvalidArgumentException('theme_error_locked'); // a fixed project only offers the themes over its own data
         }
         if (ProjectContext::projectOfTheme($theme) === null) {
             throw new InvalidArgumentException('theme_error_no_project');

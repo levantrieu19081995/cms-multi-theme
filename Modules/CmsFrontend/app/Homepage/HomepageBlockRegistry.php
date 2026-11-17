@@ -46,6 +46,7 @@ final class HomepageBlockRegistry
         Themes\DefaultHomepageLayout::class,
         Themes\NamBinhDuongHomepageLayout::class,
         Themes\BanDeAnHomepageLayout::class,
+        Themes\BandeanV2HomepageLayout::class,
     ];
 
     /** @var array<string, HomepageBlockDefinition>|null */
@@ -105,14 +106,27 @@ final class HomepageBlockRegistry
         return $keys;
     }
 
-    /** File Blade của renderer, CHỈ trong thư mục của chính theme (không tính fallback sang theme khác). */
+    /**
+     * File Blade của renderer: thư mục của chính theme, rồi lớp chung mà theme khai báo (`extends`, vd. _campus). Không bao giờ
+     * fallback sang theme khác (kể cả default). Chưa có ở đâu thì trả đường dẫn trong thư mục của theme (để báo lỗi).
+     */
     public function rendererPath(string $theme, string $renderer): ?string
     {
         if (preg_match('/^[a-z0-9-]+(?:\.[a-z0-9-]+)*$/D', $theme.'.'.$renderer) !== 1 || preg_match('/^[a-z0-9-]+$/D', $theme) !== 1) {
             return null;
         }
 
-        return module_path('CmsFrontend', 'resources/views/screens/'.$theme.'/components/home/'.str_replace('.', '/', $renderer).'.blade.php');
+        $relative = '/components/home/'.str_replace('.', '/', $renderer).'.blade.php';
+        $own = module_path('CmsFrontend', 'resources/views/screens/'.$theme.$relative);
+        $layer = config('cmsbackend.screens.themes.'.$theme.'.extends');
+        if (! is_file($own) && is_string($layer) && preg_match('/^_[a-z][a-z0-9-]*$/D', $layer) === 1) {
+            $shared = module_path('CmsFrontend', 'resources/views/screens/'.$layer.$relative);
+            if (is_file($shared)) {
+                return $shared;
+            }
+        }
+
+        return $own;
     }
 
     public function rendererExists(string $theme, string $renderer): bool

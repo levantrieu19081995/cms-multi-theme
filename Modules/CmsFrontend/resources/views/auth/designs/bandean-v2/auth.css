@@ -1,0 +1,188 @@
+/* Giao diện đăng nhập `bandean-v2` (theo bản thiết kế loginSBUT): khung bo góc trên ảnh nền cực quang, nửa kính mờ có minh họa và nửa biểu mẫu
+   trên nền trắng. Kích thước và hiệu ứng như `ban-de-an`: nửa kính trượt giữa hai cột khi chuyển Đăng nhập / Đăng ký.
+   Cấu trúc form/bố cục gốc: auth/login-base.css; chuyển động: effects/auth. Bộ này chỉ trình bày: tên biến --auth-* là hợp đồng với các tệp đó.
+   Màu theo docs/design-standards/BO-MAU-THEME.md (bộ màu bandean-v2); bo góc theo docs/design-standards/TIEU-CHUAN-THIET-KE.md (mục 1). */
+@font-face {
+  font-family: 'Roboto';
+  src: url('../../../../assets/fonts/roboto/Roboto-Variable-vi.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+.cms-public.cms-login-page {
+  /* Bộ màu bandean-v2 */
+  --bd2-green-deep: #075831;
+  --bd2-green: #008A52;
+  --bd2-gold: #F3B23A;
+  --bd2-glow-green: 51, 255, 172;   /* #33FFAC, dùng với độ trong suốt */
+  --bd2-glow-gold: 255, 216, 140;   /* #FFD88C, dùng với độ trong suốt */
+
+  /* Bo góc: ngoài = trong + khoảng đệm (nút hiện mật khẩu nằm trong ô nhập) */
+  --auth-r-toggle: 6px;
+  --auth-gap-toggle: 4px;
+  --auth-r-field: calc(var(--auth-r-toggle) + var(--auth-gap-toggle));
+  --auth-r-card: 20px;
+
+  --auth-page-bg: #0f2f2a;
+  --auth-surface: #fff;
+  --auth-ink: #14231b;
+  --auth-accent: var(--bd2-green-deep);
+  --auth-accent-hover: #06492a;
+  --auth-curtain: var(--bd2-green-deep);
+  --auth-font: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+
+  background: var(--auth-page-bg) var(--bd2-bg-image, none) center / cover no-repeat fixed;
+}
+
+/* ---- Khung: cùng kích thước và hiệu ứng như giao diện `ban-de-an` (rộng tối đa 1480px, cao gần hết màn hình; nửa kính trượt giữa hai cột
+   khi chuyển Đăng nhập / Đăng ký; cửa tách đôi khi đăng nhập xong). Kích thước và chuyển động lấy nguyên từ login-base.css và effects/auth,
+   ở đây chỉ thêm bo góc, ảnh nền trang và ảnh/màu của nửa kính. ---- */
+.cms-public.cms-login-page .cms-login-frame {
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: var(--auth-r-card);
+  box-shadow: 0 28px 70px -24px rgba(var(--bd2-glow-green), .28), 0 18px 48px -18px rgba(0, 0, 0, .55);
+}
+
+/* ---- Hai biểu mẫu: như bản gốc, mỗi biểu mẫu ở cột riêng (đăng ký bên trái, đăng nhập bên phải), nền trắng, nửa kính trượt đè lên cột đang ẩn. ---- */
+@media (min-width: 768px) {
+  /* Ảnh nền của trang hiện ra quanh khung. Khung cao hơn màn hình (đăng ký có nhiều ô) thì bắt đầu từ mép trên rồi cuộn: margin auto của flex
+     thay cho căn giữa của grid gốc, vốn đẩy khung lên trên và cắt mất phần đầu. Chiều rộng/chiều cao tối thiểu vẫn là của login-base.css. */
+  .cms-login-page-wrap { display: flex; flex-direction: column; align-items: center; background: transparent; }
+  .cms-public.cms-login-page .cms-login-frame { flex: none; margin-block: auto; }
+  .cms-login-pane { padding-block: clamp(20px, 4vh, 48px); }
+}
+
+.cms-login-form { gap: 12px; }
+
+.cms-login-brand { justify-self: center; margin-bottom: 8px; }
+.cms-login-brand img { width: auto; max-width: none; height: clamp(72px, 10vh, 104px); }
+.cms-login-brand span { display: none; } /* ảnh logo đã có chữ; alt vẫn là tên đơn vị */
+
+.cms-login-lead { color: var(--auth-ink); font-size: .88rem; font-weight: 700; }
+
+.cms-login-title {
+  justify-self: start; /* ô chỉ rộng bằng chữ để gradient chạy hết chiều dài chữ */
+  color: var(--bd2-green-deep); /* dự phòng khi trình duyệt không hỗ trợ chữ tô gradient */
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: 800;
+  letter-spacing: .01em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .cms-login-title {
+    background: linear-gradient(90deg, var(--bd2-green-deep) 0%, var(--bd2-green) 45%, var(--bd2-gold) 100%) 0 0 / 125% 100% no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+}
+
+.cms-login-description { color: #4b5750; font-size: .84rem; }
+
+.cms-login-field { gap: 5px; }
+.cms-login-field label { color: var(--bd2-green-deep); font-size: .8rem; font-weight: 700; }
+
+.cms-login-input {
+  height: 46px;
+  border: 1px solid #3b4640;
+  border-radius: var(--auth-r-field);
+}
+.cms-login-input:focus {
+  border-color: var(--bd2-green);
+  box-shadow: 0 0 0 4px rgba(0, 138, 82, .18);
+}
+.cms-login-password .cms-login-input { padding-right: 50px; }
+
+.cms-password-toggle {
+  right: var(--auth-gap-toggle);
+  width: 38px;
+  height: 38px;
+  border-radius: var(--auth-r-toggle);
+  color: var(--bd2-green-deep);
+}
+.cms-password-toggle:hover:not(:disabled) { background: rgba(7, 88, 49, .1); }
+
+.cms-login-forgot { font-size: .82rem; font-weight: 700; }
+
+.cms-login-submit {
+  min-height: 46px;
+  border-radius: var(--auth-r-field);
+  font-weight: 700;
+}
+
+.cms-login-switch { font-size: .84rem; }
+.cms-login-terms { font-size: .82rem; }
+
+.cms-public.cms-login-page :is(a, button, input):focus-visible { outline-color: rgba(0, 138, 82, .55); }
+
+/* ---- Nửa kính mờ (bên trái) ---- */
+.cms-login-visual {
+  /* Nửa kính tự mang ảnh nền (đặc, không nhìn xuyên): trượt đè lên cột trắng vẫn giữ nguyên màu, và làm "cánh cửa" khi đăng nhập xong. */
+  background:
+    radial-gradient(circle at 18% 12%, rgba(var(--bd2-glow-green), .26), transparent 52%),
+    radial-gradient(circle at 92% 96%, rgba(var(--bd2-glow-gold), .42), transparent 46%),
+    linear-gradient(150deg, rgba(7, 88, 49, .5) 0%, rgba(0, 138, 82, .4) 58%, rgba(243, 178, 58, .46) 125%),
+    var(--bd2-bg-image, none) 72% bottom / cover no-repeat,
+    var(--auth-page-bg);
+}
+
+.bd2-art {
+  position: absolute;
+  top: clamp(24px, 10%, 96px);
+  left: 50%;
+  z-index: 1;
+  width: min(60%, 440px);
+  height: auto;
+  transform: translateX(-50%);
+  pointer-events: none;
+  filter: drop-shadow(0 18px 30px rgba(7, 88, 49, .35));
+  transition: opacity 260ms ease 200ms;
+}
+.cms-login-frame[data-auth-mode="login"] .bd2-art--register,
+.cms-login-frame[data-auth-mode="register"] .bd2-art--login { opacity: 0; transition-delay: 0s; }
+
+.cms-login-visual-overlay { display: none; }
+
+.cms-login-panel {
+  inset-inline: clamp(28px, 4vw, 56px);
+  bottom: clamp(28px, 9%, 72px);
+  max-width: none;
+  gap: 10px;
+  justify-items: center;
+  text-align: center;
+}
+.cms-login-kicker { display: none; }
+.cms-login-panel h2 {
+  max-width: 11em;
+  font-size: clamp(2rem, 3.4vw, 3.1rem);
+  font-weight: 700;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+.cms-login-panel > p:not(.cms-login-kicker) {
+  max-width: 34em;
+  color: rgba(255, 255, 255, .88);
+  font-size: .82rem;
+  line-height: 1.5;
+}
+.cms-login-panel-switch { justify-content: center; margin-top: 2px; font-size: .84rem; }
+.cms-login-panel[data-auth-panel="login"] .cms-login-panel-switch { display: none; } /* ở chế độ đăng nhập, lối sang đăng ký nằm dưới biểu mẫu */
+.cms-login-panel-switch button { min-height: 36px; padding-inline: 18px; border-color: rgba(255, 255, 255, .7); font-size: .84rem; }
+.cms-login-panel-switch button:hover { background: #fff; color: var(--bd2-green-deep); }
+
+/* ---- Điện thoại: một cột, nửa kính nằm trên (không nền ảnh, không minh họa) ---- */
+@media (max-width: 767px) {
+  .cms-public.cms-login-page .cms-login-frame { border-radius: 0; box-shadow: none; }
+  .cms-login-visual { background: var(--bd2-green-deep); }
+  .bd2-art { display: none; }
+  .cms-login-panel { inset-inline: auto; bottom: auto; justify-items: start; text-align: left; } /* position: relative ở đây: bỏ khoảng đệm đáy của bản máy tính */
+  .cms-login-panel h2 { max-width: none; }
+  .cms-login-brand img { height: 72px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bd2-art { transition: none; }
+}

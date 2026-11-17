@@ -31,7 +31,7 @@ final class HomepageDataNeeds
 
     /** Khóa Definition => các nhóm cụm đó có thể đọc. */
     private const BY_DEFINITION = [
-        'hero' => ['banners'],
+        'hero' => ['banners', 'statistics'], // bandean-v2 đặt các con số nổi bật ngay trên banner
         'notice-ticker' => ['notices'],
         'article-list' => ['news', 'events', 'notices'],
         'information' => ['notices'],

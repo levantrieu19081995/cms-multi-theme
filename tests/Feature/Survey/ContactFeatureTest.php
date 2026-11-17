@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace Tests\Feature\Survey;
 
 use App\DataProviders\MenuItemDataProvider;
+use Diglactic\Breadcrumbs\Breadcrumbs;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ViewErrorBag;
 use Modules\CmsBackend\Enums\PermissionsEnum;
 use Modules\CmsBackend\Features\FeatureRegistry;
 use Modules\CmsBackend\Services\Developer\PermissionAvailability;
+use Modules\CmsBackend\Services\LienHeService;
 use Modules\CmsFrontend\Models\LienHe;
 use Modules\CmsFrontend\Services\EditorialLayout;
 
@@ -85,11 +89,11 @@ final class ContactFeatureTest extends SurveySqliteTestCase
             ['name' => str_repeat('a', 256)], ['email' => 'khong-phai-email'], ['phone' => 'abc'], ['phone' => str_repeat('1', 31)],
             ['address' => ''], ['address' => str_repeat('a', 256)], ['subject' => ''], ['message' => 'ngắn'],
         ] as $bad) {
-            \Illuminate\Support\Facades\Cache::flush(); // mỗi ca một lượt: tránh chạm giới hạn 5 lần/10 phút
+            Cache::flush(); // mỗi ca một lượt: tránh chạm giới hạn 5 lần/10 phút
             $this->post('/lien-he', $this->payload($bad))->assertSessionHasErrors(array_key_first($bad));
         }
         $this->assertSame(0, DB::table('lienhe')->count());
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
         $this->flushSession();
         $this->post('/lien-he', $this->payload(['phone' => str_repeat('1', 30)]))->assertSessionHasNoErrors();
     }
@@ -416,7 +420,8 @@ final class ContactFeatureTest extends SurveySqliteTestCase
     public function test_every_system_generated_contact_link_in_every_theme_is_guarded_by_the_feature(): void
     {
         $files = $this->viewsLinkingToContact();
-        $this->assertGreaterThanOrEqual(15, count($files), 'phải quét được các view theme có liên kết liên hệ');
+        // Files the campus themes share live once in screens/_campus (they were counted twice, as a copy in each theme, before the layer existed).
+        $this->assertGreaterThanOrEqual(14, count($files), 'phải quét được các view theme có liên kết liên hệ');
         foreach (self::THEMES as $theme) {
             $this->assertNotEmpty(array_filter($files, fn ($f) => str_contains($f, "/screens/$theme/")), $theme);
         }
@@ -435,7 +440,7 @@ final class ContactFeatureTest extends SurveySqliteTestCase
 
     public function test_rendered_partials_show_contact_links_when_on_and_hide_them_when_off(): void
     {
-        $errors = new \Illuminate\Support\ViewErrorBag;
+        $errors = new ViewErrorBag;
         $cases = [
             ['default', 'cmsfrontend::screens.components.home.partners-support', ['/lien-he']],
             ['ban-de-an', 'cmsfrontend::screens.components.home.proposal-quick-links', ['href="#lien-he"']],
@@ -474,11 +479,11 @@ final class ContactFeatureTest extends SurveySqliteTestCase
     public function test_breadcrumb_and_hidden_subject_follow_the_locale_and_never_ship_hardcoded_vietnamese(): void
     {
         $original = app()->getLocale();
-        $errors = new \Illuminate\Support\ViewErrorBag;
+        $errors = new ViewErrorBag;
         try {
             foreach (['vi' => ['Liên hệ', 'Liên hệ Ban Đề án'], 'en' => ['Contact', 'Contact the Project Office']] as $locale => [$crumb, $subject]) {
                 app()->setLocale($locale);
-                $this->assertStringContainsString($crumb, (string) \Diglactic\Breadcrumbs\Breadcrumbs::render('cms.lien-he'), "breadcrumb $locale");
+                $this->assertStringContainsString($crumb, (string) Breadcrumbs::render('cms.lien-he'), "breadcrumb $locale");
                 $this->theme('ban-de-an');
                 $form = view('cmsfrontend::screens.components.home.proposal-contact', ['errors' => $errors])->render();
                 $this->assertMatchesRegularExpression('/name="subject" value="'.preg_quote($subject, '/').'"/u', $form, "subject $locale");
@@ -539,9 +544,9 @@ final class ContactFeatureTest extends SurveySqliteTestCase
         $this->record()->forceFill(['created_at' => '2026-03-01 10:00:00'])->save();
         LienHe::query()->where('created_at', '2026-03-01 10:00:00')->first()->delete();
 
-        $stats = app(\Modules\CmsBackend\Services\LienHeService::class)->thongKeTheoThang();
+        $stats = app(LienHeService::class)->thongKeTheoThang();
         $this->assertSame([['x' => '02-2025', 'y' => 1], ['x' => '12-2025', 'y' => 1], ['x' => '01-2026', 'y' => 2]], $stats);
-        $this->assertSame([['x' => '01-2026', 'y' => 2]], app(\Modules\CmsBackend\Services\LienHeService::class)->thongKeTheoThang(2026));
+        $this->assertSame([['x' => '01-2026', 'y' => 2]], app(LienHeService::class)->thongKeTheoThang(2026));
     }
 
     public function test_vi_and_en_translations_have_matching_keys(): void

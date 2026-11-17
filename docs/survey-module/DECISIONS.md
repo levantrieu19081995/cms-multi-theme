@@ -38,4 +38,4 @@
 - **Bật/tắt:** chỉ ở Developer Settings → tab Feature Registry (phiên Developer đã mở khóa, CSRF, `throttle:10,1`, ghi Developer Audit).
 - **Menu:** loại mới "Chức năng hệ thống" (`menu_items.type = 'feature'`, `feature_key`, `feature_target`); URL luôn sinh từ route trong Registry, không lưu URL làm nguồn chính. Chức năng tắt/thiếu → ẩn ngoài website, giữ trong trình quản lý kèm cảnh báo.
 - **Mở rộng:** thêm chức năng = thêm một class vào `Definitions/` (không sửa Registry/Menu).
-- **Tài liệu cũ:** các mục trong `03-PHASE-3-PERMISSIONS.md` và `D-*` nói về `config/features.php`/theme gating nay đã lỗi thời; `verification/verify_phase3.php` bị xóa vì gọi các class đã gỡ (được thay bằng `tests/Feature/Survey`).
+- **Tài liệu cũ đã xóa (12/11/2026):** các báo cáo giai đoạn 1-5, kế hoạch tổng, hai bản review và nhật ký sửa lỗi của module Khảo sát (cùng thư mục `verification/`) vì chức năng đã hoàn thành; nội dung vẫn xem được trong lịch sử git. Nhớ rằng các mục D6, D13 trong bảng này về `config/features.php`/theme gating đã bị D27 thay thế; kiểm thử nay nằm ở `tests/Feature/Survey`.

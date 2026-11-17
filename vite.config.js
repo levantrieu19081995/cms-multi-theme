@@ -78,6 +78,7 @@ for (var key in modules) {
 // Copyright banner: chunks of a public theme get that theme's unit; shared chunks use the unit of CMS_UNIT_KEY.
 const copyrightUnits = {
   'ban-de-an': 'Ban Đề án · Trường Đại học Công nghệ Nam Bình Dương',
+  'bandean-v2': 'Ban Đề án · Trường Đại học Công nghệ Nam Bình Dương',
   'nam-binh-duong': 'Trường Đại học Công nghệ Nam Bình Dương',
   default: 'Trung tâm Khuyến nông và Dịch vụ Nông nghiệp thành phố Cần Thơ'
 };

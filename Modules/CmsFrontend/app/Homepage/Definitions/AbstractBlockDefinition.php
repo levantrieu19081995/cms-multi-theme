@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\CmsFrontend\Homepage\Definitions;
 
+use App\Services\LocaleManager;
 use Modules\CmsFrontend\Homepage\Contracts\HomepageBlockDefinition;
 
 /** Khung chung của Definition: lang key theo quy ước `homepage.blocks.<key>.name|description`, mặc định lấy từ schema. */
@@ -90,7 +91,7 @@ abstract class AbstractBlockDefinition implements HomepageBlockDefinition
     /** Nội dung chưa có bản dịch (văn bản, lịch, truy xuất) không hiện trên trang ngôn ngữ khác, giống HomePresentation::prepare(). */
     protected static function translatedPage(): bool
     {
-        return app(\App\Services\LocaleManager::class)->publicLocale() !== null;
+        return app(LocaleManager::class)->publicLocale() !== null;
     }
 
     /**

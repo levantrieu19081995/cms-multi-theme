@@ -5,17 +5,21 @@ declare(strict_types=1);
 namespace Modules\CmsBackend\Http\Controllers;
 
 use App\Facades\Toastr;
+use App\Services\LocaleManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Modules\CmsBackend\Features\FeatureRegistry;
+use Modules\CmsBackend\Services\Developer\AccountAdmin;
 use Modules\CmsBackend\Services\Developer\DeveloperAccess;
 use Modules\CmsBackend\Services\Developer\DeveloperAudit;
+use Modules\CmsBackend\Services\Developer\HomepageLayoutAdmin;
 use Modules\CmsBackend\Services\Developer\PermissionAvailability;
 use Modules\CmsBackend\Services\Developer\PermissionManifest;
 use Modules\CmsBackend\Services\DeveloperSettings;
+use Modules\CmsBackend\Services\LoginDesigns;
 use Modules\CmsBackend\Support\ModuleUrl;
 
 /**
@@ -46,8 +50,9 @@ final class DeveloperSettingsController extends Controller
             'features' => array_values(array_filter($this->features->report(), fn (array $row) => $row['key'] !== 'multilingual')),
             'language' => $this->languagePanel(),
             'featureErrors' => $this->features->errors(),
-            'homepageLayout' => app(\Modules\CmsBackend\Services\Developer\HomepageLayoutAdmin::class)->panel($request->query('layout_theme') ? (string) $request->query('layout_theme') : null),
-            'accounts' => app(\Modules\CmsBackend\Services\Developer\AccountAdmin::class)->panel(),
+            'homepageLayout' => app(HomepageLayoutAdmin::class)->panel($request->query('layout_theme') ? (string) $request->query('layout_theme') : null),
+            'accounts' => app(AccountAdmin::class)->panel(),
+            'loginDesigns' => app(LoginDesigns::class)->panel(),
             'manifest' => [
                 'state' => $state['state'],
                 'reason' => $state['reason'],
@@ -148,7 +153,7 @@ final class DeveloperSettingsController extends Controller
             $this->features->setEnabled($feature, $enabled);
             if ($feature === 'multilingual') {
                 // Nội dung cache theo ngôn ngữ (trang chủ, menu, văn bản tùy chọn) phải dựng lại theo danh sách ngôn ngữ mới.
-                app(\App\Services\LocaleManager::class)->bumpCacheVersion();
+                app(LocaleManager::class)->bumpCacheVersion();
             }
             DeveloperAudit::record(['feature' => $feature, 'before' => $before, 'after' => $enabled, 'ip' => $request->ip()], $enabled ? 'Developer Settings: bật chức năng '.$feature : 'Developer Settings: tắt chức năng '.$feature);
             Log::info('Developer Settings: feature '.$feature.' '.($enabled ? 'enabled' : 'disabled').' (ip '.$request->ip().').');
@@ -165,7 +170,7 @@ final class DeveloperSettingsController extends Controller
      */
     private function languagePanel(): array
     {
-        $locales = app(\App\Services\LocaleManager::class);
+        $locales = app(LocaleManager::class);
         $row = collect($this->features->report())->firstWhere('key', 'multilingual');
         $configured = $locales->configured();
         $default = $locales->default();
@@ -184,7 +189,7 @@ final class DeveloperSettingsController extends Controller
 
     private function failed(string $key, ?string $tab = null): RedirectResponse
     {
-        \App\Facades\Toastr::toast(__('admin.developer.'.$key), 'error');
+        Toastr::toast(__('admin.developer.'.$key), 'error');
 
         return redirect(ModuleUrl::route(self::ROUTE, $tab !== null ? ['tab' => $tab] : []));
     }

@@ -38,7 +38,7 @@ class SocialPublicationDataProvider
 
     private function project(): string
     {
-        return ProjectContext::key();
+        return ProjectContext::dataKey();
     }
 
     // ---------------------------------------------------------------- CMS posts the administrator can pick

@@ -7,6 +7,9 @@ return [
         'nam-binh-duong' => [
             'label' => 'Nam Bình Dương (SBUT)',
             'surfaces' => ['public'],
+            // Views are searched in the theme's own folder, then in this shared layer (screens/_campus: files the campus themes have in
+            // common), then in `default`. A layer is not a theme: it is not listed above and cannot be chosen. Mirror in scripts/theme-profiles.mjs.
+            'extends' => '_campus',
             'version' => 3,
             'home_sections' => [
                 'introduction' => 'gioi-thieu',
@@ -45,6 +48,7 @@ return [
         'ban-de-an' => [
             'label' => 'Ban Đề án',
             'surfaces' => ['public'],
+            'extends' => '_campus',
             'version' => 2,
             'home_sections' => [
                 'introduction' => 'gioi-thieu',
@@ -62,6 +66,34 @@ return [
             'login' => [
                 'logo' => 'assets/img/themes/nam-binh-duong/nbdut-favicon.png',
                 'favicon' => 'assets/img/themes/nam-binh-duong/nbdut-favicon.png',
+            ],
+        ],
+        // Independent copy of `ban-de-an` for the redesign: same project (see `other_themes` in projects.php), its own views / CSS / JS.
+        'bandean-v2' => [
+            'label' => 'Ban Đề án v2',
+            'surfaces' => ['public'],
+            'version' => 17,
+            'extends' => '_campus',
+            'home_sections' => [
+                'introduction' => 'gioi-thieu',
+                'programs' => 'chuong-trinh-dao-tao',
+                'research' => 'thanh-tuu-nghien-cuu',
+                'admissions' => 'thong-bao-tuyen-sinh',
+                'projects' => 'de-an-du-an',
+            ],
+            'audience_links' => ['student' => [], 'faculty' => []],
+            'brand' => [
+                'name' => 'Ban Đề án · Trường Đại học Công nghệ Nam Bình Dương',
+                'short_name' => 'NBD',
+                'tagline' => 'Kết nối tầm nhìn – Kiến tạo tương lai',
+                'portal_url' => env('CMS_PARENT_PORTAL_URL'),
+            ],
+            'login' => [
+                // Logo SBUT (hình lục giác) của bản thiết kế đăng nhập mới; bản thu nhỏ 360px của sbut-official-logo.png.
+                'logo' => 'assets/img/themes/bandean-v2/login-logo.png',
+                'favicon' => 'assets/img/themes/nam-binh-duong/sbut-favicon.png',
+                // Login design used while the project has not chosen one (a theme without a design of its own name borrows this one).
+                'design' => 'bandean-v2',
             ],
         ],
     ],

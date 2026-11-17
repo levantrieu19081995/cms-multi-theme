@@ -16,7 +16,7 @@
             <button class="cms-account-button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><span class="cms-account-avatar">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 2)) }}</span><span>{{ auth()->user()->name }}</span><i class="ri-arrow-down-s-line" aria-hidden="true"></i></button>
             <ul class="dropdown-menu dropdown-menu-end">
                 @if(\Illuminate\Support\Facades\Route::has('profile.edit'))<li><a class="dropdown-item" href="{{ route('profile.edit') }}">{{ __('admin.ui.tai_khoan_cua_toi') }}</a></li>@endif
-                <li><form method="POST" action="{{ \Modules\CmsBackend\Support\ModuleUrl::route('cms.logout') }}" data-cms-logout data-auth-transition="{{ data_get(config('cmsbackend.screens.themes'), app(\Modules\CmsBackend\Services\ScreenTheme::class)->key('public').'.login.transition') }}" data-login-url="{{ \Modules\CmsBackend\Support\ModuleUrl::route('cms.login') }}">@csrf<button class="dropdown-item" type="submit">{{ __('admin.ui.dang_xuat') }}</button></form></li>
+                <li><form method="POST" action="{{ \Modules\CmsBackend\Support\ModuleUrl::route('cms.logout') }}" data-cms-logout data-auth-transition="{{ app(\Modules\CmsBackend\Services\LoginDesigns::class)->transition() }}" data-login-url="{{ \Modules\CmsBackend\Support\ModuleUrl::route('cms.login') }}">@csrf<button class="dropdown-item" type="submit">{{ __('admin.ui.dang_xuat') }}</button></form></li>
             </ul>
         </div>
     </header>

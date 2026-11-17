@@ -1,0 +1,11 @@
+/* Mẫu giao diện đăng nhập. Chép thư mục này thành auth/designs/<ten-moi>/ rồi sửa. Cấu trúc form/bố cục chung ở auth/login-base.css;
+   thư mục bắt đầu bằng "_" không hiện trong Developer Settings. Hướng dẫn: docs/login-designs/HUONG-DAN-THEM-GIAO-DIEN.md */
+.cms-public.cms-login-page {
+  --auth-page-bg: #0d0d0d;
+  --auth-surface: #f7f7f5;
+  --auth-ink: #111;
+  --auth-accent: #111;
+  --auth-accent-hover: #262626;
+  --auth-curtain: #111;
+  --auth-font: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}

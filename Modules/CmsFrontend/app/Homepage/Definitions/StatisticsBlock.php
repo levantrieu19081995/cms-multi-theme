@@ -13,7 +13,6 @@ final class StatisticsBlock extends AbstractBlockDefinition
 
     protected ?string $route = 'cms.dashboard.con-so-noi-bat.index';
 
-
     public function __construct()
     {
         $this->schema = ['statistics_link' => self::link('cms.dashboard.con-so-noi-bat.index', 'homepage.fields.statistics_link')];

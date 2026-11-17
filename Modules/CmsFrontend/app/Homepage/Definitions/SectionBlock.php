@@ -18,7 +18,6 @@ final class SectionBlock extends AbstractBlockDefinition
 
     protected ?string $route = 'cms.dashboard.cdn.bai-viet.index';
 
-
     protected array $schema = [
         'category_id' => ['type' => 'category', 'label' => 'homepage.fields.section_category', 'help' => 'homepage.fields.section_category_help'],
     ];

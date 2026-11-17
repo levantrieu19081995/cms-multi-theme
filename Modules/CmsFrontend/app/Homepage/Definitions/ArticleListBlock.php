@@ -13,7 +13,6 @@ final class ArticleListBlock extends AbstractBlockDefinition
 
     protected ?string $route = 'cms.dashboard.cdn.bai-viet.index';
 
-
     public function __construct()
     {
         $this->schema = ['news_link' => self::link('cms.dashboard.cdn.bai-viet.index', 'homepage.fields.news_link')];

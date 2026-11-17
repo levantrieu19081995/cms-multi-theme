@@ -1,0 +1,335 @@
+/* bandean-v2: đầu trang + banner hero + menu theo thiết kế bannerSBUT (design-input/bannerSBUT). Nạp SAU theme.css và shared/campus-base.css, nên
+   mọi luật ở đây đứng sau `.proposal-public.sbut-public` (đặc hiệu hơn `.sbut-public` của campus-base). Màu: docs/design-standards/BO-MAU-THEME.md
+   (bộ màu bandean-v2); bo góc: docs/design-standards/TIEU-CHUAN-THIET-KE.md (mục 1). */
+/* Bộ font của bandean-v2: Roboto biến thiên cục bộ (OFL), đủ ký tự tiếng Việt và mọi độ đậm 100-900 (tiêu đề 800 là độ đậm thật, không giả lập). Không nạp từ Google Fonts. */
+@font-face {
+  font-family: 'Roboto';
+  src: url('../../../fonts/roboto/Roboto-Variable-vi.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+.proposal-public.sbut-public {
+  --bd2-green-deep: #075831;
+  --bd2-green: #008A52;
+  --bd2-gold: #F3B23A;
+  --bd2-gold-soft: #FFD88C;
+  --bd2-orange: #EC5C02;
+  --bd2-lime: #D4F380;          /* chấm slide đang xem (lấy từ thiết kế) */
+  --bd2-cream: #FCF9EC;         /* nền đầu trang (lấy từ thiết kế) */
+  --bd2-cream-soft: #FDFBF6;    /* nền hàng "Khám phá trên trang" */
+  --bd2-ticker: #FBF7E7;        /* nền thanh thông tin tuyển sinh */
+  --bd2-ink: #1b2d22;
+  --bd2-glass: rgba(7, 60, 35, .5);
+  --bd2-glass-line: rgba(255, 255, 255, .34);
+  /* Cỡ chữ tối thiểu của trang = cỡ dòng thông tin tuyển sinh: 14px x hệ số chữ 1,2 của trang chủ = 16,8px; điện thoại 13px x 1,2 = 15,6px.
+     Ghi số tuyệt đối vì hệ số 1,2 chỉ có trong .proposal-home (đầu và chân trang không có). typography.css (tạo tự động) ép mọi font-size không nhỏ hơn giá trị này. */
+  --bd2-fs-min: 16.8px;
+}
+@media (max-width: 760px) { .proposal-public.sbut-public { --bd2-fs-min: 15.6px; } }
+
+/* ================= Đầu trang ================= */
+.proposal-public.sbut-public .bd2-header {
+  height: auto;
+  background: var(--bd2-cream);
+  border-bottom: 1px solid rgba(7, 88, 49, .1);
+  box-shadow: none;
+  position: relative;
+  z-index: 20;
+}
+.bd2-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 70px;
+  padding: 8px clamp(16px, 4.2vw, 56px);
+}
+.bd2-brand { display: inline-flex; align-items: center; gap: 14px; min-width: 0; color: var(--bd2-ink); }
+.proposal-public.sbut-public .bd2-brand img { width: auto; height: 50px; flex: none; object-fit: contain; }
+.bd2-brand-text { display: grid; gap: 3px; min-width: 0; }
+.bd2-brand-text b {
+  font-size: clamp(.78rem, 1.1vw, .95rem);
+  font-weight: 800;
+  letter-spacing: .04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.bd2-brand-text small {
+  color: #5d6c63;
+  font-size: clamp(.64rem, .85vw, .74rem);
+  font-weight: 500;
+  letter-spacing: .06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.proposal-public.sbut-public .bd2-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-left: 18px;
+  border-left: 1px solid rgba(7, 88, 49, .16);
+  grid-column: auto;
+}
+.proposal-public.sbut-public .bd2-header .icon-btn { color: var(--bd2-ink); font-size: 1.35rem; }
+.proposal-public.sbut-public .bd2-header .icon-btn:hover { background: rgba(7, 88, 49, .08); }
+.proposal-public.sbut-public .bd2-header .cms-lang-switcher { margin: 0; color: var(--bd2-ink); }
+.bd2-login {
+  display: inline-flex;
+  min-height: 40px;
+  padding: 0 24px;
+  align-items: center;
+  border: 2px solid var(--bd2-gold);
+  border-radius: 10px;
+  background: var(--bd2-cream);
+  color: var(--bd2-green-deep);
+  font-size: .86rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+.bd2-login:hover { background: var(--bd2-gold-soft); }
+
+/* ================= Banner hero ================= */
+.proposal-public.sbut-public .bd2-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: auto;
+  min-height: clamp(640px, 50vw, 800px);
+  background: var(--bd2-green-deep);
+}
+/* Phủ tông xanh: đậm ở bên trái (chỗ chữ), nhạt dần sang phải để vẫn thấy campus. */
+.proposal-public.sbut-public .bd2-hero:after {
+  background:
+    linear-gradient(90deg, rgba(7, 88, 49, .86) 0%, rgba(7, 88, 49, .52) 42%, rgba(7, 88, 49, .12) 80%),
+    linear-gradient(0deg, rgba(7, 88, 49, .55) 0%, transparent 46%),
+    rgba(0, 138, 82, .26);
+}
+.bd2-hero .sbut-reference-slide { position: absolute; inset: 0; }
+.bd2-hero .sbut-reference-slide[hidden] { display: none; }
+.proposal-public.sbut-public .bd2-hero .hero-content { height: 100%; padding-top: clamp(56px, 7vw, 96px); }
+
+.proposal-public.sbut-public .bd2-hero h1,
+.proposal-public.sbut-public .bd2-hero .sbut-hero-heading {
+  max-width: 13em;
+  margin: 0 0 clamp(16px, 2vw, 26px);
+  color: #fff;
+  font-size: clamp(2rem, 3.8vw, 3.6rem);
+  font-weight: 800;
+  letter-spacing: .005em;
+  line-height: 1.14;
+  text-transform: uppercase;
+}
+.proposal-public.sbut-public .bd2-hero h1 em,
+.proposal-public.sbut-public .bd2-hero .sbut-hero-heading em { color: var(--bd2-gold-soft); }
+.proposal-public.sbut-public .bd2-hero p { max-width: 26em; color: #eaf3ec; font-size: clamp(.9rem, 1.1vw, 1.02rem); line-height: 1.7; }
+
+.proposal-public.sbut-public .bd2-hero .btn.gold {
+  min-height: 48px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--bd2-gold-soft);
+  color: var(--bd2-green-deep);
+  font-weight: 700;
+}
+.proposal-public.sbut-public .bd2-hero .btn.gold:hover { background: var(--bd2-gold); }
+.proposal-public.sbut-public .bd2-hero .play-circle { height: 44px; width: 44px; border: 2px solid #fff; }
+.proposal-public.sbut-public .bd2-hero .hero-video { font-size: .9rem; font-weight: 700; }
+
+/* Nút hành động của hero: xuống dòng được trên màn hình hẹp, chữ nút không bị bẻ. */
+.proposal-public.sbut-public .bd2-hero .hero-buttons { flex-wrap: wrap; gap: 14px 22px; }
+.proposal-public.sbut-public .bd2-hero .btn.gold { white-space: nowrap; }
+
+/* Cột bên phải: ba lối tắt theo đối tượng (khẩu hiệu, ghi chú và chú thích ảnh đã bỏ). */
+.bd2-hero-side {
+  position: absolute;
+  top: clamp(130px, 14vw, 190px);
+  right: 0;
+  display: grid;
+  width: min(560px, 46%);
+  gap: 14px;
+}
+.bd2-hero-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.bd2-hero-chips a {
+  display: grid;
+  gap: 4px;
+  min-height: 62px;
+  padding: 12px 14px;
+  border: 1px solid var(--bd2-glass-line);
+  border-radius: 10px;
+  background: var(--bd2-glass);
+  color: #fff;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+.bd2-hero-chips a:hover { background: rgba(255, 255, 255, .26); transform: translateY(-2px); }
+.bd2-hero-chips small { color: var(--bd2-gold-soft); font-size: .68rem; font-weight: 500; letter-spacing: .03em; }
+.bd2-hero-chips b { font-size: .86rem; font-weight: 700; line-height: 1.25; }
+
+/* Điều khiển slide: viên thuốc có đường nối các chấm. */
+.proposal-public.sbut-public .bd2-hero .sbut-hero-controls { position: relative; z-index: 2; margin-bottom: clamp(16px, 2vw, 26px); }
+.proposal-public.sbut-public .bd2-hero .slide-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  padding: 8px 14px 8px 16px;
+  border: 1px solid var(--bd2-glass-line);
+  border-radius: 999px;
+  background: rgba(7, 60, 35, .6);
+}
+.bd2-hero .slide-index { font-size: 1rem; font-weight: 700; }
+.bd2-hero .slide-progress { display: flex; align-items: center; gap: 0; }
+.proposal-public.sbut-public .bd2-hero .slide-progress button {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  margin-left: 30px;
+  border: 1.5px solid rgba(255, 255, 255, .85);
+  border-radius: 50%;
+  background: transparent;
+}
+.proposal-public.sbut-public .bd2-hero .slide-progress button:first-child { margin-left: 42px; }
+.proposal-public.sbut-public .bd2-hero .slide-progress button:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 2px);
+  width: 28px;
+  height: 2px;
+  background: rgba(255, 255, 255, .4);
+  transform: translateY(-50%);
+}
+.proposal-public.sbut-public .bd2-hero .slide-progress button:first-child:before { width: 40px; }
+.proposal-public.sbut-public .bd2-hero .slide-progress button.active { border-color: var(--bd2-lime); background: var(--bd2-lime); }
+.proposal-public.sbut-public .bd2-hero .slide-progress button.active:before { background: var(--bd2-lime); }
+.proposal-public.sbut-public .bd2-hero .slide-arrows button { width: 28px; height: 28px; border: 1.5px solid #fff; border-radius: 50%; line-height: 1; }
+.proposal-public.sbut-public .bd2-hero .slide-arrows button:hover { background: rgba(255, 255, 255, .2); }
+
+/* Các con số nổi bật nằm trên banner. */
+.bd2-hero-stats {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(860px, calc(100% - 40px));
+  margin: 0 auto clamp(24px, 3vw, 44px);
+  padding: 22px 28px;
+  border: 1px solid var(--bd2-glass-line);
+  border-radius: 44px;
+  background: linear-gradient(135deg, rgba(7, 60, 35, .66), rgba(7, 88, 49, .5));
+  box-shadow: 0 24px 60px -28px rgba(var(--bd2-glow-green-rgb, 51, 255, 172), .5), 0 0 0 1px rgba(255, 255, 255, .06) inset;
+  color: #fff;
+  text-align: center;
+}
+.bd2-stat { display: grid; gap: 4px; align-content: center; padding-inline: 10px; }
+.bd2-stat strong { font-size: clamp(1.9rem, 3.4vw, 2.9rem); font-weight: 800; letter-spacing: -.01em; line-height: 1.05; text-shadow: 0 2px 14px rgba(7, 88, 49, .55); }
+.bd2-stat > span { font-size: clamp(.72rem, .9vw, .84rem); font-weight: 500; line-height: 1.35; }
+
+/* ================= Menu chính (dưới banner) ================= */
+.proposal-public.sbut-public .quick-links:has(>.sbut-shortcut-inner) {
+  background: #fff;
+  border-top: 0;
+  box-shadow: 0 6px 12px -8px rgba(7, 88, 49, .45);
+}
+.proposal-public.sbut-public .sbut-shortcut-inner { align-items: stretch; }
+.proposal-public.sbut-public .sbut-shortcut-inner .sbut-shortcut-item { position: relative; display: flex; }
+.proposal-public.sbut-public .sbut-shortcut-inner .sbut-shortcut-item + .sbut-shortcut-item { border-left: 0; }
+.proposal-public.sbut-public .sbut-shortcut-inner .sbut-shortcut-item + .sbut-shortcut-item:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1px;
+  height: 28px;
+  background: #cdd9d1;
+  transform: translateY(-50%);
+}
+.proposal-public.sbut-public .sbut-shortcut-inner .sbut-shortcut-item .sbut-shortcut-trigger {
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 12px;
+  justify-content: center;
+  color: var(--bd2-green-deep);
+}
+.proposal-public.sbut-public .sbut-shortcut-inner .sbut-shortcut-item:first-child .sbut-shortcut-trigger,
+.proposal-public.sbut-public .sbut-shortcut-inner .sbut-shortcut-item:last-child .sbut-shortcut-trigger { padding-inline: 12px; }
+.proposal-public.sbut-public .sbut-shortcut-trigger i { color: var(--bd2-green-deep); font-size: 1.1rem; }
+.proposal-public.sbut-public .sbut-shortcut-trigger strong {
+  color: var(--bd2-green-deep);
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+.proposal-public.sbut-public .sbut-shortcut-trigger:hover strong { color: var(--bd2-green); }
+
+/* ================= Hàng "Khám phá trên trang" và thanh tuyển sinh ================= */
+/* overflow: clip (không phải hidden) để menu dính (sticky) đầu màn hình khi cuộn qua trang chủ. */
+.proposal-public.sbut-public .proposal-home { overflow: clip; background: var(--bd2-cream-soft); }
+.proposal-public.sbut-public .section-shortcuts { background: var(--bd2-cream-soft); border-bottom: 0; }
+.proposal-public.sbut-public .section-shortcuts a.active { color: var(--bd2-ink); font-weight: 700; }
+.proposal-public.sbut-public .admission-ticker { background: transparent; border: 0; }
+.proposal-public.sbut-public .admission-ticker .ticker-inner {
+  min-height: 56px;
+  border-left: 4px solid var(--bd2-orange);
+  background: var(--bd2-ticker);
+}
+.proposal-public.sbut-public .admission-ticker .ticker-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--bd2-orange);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.proposal-public.sbut-public .admission-ticker .ticker-label i { font-size: 1.3rem; }
+.proposal-public.sbut-public .admission-ticker .text-button { color: var(--bd2-ink); font-weight: 700; }
+
+/* ================= Máy tính bảng và điện thoại ================= */
+@media (max-width: 1023px) {
+  .bd2-hero-side { position: static; width: auto; margin-top: 22px; }
+  .proposal-public.sbut-public .bd2-hero { min-height: 0; padding-bottom: 8px; }
+  .bd2-hero .sbut-reference-slide { position: relative; inset: auto; }
+  .proposal-public.sbut-public .bd2-hero .hero-content { height: auto; padding-bottom: 28px; }
+  .proposal-public.sbut-public .bd2-hero .hero-image { min-height: 100%; }
+  .bd2-hero-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 0; border-radius: 28px; padding: 18px 12px; }
+}
+@media (max-width: 760px) {
+  /* Chữ không nhỏ hơn mức tối thiểu nên tên trường không còn vừa chung một hàng với nút: tên trường một hàng riêng, các nút xuống hàng dưới bên phải. */
+  .bd2-header-inner { min-height: 60px; gap: 8px 10px; flex-wrap: wrap; padding-block: 10px; }
+  .bd2-brand { flex: 1 1 100%; }
+  .proposal-public.sbut-public .bd2-brand img { height: 40px; }
+  .bd2-brand-text small { display: none; }
+  .bd2-brand-text b { font-size: .7rem; }
+  .proposal-public.sbut-public .bd2-header-actions { gap: 8px; margin-left: auto; padding-left: 0; border-left: 0; }
+  .bd2-login { min-height: 36px; padding: 0 14px; font-size: .78rem; }
+  .bd2-hero-chips { grid-template-columns: 1fr; }
+  .bd2-hero-chips a { min-height: 0; grid-template-columns: auto 1fr; align-items: baseline; gap: 8px; }
+  .proposal-public.sbut-public .bd2-hero .slide-controls { gap: 12px; padding-inline: 12px; }
+  .proposal-public.sbut-public .bd2-hero .slide-progress button { margin-left: 18px; }
+  .proposal-public.sbut-public .bd2-hero .slide-progress button:first-child { margin-left: 26px; }
+  .proposal-public.sbut-public .bd2-hero .slide-progress button:before { width: 16px; }
+  .proposal-public.sbut-public .bd2-hero .slide-progress button:first-child:before { width: 24px; }
+ 
+}
+@media (prefers-reduced-motion: reduce) {
+  .bd2-hero-chips a, .bd2-login { transition: none; }
+}
+
+/* Hai chỗ xanh dương còn sót ở CSS khác (danh sách, video). */
+.proposal-public.sbut-public .list-section-intro { color: #5d6c63; }
+.proposal-public.sbut-public .video-thumb-play { background: rgba(7, 88, 49, .5); }
+
+/* Điện thoại: menu chiếm hai cột nhiều hàng, để dính đầu màn hình sẽ che nội dung đang đọc. */
+@media (max-width: 760px) {
+  .proposal-public.sbut-public .quick-links:has(>.sbut-shortcut-inner) { position: relative; top: auto; }
+}
+
+/* Thanh menu "dính" bằng position: fixed (do js/screens/bandean-v2/theme.js bật .is-pinned khi cuộn qua) thay cho position: sticky: sticky bị trễ/giật khi
+   luồng chính bận (cuộn chạy ở luồng riêng của trình duyệt còn vị trí dính tính ở luồng chính), còn fixed do bộ ghép lớp giữ yên tại chỗ. .bd2-menu-slot giữ chỗ
+   (chiều cao đo bằng JS) nên khi thanh rời khỏi luồng, nội dung bên dưới không nhảy. */
+.proposal-public.sbut-public .bd2-menu-slot { position: relative; z-index: 9; }
+.proposal-public.sbut-public .bd2-menu-slot > .quick-links:has(>.sbut-shortcut-inner) { position: relative; top: auto; }
+.proposal-public.sbut-public .bd2-menu-slot.is-pinned > .quick-links:has(>.sbut-shortcut-inner) { position: fixed; top: 0; left: 0; right: 0; z-index: 30; }

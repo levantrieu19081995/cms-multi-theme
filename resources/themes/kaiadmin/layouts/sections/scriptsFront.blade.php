@@ -1,1 +1,0 @@
-@include('layouts/sections/scripts')

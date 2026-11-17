@@ -1,4 +1,4 @@
-{{-- Common Login/Register document. Theme pages (screens/<theme>/pages/auth/login.blade.php) @extend this and provide:
+{{-- Common Login/Register document. Login designs (views/auth/designs/<key>/login.blade.php) @extend this and provide:
        auth-assets  the theme's @vite auth.css (colour/font/logo tokens: --auth-*)
        auth-frame-attrs  optional extra attributes for the frame (e.g. data-auth-layout, data-auth-doors, an inline --auth-* style)
        auth-frame   the layout inside .cms-login-frame (panes, image panel, curtains), built from the auth.shared partials

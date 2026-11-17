@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\CmsFrontend\Homepage\Definitions;
 
+use Modules\CmsFrontend\Homepage\HomepageSettingsService;
+use Modules\CmsFrontend\Services\HomeBlocks;
+
 /** Dải thông báo mới chạy dưới banner (cùng chuyên mục thông báo với cụm Thông báo và văn bản). */
 final class NoticeTickerBlock extends AbstractBlockDefinition
 {
@@ -12,7 +15,6 @@ final class NoticeTickerBlock extends AbstractBlockDefinition
     protected string $icon = 'ri-notification-3-line';
 
     protected ?string $route = 'cms.dashboard.cdn.bai-viet.index';
-
 
     public function __construct()
     {
@@ -23,11 +25,11 @@ final class NoticeTickerBlock extends AbstractBlockDefinition
     public function resolve(array $settings, array $data): array
     {
         $theme = (string) ($data['_theme'] ?? '');
-        $category = (int) (app(\Modules\CmsFrontend\Homepage\HomepageSettingsService::class)->read($theme, 'information')['notice_category'] ?? 0);
+        $category = (int) (app(HomepageSettingsService::class)->read($theme, 'information')['notice_category'] ?? 0);
         if ($theme === '' || $category <= 0) {
             return [];
         }
-        $notices = app(\Modules\CmsFrontend\Services\HomeBlocks::class)->noticePosts($category);
+        $notices = app(HomeBlocks::class)->noticePosts($category);
 
         return ['categoryInfo' => $notices['info'], 'categoryPosts' => $notices['posts']];
     }

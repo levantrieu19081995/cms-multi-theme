@@ -13,7 +13,6 @@ final class MediaBlock extends AbstractBlockDefinition
 
     protected ?string $route = 'cms.dashboard.cdn.thu-vien-hinh-anh.index';
 
-
     public function __construct()
     {
         $this->schema = [

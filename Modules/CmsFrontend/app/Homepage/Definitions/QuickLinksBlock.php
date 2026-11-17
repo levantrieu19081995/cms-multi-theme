@@ -10,5 +10,4 @@ final class QuickLinksBlock extends AbstractBlockDefinition
     protected string $key = 'quick-links';
 
     protected string $icon = 'ri-apps-line';
-
 }

@@ -106,7 +106,7 @@ final class HomepageCoreTest extends TestCase
         $registry = $this->registry();
         $this->assertSame([], $registry->selfCheck());
         $this->assertCount(24, $registry->definitions());
-        $this->assertSame(['default', 'nam-binh-duong', 'ban-de-an'], array_keys($registry->layouts()));
+        $this->assertSame(['default', 'nam-binh-duong', 'ban-de-an', 'bandean-v2'], array_keys($registry->layouts()));
     }
 
     public function test_every_declared_renderer_and_effect_is_available_for_its_theme(): void

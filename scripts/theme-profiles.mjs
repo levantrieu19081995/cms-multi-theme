@@ -7,7 +7,6 @@
 //
 // Source layout is unchanged: Modules/CmsFrontend/resources/assets/{css,js}/screens/<theme>/ . Everything else under
 // css/, js/ and sass/ of CmsFrontend is "shared" and is always built. Core resources and CmsBackend are always built too.
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { glob } from 'glob';
@@ -32,6 +31,8 @@ const sharedEffectEntries = [...['reveal', 'stagger', 'gallery-orbit', 'crossfad
  * dependencies  themes whose entries must be built with this one (declared, never picked up by accident)
  * entries       CSS / JS entries owned by the theme (glob patterns relative to the project root)
  * sharedEntries CSS entries outside screens/ that ONLY this theme loads (shared/ layout base, effects/): built for the theme (and for mode `all`), never for the others
+ * layers        shared view folders under views/screens/ (named _<name>) that the theme extends: its views are searched after the theme's own and before `default`
+ *                 (same order as ScreenTheme::lookup, `extends` in Modules/CmsBackend/config/screens.php); the build check reads them as part of the theme
  * fallbackEntries  entries of ANOTHER theme that this theme still loads because ScreenTheme falls back to the default
  *                  view (see the comments below). They are verified at build time against the Blade views.
  */
@@ -50,6 +51,7 @@ export const themeProfiles = {
   'nam-binh-duong': {
     label: 'Nam Bình Dương',
     dependencies: [],
+    layers: ['_campus'],
     entries: {
       css: [`${frontendAssets}/css/screens/nam-binh-duong/**/*.css`],
       js: [`${frontendAssets}/js/screens/nam-binh-duong/**/*.js`]
@@ -63,9 +65,23 @@ export const themeProfiles = {
     label: 'Ban Đề án',
     // Layout loads shared/campus-base.css + effects (shared assets, always built) and its own theme.css/theme.js: no longer needs Nam Bình Dương's files.
     dependencies: [],
+    layers: ['_campus'],
     entries: {
       css: [`${frontendAssets}/css/screens/ban-de-an/**/*.css`],
       js: [`${frontendAssets}/js/screens/ban-de-an/**/*.js`]
+    },
+    sharedEntries: campusSharedEntries,
+    fallbackEntries: [`${frontendAssets}/css/screens/default/shell.css`, `${frontendAssets}/js/screens/default/shell.js`]
+  },
+
+  // Independent copy of ban-de-an for the redesign (same project, own views / CSS / JS).
+  'bandean-v2': {
+    label: 'Ban Đề án v2',
+    dependencies: [],
+    layers: ['_campus'],
+    entries: {
+      css: [`${frontendAssets}/css/screens/bandean-v2/**/*.css`],
+      js: [`${frontendAssets}/js/screens/bandean-v2/**/*.js`]
     },
     sharedEntries: campusSharedEntries,
     fallbackEntries: [`${frontendAssets}/css/screens/default/shell.css`, `${frontendAssets}/js/screens/default/shell.js`]
@@ -82,11 +98,14 @@ export const themeKeys = Object.keys(themeProfiles);
 export const unusedViews = ['components/layouts/sections/scriptsIncludesFront.blade.php'];
 
 /** Shared CmsFrontend assets: everything outside screens/<theme>/, plus effects/auth. Always built. */
-// Login is one flow for every theme: auth/ (shared form logic + base CSS) and effects/auth are shared entries. Each theme's own Login look is
-// css/screens/<theme>/auth.css, picked up by that theme's `entries.css` glob (so a single build only carries its own). The three effects/auth .js
+// Login is one flow for every theme: auth/ (shared form logic + base CSS) and effects/auth are shared entries. The look of the page is a
+// "login design" (views/auth/designs/<key>/, see Modules/CmsBackend/app/Services/LoginDesigns.php): every design's auth.css is a shared entry, so
+// every build (single-theme builds too) carries every design and a project can be given any of them in Developer Settings. Adding a design
+// needs no edit here: the glob below finds the new folder. The three effects/auth .js
 // files are plain scripts loaded with <script src> (pagereveal must be registered before the first render); the module files are imported by
 // auth/login.js and are not entries. Other effect entries (sharedEffectEntries) are shared too; shared/ CSS of a layout base is per-theme: see sharedEntries.
 const authEffectEntries = [
+  'Modules/CmsFrontend/resources/views/auth/designs/*/auth.css',
   `${frontendAssets}/auth/login-base.css`,
   `${frontendAssets}/auth/login.js`,
   ...['style.css', 'dashboard-arrival.css', 'dashboard-arrival.js', 'login-arrival.js', 'logout-login-transition.js', 'push-horizontal.css', 'push-horizontal-transition.js'].map(file => `${frontendAssets}/effects/auth/${file}`)
@@ -125,11 +144,7 @@ export function frontendEntryFiles(profile) {
   const find = (patterns, ignore = []) => glob.sync(patterns, { cwd: root, ignore, posix: true, nodir: true });
   const shared = find(sharedFrontendPatterns, sharedFrontendIgnore);
   const byTheme = Object.fromEntries(profile.buildThemes.map(key => [key, find([...themeProfiles[key].entries.css, ...themeProfiles[key].entries.js, ...(themeProfiles[key].sharedEntries ?? [])])]));
-  // A theme without its own Login page falls back to the default Login view, which needs default's auth.css.
-  const loginFallback = profile.buildThemes
-    .filter(key => key !== 'default' && !fs.existsSync(path.join(root, `Modules/CmsFrontend/resources/views/screens/${key}/pages/auth/login.blade.php`)))
-    .map(() => `${frontendAssets}/css/screens/default/auth.css`);
-  const fallback = [...new Set([...profile.buildThemes.flatMap(key => themeProfiles[key].fallbackEntries), ...loginFallback])];
+  const fallback = [...new Set(profile.buildThemes.flatMap(key => themeProfiles[key].fallbackEntries))];
   for (const file of fallback) {
     if (!glob.sync(file, { cwd: root, posix: true }).length) throw new Error(`Fallback entry is missing on disk: ${file}`);
   }

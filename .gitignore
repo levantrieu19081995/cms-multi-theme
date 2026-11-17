@@ -46,3 +46,9 @@ yarn-error.log
 /storage/framework/*/*
 !/storage/framework/*/.gitignore
 /storage/framework/*.*
+
+# Images moved out of the source while checking that nothing uses them (scripts/unused-images.mjs --apply / --restore)
+/_unused-images/
+
+# Bản thiết kế gốc (chưa công bố) và hình đi kèm, chỉ để dựng giao diện
+/design-input/

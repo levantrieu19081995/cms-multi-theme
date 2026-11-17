@@ -4,8 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\CmsFrontend\Services;
 
+use App\Services\LocaleManager;
+use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Facades\Cache;
 use Modules\CmsBackend\Services\ScreenTheme;
+use Modules\CmsBackend\Support\ModuleUrl;
+use Modules\CmsFrontend\Homepage\EffectCatalog;
+use Modules\CmsFrontend\Homepage\HomepageDataResolver;
+use Modules\CmsFrontend\Homepage\HomepageRenderer;
 
 final class HomePresentation
 {
@@ -19,14 +25,14 @@ final class HomePresentation
         // Homepage Layout Manager: the blocks' content is replaced by the theme's own settings BEFORE the cache stamp
         // below is computed, so the fragment cache follows the theme's content.
         if ($managed = $this->managed()) {
-            $data = app(\Modules\CmsFrontend\Homepage\HomepageDataResolver::class)->mergeAll($managed['plan'], $data);
+            $data = app(HomepageDataResolver::class)->mergeAll($managed['plan'], $data);
             // Only the effect assets the enabled blocks declare are loaded by the page (see home.blade.php of each theme).
-            $data['homepageEffectEntries'] = \Modules\CmsFrontend\Homepage\EffectCatalog::entriesForPlan($managed['plan']);
+            $data['homepageEffectEntries'] = EffectCatalog::entriesForPlan($managed['plan']);
         }
 
         // Content kept in tables of its own (partners, services, role models, documents, schedules, traceability links) has no
         // translation table yet. On a page in another language it is left out, never shown in Vietnamese instead.
-        if (app(\App\Services\LocaleManager::class)->publicLocale()) {
+        if (app(LocaleManager::class)->publicLocale()) {
             foreach (['links', 'dichvus', 'guongTieuBieu', 'homepageDocuments', 'homeSchedules', 'homeTraceLinks'] as $untranslated) {
                 $data[$untranslated] = [];
             }
@@ -36,19 +42,19 @@ final class HomePresentation
         $categoryInfo = $data['categoryInfo'] ?? null;
         $categoryPosts = $data['categoryPosts'] ?? null;
 
-        if (in_array($this->screens->key('public'), ['nam-binh-duong', 'ban-de-an'], true)) {
+        if (in_array($this->screens->key('public'), ['nam-binh-duong', 'ban-de-an', 'bandean-v2'], true)) {
             $data['homeShortcutNavigation'] = app(EditorialLayout::class)->mainMenu();
         }
 
         $homeNews = collect($firstPost ?? [])->concat(collect($posts ?? []))->unique('id')->values();
-        $homeNotices = ($categoryPosts instanceof \Illuminate\Pagination\AbstractPaginator ? $categoryPosts->getCollection() : collect($categoryPosts ?? []))->take(4);
+        $homeNotices = ($categoryPosts instanceof AbstractPaginator ? $categoryPosts->getCollection() : collect($categoryPosts ?? []))->take(4);
         $homeDocuments = collect($homepageDocuments ?? [])->take(4);
         $homeEvents = collect($events ?? [])->take(3);
         $homeExamples = collect($guongTieuBieu ?? [])->take(3);
         $homeAlbums = collect($libraryImages ?? [])->take(9);
         $homeVideos = collect($videos ?? [])->take(9);
-        $newsUrl = \Modules\CmsBackend\Support\ModuleUrl::route('cms.tin-tuc.index');
-        $noticeUrl = \Modules\CmsBackend\Support\ModuleUrl::route('cms.tin-tuc.index', ['category' => $categoryInfo?->term?->slug]);
+        $newsUrl = ModuleUrl::route('cms.tin-tuc.index');
+        $noticeUrl = ModuleUrl::route('cms.tin-tuc.index', ['category' => $categoryInfo?->term?->slug]);
 
         $modelStamp = static fn ($items) => collect($items)->map(static fn ($item) => [
             $item->getKey(),
@@ -95,7 +101,7 @@ final class HomePresentation
             'origin' => request()->getSchemeAndHttpHost(),
             'locale' => app()->getLocale(),
             // Bumped whenever any translation is saved (TranslationService): English text edited alone must not leave a stale page.
-            'i18n_version' => app(\App\Services\LocaleManager::class)->cacheVersion(),
+            'i18n_version' => app(LocaleManager::class)->cacheVersion(),
             'content' => $data['homeContentStamp'],
             // Homepage Layout Manager: the fragment is cached per layout (zones, variants, settings, effects).
             'layout' => $this->managed()['plan']['stamp'] ?? null,
@@ -108,7 +114,7 @@ final class HomePresentation
         $managed = $this->managed();
         abort_if($managed === null, 500, 'Homepage layout is not available.');
         $render = fn (): string => view($this->screens->view('public', 'components.home.managed.layout'), $data + [
-            'homepageZones' => app(\Modules\CmsFrontend\Homepage\HomepageRenderer::class)->zones($managed['plan'], $data, $managed['preview']),
+            'homepageZones' => app(HomepageRenderer::class)->zones($managed['plan'], $data, $managed['preview']),
         ])->render();
 
         // Preview is never cached: it must show the snapshot of this Developer session only.
@@ -122,6 +128,6 @@ final class HomePresentation
      */
     private function managed(): ?array
     {
-        return app(\Modules\CmsFrontend\Homepage\HomepageRenderer::class)->active($this->screens->key('public'));
+        return app(HomepageRenderer::class)->active($this->screens->key('public'));
     }
 }
